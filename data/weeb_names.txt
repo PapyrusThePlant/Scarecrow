@@ -1,191 +1,191 @@
-f|Abe 阿部 (hist)|None
-f|Ado|None
-f|Aeka|None
-f|Aemi|None
-f|Aeri|None
-m|Aguri|None
-f|Agyoku|None
-f|Ahiko|None
+f|Abe 阿部 (hist)|
+f|Ado|
+f|Aeka|
+f|Aemi|
+f|Aeri|
+m|Aguri|
+f|Agyoku|
+f|Ahiko|
 f|Ai 愛|amour
-m|Aīchirō|None
-m|Aiji 愛司|None
-m|Aijirō|None
+m|Aīchirō|
+m|Aiji 愛司|
+m|Aijirō|
 f|Aika 哀歌|lamentation, chanson triste
 f|Aiko 愛子|enfant de l'amour
-f|Aimi 愛美|None
-f|Aina 愛奈|None
+f|Aimi 愛美|
+f|Aina 愛奈|
 f|Ainoko 合いの子|métis
 f|Airi 愛理|raison de l'amour
-m|Akahiko|None
+m|Akahiko|
 f|Akako 赤子|enfant rouge
-m|Akamaru petite boule rouge|None
+m|Akamaru petite boule rouge|
 f|Akane|茜 : garance (fleur rouge foncé)
-f|Akari 明里|None
+f|Akari 明里|
 m|Akebono 曙|aurore
 f|Akeko|enfant de beauté
 x|Akemi|beauté éclatante, intelligente et belle ou 明美 belle aube
-f|Akeru|None
+f|Akeru|
 x|Aki 秋|automne
-f|Akie|None
-m|Akifumi|None
+f|Akie|
+m|Akifumi|
 m|Akiharu 秋春|automne (aki), printemps (haru)
-m|Akihide|None
-m|Akihio|None
+m|Akihide|
+m|Akihio|
 m|Akihiko|garçon brillant
-m|Akihisa 晃久|None
-m|Akihirō 秋披露|None
-m|Akihito 秋人|None
-f|Akiho|None
-m|Akīchi|None
-m|Akiji|None
+m|Akihisa 晃久|
+m|Akihirō 秋披露|
+m|Akihito 秋人|
+f|Akiho|
+m|Akīchi|
+m|Akiji|
 m|Akikazu|harmonie printanière
 f|Akiko 秋子|enfant de l'automne
-m|Akimasa|None
-f|Akimi beauté printanière|None
-m|Akimitsu|None
-m|Akimune (hist)|None
+m|Akimasa|
+f|Akimi beauté printanière|
+m|Akimitsu|
+m|Akimune (hist)|
 f|Akina|brillante 明菜
-m|Akinari|None
-f|Akinaru|None
-x|Akino 秋野|None
-m|Akinobu|None
-m|Akinori|None
+m|Akinari|
+f|Akinaru|
+x|Akino 秋野|
+m|Akinobu|
+m|Akinori|
 m|Akio 昭夫|brillant
 x|Akira 明|intelligent(e), clairvoyant(e)
-m|Akirō|None
+m|Akirō|
 f|Akisa 秋砂|sable de l'automne
-f|Akise|None
-m|Akitaka|None
-m|Akitake|None
-x|Akito 暁人|None
-x|Akiya|None
-f|Akiyo|None
+f|Akise|
+m|Akitaka|
+m|Akitake|
+x|Akito 暁人|
+x|Akiya|
+f|Akiyo|
 m|Akiyoshi|秋吉 bon automne
 m|Akiyuki|秋雪 Neige d'automne
-f|Akko surnom pour Akiko|None
-x|Ako|None
+f|Akko surnom pour Akiko|
+x|Ako|
 f|Amako|雨子 enfant de la pluie
 f|Amami|belle pluie
 f|Amane|son divin, son de la pluie
-f|Amari|None
+f|Amari|
 f|Amaterasu 天照|déesse du Soleil dans le shintoïsme
 f|Amaya|pluie nocturne 夜雨
-f|Amayumi|None
-f|Ami 亜美|None
-f|Amika|None
-f|Amiko|None
-f|Amiri|None
-f|An|None
-f|Anko|None
+f|Amayumi|
+f|Ami 亜美|
+f|Amika|
+f|Amiko|
+f|Amiri|
+f|An|
+f|Anko|
 f|Aneko|sœur aînée
-f|Anī|None
-f|Anju = Ange|None
-f|Anna あんな ou アンナ|None
-f|Annu|None
-f|Anon|None
-f|Anri 杏里|None
+f|Anī|
+f|Anju = Ange|
+f|Anna あんな ou アンナ|
+f|Annu|
+f|Anon|
+f|Anri 杏里|
 f|Anzu 杏|abricot
 x|Aoi 葵|bleu
 f|Aoko 葵子|enfant bleue
-f|Aona|None
-f|Apapa|None
-f|Arako|None
-f|Arami|None
+f|Aona|
+f|Apapa|
+f|Arako|
+f|Arami|
 f|Arata 新た|nouvelle, fraîcheur
 f|Ari 蟻|fourmi
-f|Arie|None
-m|Arihiro|None
-m|Arihito|None
-f|Arika|None
+f|Arie|
+m|Arihiro|
+m|Arihito|
+f|Arika|
 f|Ariko 蟻子|enfant de la fourmi
-f|Arimi|None
-f|Arina 有菜|None
-f|Arisa 有沙 ou ありさ|None
+f|Arimi|
+f|Arina 有菜|
+f|Arisa 有沙 ou ありさ|
 f|Arisu アリス|Alice
-f|Aritsune|None
-m|Arō|None
+f|Aritsune|
+m|Arō|
 f|Aru|être, exister
-f|Arumi|None
-x|Aruna|None
+f|Arumi|
+x|Aruna|
 f|Asa 朝|matin, aube
-f|Asae|None
-f|Asaeda|None
-f|Asago|None
+f|Asae|
+f|Asaeda|
+f|Asago|
 m|Asagorō|cinquième matin
 f|Asahi 朝日|soleil levant
 m|Asajirō|matin (pour 2e fils)
-f|Asaka 朝香|None
+f|Asaka 朝香|
 m|Asaki 朝気|humeur matinale, état d'esprit matinal
 f|Asako 朝子|enfant du matin (ou né le matin)
 f|Asami 朝美|beauté du matin
-m|Asatarō|None
-f|Asato|None
-f|Asayo|None
+m|Asatarō|
+f|Asato|
+f|Asayo|
 m|Asayoshi 朝良し|bon matin
-m|Ashido|None
+m|Ashido|
 m|Ashihei 葦平|roseau plat (????)
-x|Asuka 明日香|None
-f|Asumi 明日美|None
-f|Asuna 明日菜|None
-f|Atari|None
-f|Atsu|None
-f|Atsue|None
-m|Atsuhiko|None
-m|Atsuhito|None
-m|Atsuji|None
-f|Atsuka|None
-f|Atsuko 厚子 ou 温子 ou 敦子|None
-f|Atsumi|None
-m|Atsuo|None
-m|Atsurō|None
-m|Atsushi 敦史 ou 敦志|None
-m|Atsutoshi|None
-f|Atsuyo|None
+x|Asuka 明日香|
+f|Asumi 明日美|
+f|Asuna 明日菜|
+f|Atari|
+f|Atsu|
+f|Atsue|
+m|Atsuhiko|
+m|Atsuhito|
+m|Atsuji|
+f|Atsuka|
+f|Atsuko 厚子 ou 温子 ou 敦子|
+f|Atsumi|
+m|Atsuo|
+m|Atsurō|
+m|Atsushi 敦史 ou 敦志|
+m|Atsutoshi|
+f|Atsuyo|
 f|Aya|soie tissée. Par extension: beauté sauvage ; 彩 ou 綾
-f|Ayae|None
-f|Ayaha|None
-m|Ayahito|None
-f|Ayaka 彩華 ou 彩夏 ou 綾香|None
-f|Ayaki|None
-f|Ayako 彩子 ou 綾子|None
+f|Ayae|
+f|Ayaha|
+m|Ayahito|
+f|Ayaka 彩華 ou 彩夏 ou 綾香|
+f|Ayaki|
+f|Ayako 彩子 ou 綾子|
 x|Ayame 菖蒲|iris
-f|Ayami|None
-f|Ayana 彩名 ou 彩菜 ou 彩奈|None
-f|Ayane 彩音|None
-f|Ayano 綾乃|None
-f|Ayato 彩斗|None
-f|Ayuka|None
-f|Ayuki|None
-f|Ayuko|None
-x|Ayumi あゆみ|None
-x|Ayumu|None
-f|Awako|None
+f|Ayami|
+f|Ayana 彩名 ou 彩菜 ou 彩奈|
+f|Ayane 彩音|
+f|Ayano 綾乃|
+f|Ayato 彩斗|
+f|Ayuka|
+f|Ayuki|
+f|Ayuko|
+x|Ayumi あゆみ|
+x|Ayumu|
+f|Awako|
 f|Azami 薊|chardon
-f|Azukiyo|None
-f|Azuko 寿子|None
-f|Azumi|None
-f|Azuna|None
+f|Azukiyo|
+f|Azuko 寿子|
+f|Azumi|
+f|Azuna|
 f|Azusa 梓|catalpa
-f|Azura|None
+f|Azura|
 f|Ban 晩|soir, nuit ou 鷭: oiseau aquatique
 f|Banana バナナ|banane
 f|Beniko 紅子|enfant rouge écarlate
 f|Benihime 紅姫|princesse écarlate
-m|Bokusui|None
+m|Bokusui|
 x|Botan 牡丹|bouton de pivoine
-m|Buichi 武一|None
-m|Bun'ichi 文一|None
-m|Bun'ichirō 文一郎|None
-f|Bunjaku|None
-m|Bunji|None
-m|Bunjirō|None
+m|Buichi 武一|
+m|Bun'ichi 文一|
+m|Bun'ichirō 文一郎|
+f|Bunjaku|
+m|Bunji|
+m|Bunjirō|
 f|Bunko 文子|enfant de la phrase/littérature
 m|Bunmei 文明|culture
-m|Bunshichi|None
-m|Bunta 文太|None
+m|Bunshichi|
+m|Bunta 文太|
 m|Byakuya白毫|nuit Blanche
-f|Chachami|None
-f|Chami|None
+f|Chachami|
+f|Chami|
 f|Chī 千 ou 地|mille ou terre
 x|Chiaki 地秋|terre d'automne ou mille automnes
 f|Chiasa 千朝|Mille matins
@@ -193,2185 +193,2185 @@ m|Chiba|Mille lames
 f|Chibana 千花|mille fleurs
 f|Chidori 千鳥|mille oiseaux
 f|Chie 知恵　|sagesse
-f|Chiei|None
-f|Chieka|None
-f|Chieki|None
+f|Chiei|
+f|Chieka|
+f|Chieki|
 f|Chieko 知恵子|　enfant de la sagesse, sage enfant
-f|Chiemi|None
-f|Chieno|None
-f|Chieri|None
-f|Chifumi|None
-f|Chiga|None
+f|Chiemi|
+f|Chieno|
+f|Chieri|
+f|Chifumi|
+f|Chiga|
 f|Chigiku 千菊　|mille chrysanthèmes
-f|Chigusa 千種|None
+f|Chigusa 千種|
 f|Chiharu 千春　|mille printemps
 x|Chihiro 千尋|très profond(e)
-f|Chihisa|None
-f|Chiho|None
-f|Chihoko|None
+f|Chihisa|
+f|Chiho|
+f|Chihoko|
 x|Chika|sagesse
-f|Chikae|None
-f|Chikage|None
-m|Chikahide|None
-m|Chikāki|None
+f|Chikae|
+f|Chikage|
+m|Chikahide|
+m|Chikāki|
 f|Chikako|enfant de sagesse
-m|Chikamasa|None
-m|Chikanori|None
-m|Chikatoshi|None
-m|Chikashi|None
-m|Chikashige|None
-f|Chikayo|None
-f|Chīko|None
+m|Chikamasa|
+m|Chikanori|
+m|Chikatoshi|
+m|Chikashi|
+m|Chikashige|
+f|Chikayo|
+f|Chīko|
 f|Chiko 千子|mille enfants
-f|Chiku|None
-f|Chima|None
+f|Chiku|
+f|Chima|
 f|Chimaki|mille livres
-f|Chimako|None
-f|Chimari|None
+f|Chimako|
+f|Chimari|
 f|Chinami 千波|mille vagues
 f|Chinatsu 千夏|mille étés
-f|Chiori|None
-f|Chisa|None
-f|Chisako|None
-f|Chisaku|None
-f|Chisame|None
+f|Chiori|
+f|Chisa|
+f|Chisako|
+f|Chisaku|
+f|Chisame|
 f|Chisato|terre natale
 x|Chisei|intelligence
-f|Chiseko|None
-f|Chishiko|None
-f|Chitae|None
-f|Chitose|None
-f|Chitoyo|None
-f|Chitsuko|None
-f|Chiwa|None
-f|Chiya|None
-f|Chiyako|None
-f|Chiyami|None
+f|Chiseko|
+f|Chishiko|
+f|Chitae|
+f|Chitose|
+f|Chitoyo|
+f|Chitsuko|
+f|Chiwa|
+f|Chiya|
+f|Chiyako|
+f|Chiyami|
 f|Chiyo|mille générations
-f|Chiyoe|None
+f|Chiyoe|
 f|Chiyoko|enfant de mille générations
-f|Chiyomi|None
-f|Chiyono|None
-f|Chiyui|None
+f|Chiyomi|
+f|Chiyono|
+f|Chiyui|
 f|Chiyuki 千雪|mille neiges
-f|Chiyumi|None
-f|Chizato|None
+f|Chiyumi|
+f|Chizato|
 f|Chizu 千鶴|mille cigognes
-f|Chizue 千寿江, 知津江|None
-f|Chizuka|None
+f|Chizue 千寿江, 知津江|
+f|Chizuka|
 f|Chizuko 千鶴子|enfant de mille cigognes
-f|Chizumi|None
-f|Chizuru 千鶴|None
-f|Chizuyo|None
+f|Chizumi|
+f|Chizuru 千鶴|
+f|Chizuyo|
 f|Chō|crépuscule
 f|Chōchō 蝶々|papillon
-m|Chōhachirō|None
-m|Chōichirō|None
-m|Chōji|None
-m|Chōjirō|None
+m|Chōhachirō|
+m|Chōichirō|
+m|Chōji|
+m|Chōjirō|
 f|Chōko|enfant du crépuscule
 m|Chōmei 著名|célèbre
-m|Chūichirō|None
-m|Chūji|None
-m|Chūjirō|None
-m|Chūshichirō|None
-m|Chūya|None
+m|Chūichirō|
+m|Chūji|
+m|Chūjirō|
+m|Chūshichirō|
+m|Chūya|
 x|Dai 大|grand
 m|Daīchi 大一|petit-fils aîné
-m|Daīchirō|None
-m|Daigaku 大学|None
-m|Daigen 大厳|None
+m|Daīchirō|
+m|Daigaku 大学|
+m|Daigen 大厳|
 m|Daijirō|grand (pour le second fils)
 m|Daiki|grand espoir
-m|Dairō|None
-m|Daisuke|None
+m|Dairō|
+m|Daisuke|
 m|Dan|mandala
-m|Deisaku|None
-m|Denjirō|None
+m|Deisaku|
+m|Denjirō|
 m|Doku 毒|Poison
-f|Dosanko|None
-f|Eba|None
-f|Ebiko|None
-f|Ebisu|None
-f|Echiko|None
-m|Eeichi|None
-m|Egi|None
-m|Eihachirō|None
-f|Eihi|None
-m|Eihiko|None
-m|Eiichi|None
+f|Dosanko|
+f|Eba|
+f|Ebiko|
+f|Ebisu|
+f|Echiko|
+m|Eeichi|
+m|Egi|
+m|Eihachirō|
+f|Eihi|
+m|Eihiko|
+m|Eiichi|
 m|Eiichirō 栄一郎|gloire
-m|Eiji|None
-m|Eijirō|None
-m|Eiki|None
-m|Eikichi|None
+m|Eiji|
+m|Eijirō|
+m|Eiki|
+m|Eikichi|
 f|Eiko|enfant de la longévité
 m|Eikō 栄光|Gloire
-f|Eime|None
-f|Eimi|None
-m|Eisaburō|None
-m|Eisaku|None
-f|Eishi|None
-m|Eishirō|None
-m|Eisuke|None
-m|Eita|None
-m|Eitarō|None
-m|Eizaburō|None
+f|Eime|
+f|Eimi|
+m|Eisaburō|
+m|Eisaku|
+f|Eishi|
+m|Eishirō|
+m|Eisuke|
+m|Eita|
+m|Eitarō|
+m|Eizaburō|
 m|Ekitai 液体|Fluide
-f|Ema|None
-f|Emako|None
+f|Ema|
+f|Emako|
 f|Emi 恵美|(eth: bénie par la beauté), beauté bénie/divine ou sourire
 f|Emiko 恵美子|enfant souriante/qui est doté d'une grande beauté
-f|Emiri|None
-f|Emu|None
-f|Ena|None
-f|Enako|None
-m|Enchō|None
-m|En'ichi|None
-f|Ere|None
-f|Eri|None
-f|Eria|None
-f|Erika|None
-f|Eriko|None
-f|Erina|None
-f|Eririn|None
-f|Eru|None
-f|Esa|None
-f|Eshiko|None
-f|Etsiko|None
-m|Etsō|None
+f|Emiri|
+f|Emu|
+f|Ena|
+f|Enako|
+m|Enchō|
+m|En'ichi|
+f|Ere|
+f|Eri|
+f|Eria|
+f|Erika|
+f|Eriko|
+f|Erina|
+f|Eririn|
+f|Eru|
+f|Esa|
+f|Eshiko|
+f|Etsiko|
+m|Etsō|
 f|Etsu|plaisir
-m|Etsuji|None
+m|Etsuji|
 m|Etsujirō|plaisir (pour le second fils)
 m|Etsukazu|plaisir de l'harmonie, de la paix
 f|Etsuko|délicieuse enfant, enfant du plaisir
-f|Etsumi|None
-f|Etsuo|None
-f|Etsuyo|None
+f|Etsumi|
+f|Etsuo|
+f|Etsuyo|
 x|Fubuki 吹雪|tempête de neige
-m|Fubuku|None
-f|Fudeko|None
-f|Fueko|None
-f|Fuifui|None
-f|Fujie|None
-m|Fujihiko|None
-m|Fujīchirō|None
-f|Fujiko|None
-f|Fujimi|None
-f|Fujino|None
-m|Fujio|None
-m|Fujitaka|None
-f|Fujiyo|None
-f|Fukami|None
-f|Fuki|None
-f|Fukie|None
-f|Fukiko|None
-f|Fuku|None
-m|Fukujirō|None
-f|Fukuju|None
-f|Fukuko|None
-f|Fukumi|None
-f|Fukuno|None
-m|Fukuto|None
-f|Fukuyo|None
-m|Fuma|None
-f|Fumei|None
+m|Fubuku|
+f|Fudeko|
+f|Fueko|
+f|Fuifui|
+f|Fujie|
+m|Fujihiko|
+m|Fujīchirō|
+f|Fujiko|
+f|Fujimi|
+f|Fujino|
+m|Fujio|
+m|Fujitaka|
+f|Fujiyo|
+f|Fukami|
+f|Fuki|
+f|Fukie|
+f|Fukiko|
+f|Fuku|
+m|Fukujirō|
+f|Fukuju|
+f|Fukuko|
+f|Fukumi|
+f|Fukuno|
+m|Fukuto|
+f|Fukuyo|
+m|Fuma|
+f|Fumei|
 f|Fumi|écrit, littérature
 m|Fumiaki|écrit, littérature de l'automne
-f|Fumie|None
+f|Fumie|
 m|Fumiharu|écrit, littérature du printemps
-m|Fumihiko|None
+m|Fumihiko|
 m|Fumihiro|grand écrit, grand littérature
-m|Fumihito|None
-m|Fumīchirō|None
+m|Fumihito|
+m|Fumīchirō|
 m|Fumijirō|écrit, littérature (pour le second fils)
-f|Fumika|None
+f|Fumika|
 m|Fumikazu|littérature harmonieuse
-m|Fumikazurō|None
+m|Fumikazurō|
 f|Fumiko|enfant de la littérature, de l'écrit
-m|Fumimaro|None
-f|Fumina|None
+m|Fumimaro|
+f|Fumina|
 m|Fuminori|règle de la littérature, de l'écrit
-m|Fumio|None
-m|Fumitaka|None
-f|Fumiya|None
-f|Fumiyo|None
-f|Fune|None
-f|Furiko|None
-f|Furuyahitomi|None
-f|Fusa|None
-f|Fusae|None
-m|Fusaichirō|None
-m|Fusajirō|None
-f|Fusako|None
-m|Fusanori|None
-f|Fusayo|None
-m|Fusayoshi|None
-m|Fusazō|None
-f|Futaba (prénom)|None
-f|Futako|None
-f|Futami|None
-f|Futomi|None
-f|Fūko|None
-f|Fuyo|None
+m|Fumio|
+m|Fumitaka|
+f|Fumiya|
+f|Fumiyo|
+f|Fune|
+f|Furiko|
+f|Furuyahitomi|
+f|Fusa|
+f|Fusae|
+m|Fusaichirō|
+m|Fusajirō|
+f|Fusako|
+m|Fusanori|
+f|Fusayo|
+m|Fusayoshi|
+m|Fusazō|
+f|Futaba (prénom)|
+f|Futako|
+f|Futami|
+f|Futomi|
+f|Fūko|
+f|Fuyo|
 f|Fuyu 冬|hiver
 f|Fuyuka 冬格|bel hiver
 x|Fuyuki 冬雪|neige d'hiver
 f|Fuyuko 冬子|enfant de l'hiver
-f|Fuyumi|None
-f|Fuzuki|None
+f|Fuyumi|
+f|Fuzuki|
 f|Gaiya|Terre-Mère (grec)
 m|Gaku 岳|Sommet
-m|Gakuun 岳雲|None
-m|Ganji|None
-x|Gen|None
-m|Gen'ichirō|None
-x|Genji (prénom)|None
-m|Genjirō 元二朗|None
+m|Gakuun 岳雲|
+m|Ganji|
+x|Gen|
+m|Gen'ichirō|
+x|Genji (prénom)|
+m|Genjirō 元二朗|
 m|Genki 元気|Santé, forme
-m|Gen'nosuke|None
-m|Gensaku|None
-m|Genshirō|None
-m|Gentarō|None
-m|Genzaburō|None
-m|Genzō|None
-m|Giichi|None
-m|Giichirō|None
-m|Gikaibo vieux prénom|None
-m|Gikan vieux prénom|None
-m|Gikanbo vieux prénom|None
+m|Gen'nosuke|
+m|Gensaku|
+m|Genshirō|
+m|Gentarō|
+m|Genzaburō|
+m|Genzō|
+m|Giichi|
+m|Giichirō|
+m|Gikaibo vieux prénom|
+m|Gikan vieux prénom|
+m|Gikanbo vieux prénom|
 f|Gin, Gina 銀|argent
-m|Gin'ichirō|None
+m|Gin'ichirō|
 m|Ginji|argent (pour le 2nd fils)
 m|Ginjirō|argent (pour le second fils)
 f|Ginko 銀子|enfant de l'argent
-f|Ginnojō|None
-m|Gintarō|None
-m|Gisuke|None
-m|Gogei 五兵衛 (hist)|None
-m|Goichi|None
-m|Gokudera|None
+f|Ginnojō|
+m|Gintarō|
+m|Gisuke|
+m|Gogei 五兵衛 (hist)|
+m|Goichi|
+m|Gokudera|
 m|Gorō|cinquième fils
-m|Goshikinuma|None
-f|Gosuke|None
-m|Gōichirō|None
-m|Gōshi|None
+m|Goshikinuma|
+f|Gosuke|
+m|Gōichirō|
+m|Gōshi|
 f|Gyokuyô|pétale de perle
 f|Hachi 八|huit
-f|Hachijōjima|None
-f|Hachiko|None
-f|Hachinoko|None
+f|Hachijōjima|
+f|Hachiko|
+f|Hachinoko|
 m|Hachirō 八郎|huitième fils
-f|Hagiko|None
+f|Hagiko|
 f|Haiko 灰子|Enfant des cendres
-f|Hairi|None
+f|Hairi|
 m|Hajime 初め|Premier
 f|Hako 葉子|Enfant de la feuille d'arbre
-m|Hakkotsu|None
+m|Hakkotsu|
 m|Haku 泊|blanc
 m|Hakuba 泊馬|cheval blanc
 f|Hakuko 泊子|enfant blanc
-f|Hakuturu|None
+f|Hakuturu|
 f|Hama 浜|ancien prénom / plage
 f|Hamako 浜子|enfant de la plage
-f|Hamayo|None
-f|Hamiko|None
-f|Han|None
+f|Hamayo|
+f|Hamiko|
+f|Han|
 f|Hana 花|fleur
 f|Hanabi 花火|feu d'artifice
 f|Hanae|fleur bénite
 f|Hanako 花子|(eth: enfant de fleur), enfant-fleur
-f|Hanayo|None
-f|Haneki|None
-f|Haneko|None
-m|Hanjirō|None
-m|Hanshirō|None
-m|Hantarō|None
-m|Hareaki|None
-f|Harei|None
+f|Hanayo|
+f|Haneki|
+f|Haneko|
+m|Hanjirō|
+m|Hanshirō|
+m|Hantarō|
+m|Hareaki|
+f|Harei|
 x|Haru 春|printemps
 f|Harue|branche d'arbre
-f|Haruhi|None
-m|Haruhiko|None
-m|Haruhisa|None
-f|Harui|None
+f|Haruhi|
+m|Haruhiko|
+m|Haruhisa|
+f|Harui|
 f|Haruka|centaine de printemps
-x|Haruki|None
+x|Haruki|
 f|Haruko 春子|enfant du printemps
 f|Harumi|beau printemps
-m|Harumune (hist)|None
-f|Haruna|None
-m|Harunobu|None
-m|Haruo|None
-f|Haruomi|None
-m|Harushige|None
-m|Haruto 春人|None
-f|Haruyo|None
-m|Haruyoshi|None
-f|Hase|None
-f|Hasuko|None
-f|Hasumi|None
-f|Hatano|None
-f|Hatoko|None
+m|Harumune (hist)|
+f|Haruna|
+m|Harunobu|
+m|Haruo|
+f|Haruomi|
+m|Harushige|
+m|Haruto 春人|
+f|Haruyo|
+m|Haruyoshi|
+f|Hase|
+f|Hasuko|
+f|Hasumi|
+f|Hatano|
+f|Hatoko|
 x|Hayate|ouragan ou la vie en arabe
 f|Hotaru 蛍|luciole
 f|Hatsu|première née
-f|Hatsue|None
+f|Hatsue|
 x|Hatsuharu|début du printemps
-m|Hatsuhiko|None
-f|Hatsuka|None
-f|Hatsuko|None
-f|Hatsumi|None
-f|Hatsuno|None
-m|Hatsunosuke|None
-f|Hatsuyo|None
+m|Hatsuhiko|
+f|Hatsuka|
+f|Hatsuko|
+f|Hatsumi|
+f|Hatsuno|
+m|Hatsunosuke|
+f|Hatsuyo|
 f|Hayai 速い|rapide
-f|Hayaka|None
-f|Hayami|None
-m|Hayao|None
-m|Hayato|None
-f|Hazuki|None
-f|Hazumi|None
-m|Heīchirō|None
-m|Heihachirō|None
-m|Heijirō|None
-m|Heisaburō cf. Hidesaburō|None
-f|Heisei|None
-m|Heizaemon 平座衛門|None
-m|Heizō|None
-f|Hibari|None
-f|Hibiki|None
-f|Hidaka (topo, hist)|None
+f|Hayaka|
+f|Hayami|
+m|Hayao|
+m|Hayato|
+f|Hazuki|
+f|Hazumi|
+m|Heīchirō|
+m|Heihachirō|
+m|Heijirō|
+m|Heisaburō cf. Hidesaburō|
+f|Heisei|
+m|Heizaemon 平座衛門|
+m|Heizō|
+f|Hibari|
+f|Hibiki|
+f|Hidaka (topo, hist)|
 x|Hide|supérieur
 x|Hideaki|sage, excellent(e), et intelligent(e)
-m|Hidechika|None
-m|Hideichirō|None
+m|Hidechika|
+m|Hideichirō|
 m|Hidejirō|supérieur (pour 2e fils)
-m|Hidekazu|None
-x|Hideki|None
+m|Hidekazu|
+x|Hideki|
 f|Hideko|enfant supérieur
-m|Hidemasa|None
+m|Hidemasa|
 f|Hidemi|beauté supérieure
-m|Hidemitsu|None
-m|Hidenari|None
+m|Hidemitsu|
+m|Hidenari|
 m|Hidenori|loi supérieure
-m|Hideo|None
-m|Hiderō|None
-m|Hidesamurō, Hidesaburō|None
-m|Hideshi|None
-m|Hidetada|None
-m|Hidetaka|None
-m|Hidetarō|None
-m|Hideto|None
-m|Hidetoshi|None
-m|Hideya|None
-m|Hideyuki|None
-f|Hifumi|None
-f|Higashiko|None
-f|Hijiri|None
+m|Hideo|
+m|Hiderō|
+m|Hidesamurō, Hidesaburō|
+m|Hideshi|
+m|Hidetada|
+m|Hidetaka|
+m|Hidetarō|
+m|Hideto|
+m|Hidetoshi|
+m|Hideya|
+m|Hideyuki|
+f|Hifumi|
+f|Higashiko|
+f|Hijiri|
 f|Hikari 光|lumière
 x|Hikaru 光る|briller, étinceler
-f|Hikiko|None
-m|Hikozō|None
+f|Hikiko|
+m|Hikozō|
 f|Himawari 向日葵|Tournesol
 f|Hime 姫|princesse
 f|Himeka|belle princesse
 f|Himeko 姫子|enfant de la princesse
-f|Himi|None
-f|Himiko 卑弥呼|None
+f|Himi|
+f|Himiko 卑弥呼|
 f|Hina 雛|Poussin, oisillon
-f|Hinae|None
-f|Hinaki|None
+f|Hinae|
+f|Hinaki|
 f|Hinako 雛子|Enfant du poussin
-x|Hinaru|None
+x|Hinaru|
 f|Hinata 日向|Lumière du soleil
-f|Hirako|None
+f|Hirako|
 m|Hiraku|lumière
-f|Hirame|None
-f|Hirari|None
+f|Hirame|
+f|Hirari|
 x|Hiro 広|grand, étendu
-m|Hiroo 博雄|None
+m|Hiroo 博雄|
 m|Hirō 寛郎|Lumière sur le chemin
 x|Hiroaki 広秋|long automne
-x|Hirobumi|None
-m|Hirochika|None
-f|Hiroe|None
-m|Hirofumi|None
+x|Hirobumi|
+m|Hirochika|
+f|Hiroe|
+m|Hirofumi|
 m|Hiroharu 広春|long printemps
-m|Hirohide|None
-m|Hirohiko|None
-m|Hirohisa|None
-m|Hirohito|None
-f|Hiroi|None
-m|Hiroichi 広一|None
-m|Hiroie (hist)|None
-m|Hiroji|None
-f|Hiroka|None
-m|Hirokazu|None
-m|Hiroki|None
+m|Hirohide|
+m|Hirohiko|
+m|Hirohisa|
+m|Hirohito|
+f|Hiroi|
+m|Hiroichi 広一|
+m|Hiroie (hist)|
+m|Hiroji|
+f|Hiroka|
+m|Hirokazu|
+m|Hiroki|
 f|Hiroko 広子|enfant généreux
-m|Hiromasa|None
-x|Hiromi|None
+m|Hiromasa|
+x|Hiromi|
 m|Hiromichi 広道|Long chemin
-m|Hiromitsu|None
-m|Hiromu|None
-f|Hirona|None
-m|Hirondo|None
-m|Hironari|None
-f|Hironobu|None
-m|Hironori|None
+m|Hiromitsu|
+m|Hiromu|
+f|Hirona|
+m|Hirondo|
+m|Hironari|
+f|Hironobu|
+m|Hironori|
 m|Hiroshi|généreux ou franc
-m|Hirosuke|None
-m|Hirotada|None
-m|Hirotaka|None
-m|Hiroteru|None
-m|Hiroto|None
+m|Hirosuke|
+m|Hirotada|
+m|Hirotaka|
+m|Hiroteru|
+m|Hiroto|
 m|Hirotoshi 広年|Longue année
-m|Hirotsugu|None
-f|Hiroyasu|None
-m|Hiroya|None
-f|Hiroyo|None
+m|Hirotsugu|
+f|Hiroyasu|
+m|Hiroya|
+f|Hiroyo|
 m|Hiroyuki 広雪|Neige étendue
-f|Hiruko|None
+f|Hiruko|
 f|Hisa|résistance
-f|Hisae|None
-m|Hisahiko|None
-m|Hisahiro|None
-m|Hisaichi|None
-m|Hisaichirō|None
-m|Hisajirō|None
+f|Hisae|
+m|Hisahiko|
+m|Hisahiro|
+m|Hisaichi|
+m|Hisaichirō|
+m|Hisajirō|
 m|Hisaka|réservé
-m|Hisakazu|None
-f|Hisako|None
-f|Hisami|None
-m|Hisamitsu|None
-m|Hisanaga|None
+m|Hisakazu|
+f|Hisako|
+f|Hisami|
+m|Hisamitsu|
+m|Hisanaga|
 f|Hisano|longue plaine
-f|Hisanori|None
-m|Hisao|None
-x|Hisashi|None
-m|Hisasuke|None
-m|Hisato|None
-m|Hisatsugu|None
-f|Hisayo|None
-m|Hisayoshi|None
-m|Hisayuki|None
-f|Hitoha|None
-f|Hitoko|None
+f|Hisanori|
+m|Hisao|
+x|Hisashi|
+m|Hisasuke|
+m|Hisato|
+m|Hisatsugu|
+f|Hisayo|
+m|Hisayoshi|
+m|Hisayuki|
+f|Hitoha|
+f|Hitoko|
 f|Hitomi 瞳|doublement belle, désigne également la pupille, l'œil, la prunelle,
-m|Hitoshi|None
-f|Hitsujiko|None
-f|Hiyoko|None
-f|Hochimi|None
-m|Hōchū|None
-f|Hokkaidō|None
-f|Hōko|None
-f|Hokuto|None
-f|Homi|None
-f|Honami|None
-f|Honoe|None
+m|Hitoshi|
+f|Hitsujiko|
+f|Hiyoko|
+f|Hochimi|
+m|Hōchū|
+f|Hokkaidō|
+f|Hōko|
+f|Hokuto|
+f|Homi|
+f|Honami|
+f|Honoe|
 f|Honoka ほのか|délicate, discrète
 f|Hoshi 星|étoile
-f|Hoshie|None
+f|Hoshie|
 f|Hoshiko 星子|enfant des étoiles
 f|Hoshiyo|nuit étoilée
-f|Hosoka|None
-m|Hotochi|None
+f|Hosoka|
+m|Hotochi|
 f|Hotaru 蛍|luciole
-m|Hōshun|None
-f|Hozumi|None
-m|Hyakken (surnom)|None
-f|Hyakuko|None
-m|Hyakuzō|None
-m|Hyōzō|None
-m|Hyuga (日向)?|None
-m|Ibiki|None
-f|Ichie|None
+m|Hōshun|
+f|Hozumi|
+m|Hyakken (surnom)|
+f|Hyakuko|
+m|Hyakuzō|
+m|Hyōzō|
+m|Hyuga (日向)?|
+m|Ibiki|
+f|Ichie|
 x|Ichigo|f, fraise ou m, premier protecteur
-m|Ichigorō|None
+m|Ichigorō|
 f|Ichihime 一姫|première princesse
-f|Ichiho|None
-f|Ichika|None
+f|Ichiho|
+f|Ichika|
 f|Ichiko|sorcière ou premier enfant
-f|Ichine|None
-m|Ichinosuke|None
+f|Ichine|
+m|Ichinosuke|
 m|Ichirō 一郎|premier fils
-m|Īchirō 猪一郎|None
-m|Ichitarō 一太郎|None
-f|Ichiyo 一世 monde unique?|None
-f|Ichiyō 一葉|None
-f|Izuko|None
-m|Iekazu|None
-m|Iekiyo|None
-f|Ieko|None
-m|Iemoto|None
-m|Ienobu|None
-m|Ietada|None
-m|Ieyasu (hist)|None
-f|Ihoko|None
-m|Ijūrō|None
-m|Ikaku|None
-f|Ikimi|None
-m|Ikkō|None
-f|Iko|None
+m|Īchirō 猪一郎|
+m|Ichitarō 一太郎|
+f|Ichiyo 一世 monde unique?|
+f|Ichiyō 一葉|
+f|Izuko|
+m|Iekazu|
+m|Iekiyo|
+f|Ieko|
+m|Iemoto|
+m|Ienobu|
+m|Ietada|
+m|Ieyasu (hist)|
+f|Ihoko|
+m|Ijūrō|
+m|Ikaku|
+f|Ikimi|
+m|Ikkō|
+f|Iko|
 f|Iku|nourrissant
-f|Ikue|None
-f|Ikuko|None
-f|Ikumi|None
+f|Ikue|
+f|Ikuko|
+f|Ikumi|
 x|Ikura|petit dauphin
-f|Ikuno|None
-m|Ikuo|None
-m|Ikurō|None
-m|Ikutaka|None
-m|Ikutarō|None
-m|Ikuto|None
-f|Ikuyo|None
+f|Ikuno|
+m|Ikuo|
+m|Ikurō|
+m|Ikutaka|
+m|Ikutarō|
+m|Ikuto|
+f|Ikuyo|
 f|Imako 今子|enfant actuel ou enfant d'aujourd'hui
-f|Imi|None
-f|Imiko|None
-x|Imoko|None
-m|Inajirō|None
-f|Inari|None
+f|Imi|
+f|Imiko|
+x|Imoko|
+m|Inajirō|
+f|Inari|
 f|Ine 稲|plant de riz
-m|Inejirō|None
-f|Ineko|None
-f|Inoko|None
-f|Inuko|None
-f|Io|None
-f|Iori|None
-m|Ippei|None
-f|Iriko|None
-f|Irina|None
-f|Irisu|None
+m|Inejirō|
+f|Ineko|
+f|Inoko|
+f|Inuko|
+f|Io|
+f|Iori|
+m|Ippei|
+f|Iriko|
+f|Irina|
+f|Irisu|
 x|Iruka|Dauphin
-m|Isaburō, cf. Eisaburō|None
-f|Isako|None
-f|Isami|None
+m|Isaburō, cf. Eisaburō|
+f|Isako|
+f|Isami|
 f|Isamu|énergique, bravoure
-x|Isao|None
-f|Iseko|None
-m|Ishi|None
-m|Ishiro|None
-m|Ishihara|None
-f|Ishiko|None
-m|Ishitsugu|None
-f|Iso|None
-f|Isoko|None
-m|Issei 一成|None
-f|Isuzu|None
+x|Isao|
+f|Iseko|
+m|Ishi|
+m|Ishiro|
+m|Ishihara|
+f|Ishiko|
+m|Ishitsugu|
+f|Iso|
+f|Isoko|
+m|Issei 一成|
+f|Isuzu|
 x|Itachi|belette
-f|Itoe|None
-f|Itoko|None
-f|Itome|None
-f|Itomi|None
-f|Itoyo|None
-m|Itsō|None
-f|Itsu|None
-f|Itsuka|None
-x|Itsuki|None
-f|Itsuko|None
-f|Itsumi|None
-m|Itsuo|None
-f|Iwa|None
-m|Iwadono|None
-m|Iwajirō|None
-f|Iwako|None
-f|Iwami|None
-m|Iwao|None
-f|Iyo|None
-f|Iyoko|None
-f|Iyona|None
-f|Iyori|None
-m|Izō 橋本|None
-f|Izuki|None
-f|Izuko|None
+f|Itoe|
+f|Itoko|
+f|Itome|
+f|Itomi|
+f|Itoyo|
+m|Itsō|
+f|Itsu|
+f|Itsuka|
+x|Itsuki|
+f|Itsuko|
+f|Itsumi|
+m|Itsuo|
+f|Iwa|
+m|Iwadono|
+m|Iwajirō|
+f|Iwako|
+f|Iwami|
+m|Iwao|
+f|Iyo|
+f|Iyoko|
+f|Iyona|
+f|Iyori|
+m|Izō 橋本|
+f|Izuki|
+f|Izuko|
 f|Izumi|fontaine, printemps
-f|Izumiko|None
-f|Izuru|None
-m|Jigorō 治五郎|None
-f|Jineko|None
-m|Jin'ichi|None
-m|Jin'ichirō|None
-f|Jinko|None
-m|Jinpachi|None
-m|Jinta|None
-m|Jinzō|None
-m|Jirokichi|None
+f|Izumiko|
+f|Izuru|
+m|Jigorō 治五郎|
+f|Jineko|
+m|Jin'ichi|
+m|Jin'ichirō|
+f|Jinko|
+m|Jinpachi|
+m|Jinta|
+m|Jinzō|
+m|Jirokichi|
 m|Jirō|second fils
-m|Jirōzaemon|None
-f|Jitsuko|None
-m|Jōichi|None
-m|Jōji|None
-m|Jōjirō|None
-f|Jōko|None
-m|Jōtarō|None
-m|Juichi|None
-m|Juichirō|None
-f|Juka|None
+m|Jirōzaemon|
+f|Jitsuko|
+m|Jōichi|
+m|Jōji|
+m|Jōjirō|
+f|Jōko|
+m|Jōtarō|
+m|Juichi|
+m|Juichirō|
+f|Juka|
 x|Jun 淳|obéissant(e)
-f|Juna|None
-m|Jun'ichi|None
-m|Jun'ichirō|None
-m|Junji|None
+f|Juna|
+m|Jun'ichi|
+m|Jun'ichirō|
+m|Junji|
 f|Junko|dévouée, enfant pure
-x|Jun'nosuke|None
-m|Junpei|None
-m|Junrō|None
-f|Junshi|None
-m|Jūjirō|None
-f|Junya|None
-m|Jūraku|None
-f|Juri|None
-f|Juria|None
-m|Jūrōta 十郎太|None
-f|Jusuchin|None
+x|Jun'nosuke|
+m|Junpei|
+m|Junrō|
+f|Junshi|
+m|Jūjirō|
+f|Junya|
+m|Jūraku|
+f|Juri|
+f|Juria|
+m|Jūrōta 十郎太|
+f|Jusuchin|
 m|Jūzō 十三|treize
-m|Jyūro|None
-f|Kachiko|None
-f|Kae|None
+m|Jyūro|
+f|Kachiko|
+f|Kae|
 f|Kaede|érable
-f|Kaeko|None
+f|Kaeko|
 f|Kagami|miroir
 f|Kagamiko|enfant du miroir
-f|Kageno|None
-f|Kageo|None
-f|Kagome|None
+f|Kageno|
+f|Kageo|
+f|Kagome|
 m|Kahei|monnaie
-f|Kaho|None
-f|Kahoko|None
-f|Kahori|None
-f|Kahoru|None
-f|Kahoruko|None
-x|Kai|None
-m|Kaïdo|None
-m|Kaiho = Hǎifēng|None
-m|Kaiichirō (Kaichirō)|None
-m|Kaiji|None
-f|Kaiko|None
+f|Kaho|
+f|Kahoko|
+f|Kahori|
+f|Kahoru|
+f|Kahoruko|
+x|Kai|
+m|Kaïdo|
+m|Kaiho = Hǎifēng|
+m|Kaiichirō (Kaichirō)|
+m|Kaiji|
+f|Kaiko|
 f|Kairi|mer
-m|Kaitarō|None
-m|Kaito|None
-f|Kajimi|None
-m|Kajirō|None
-f|Kakami|None
+m|Kaitarō|
+m|Kaito|
+f|Kajimi|
+m|Kajirō|
+f|Kakami|
 x|Kakashi|épouvantail
-f|Kakko|None
-f|Kako|None
-m|Kakuei|None
-m|Kakujirō|None
-f|Kakuko|None
-f|Kakumi|None
-m|Kakuzō (nom de plume)|None
-m|Kamegorō|None
-m|Kamejirō|None
+f|Kakko|
+f|Kako|
+m|Kakuei|
+m|Kakujirō|
+f|Kakuko|
+f|Kakumi|
+m|Kakuzō (nom de plume)|
+m|Kamegorō|
+m|Kamejirō|
 f|Kameko|enfant de tortue
 f|Kameyo|générations de tortues
 f|Kamiko|Enfant de dieu/déesse
-m|Kan|None
-f|Kana|None
-f|Kanade|None
-f|Kanae|None
-f|Kanako|None
-f|Kaname|None
-f|Kanami|None
-f|Kanari|None
-x|Kane|None
-m|en or|None
-f|accomplissements multiples|None
-m|Kaneaki|None
-m|Kanehiko|None
+m|Kan|
+f|Kana|
+f|Kanade|
+f|Kanae|
+f|Kanako|
+f|Kaname|
+f|Kanami|
+f|Kanari|
+x|Kane|
+m|en or|
+f|accomplissements multiples|
+m|Kaneaki|
+m|Kanehiko|
 m|Kanejirō|en or (pour le 2e fils)
 f|Kaneko|fille de l'or
-m|Kanemochi|None
-m|Kanemori|None
-m|Kanenari|None
-m|Kanenobu|None
-m|Kaneo|None
-m|Kanetada|None
-m|Kanetsugu|None
-m|Kaneyasu|None
-m|Kaneyoshi|None
-m|Kangorō|None
-m|Kan'ichirō|None
-m|Kanji|None
-m|Kanjirō|None
-f|Kanko|None
-f|Kanmi|None
-f|Kanna|None
-f|Kano|None
-f|Kanoko|None
-f|Kanori|None
-f|Kansai|None
-m|Kantarō|None
-m|Kanzaburō|None
-f|Kaoki|None
-f|Kaoko|None
-f|Kaon|None
+m|Kanemochi|
+m|Kanemori|
+m|Kanenari|
+m|Kanenobu|
+m|Kaneo|
+m|Kanetada|
+m|Kanetsugu|
+m|Kaneyasu|
+m|Kaneyoshi|
+m|Kangorō|
+m|Kan'ichirō|
+m|Kanji|
+m|Kanjirō|
+f|Kanko|
+f|Kanmi|
+f|Kanna|
+f|Kano|
+f|Kanoko|
+f|Kanori|
+f|Kansai|
+m|Kantarō|
+m|Kanzaburō|
+f|Kaoki|
+f|Kaoko|
+f|Kaon|
 f|Kaori|parfum
 f|Kaoriko|enfant du parfum
 x|Kaoru|sentir bon
 f|Kaoruko|enfant qui sent bon
-f|Karafuto|None
-f|Karen|None
-f|Kari|None
-f|Karia|None
-f|Kariko|None
-f|Karin|None
-f|Karina|None
-f|Karuho|None
-f|Karuta|None
-f|Kasetsu|None
-f|Kashi|None
-f|Kasuga|None
+f|Karafuto|
+f|Karen|
+f|Kari|
+f|Karia|
+f|Kariko|
+f|Karin|
+f|Karina|
+f|Karuho|
+f|Karuta|
+f|Kasetsu|
+f|Kashi|
+f|Kasuga|
 f|Kasumi|brouillard, brume
-f|Katako|None
+f|Katako|
 f|Katana|épée
 m|Katashi|fermeté
-f|Katsako|None
-m|Katsō|None
+f|Katsako|
+m|Katsō|
 x|Katsu|victoire. Par extension: victorieux (se)
 m|Katsuo|enfant victorieux
 m|Katsuro|fils victorieux
-f|Katsue|None
-m|Katsuhide|None
-m|Katsuhiko|None
-m|Katsuhiro|None
-f|Katsuhisa|None
-m|Katsuichirō|None
-m|Katsuji|None
+f|Katsue|
+m|Katsuhide|
+m|Katsuhiko|
+m|Katsuhiro|
+f|Katsuhisa|
+m|Katsuichirō|
+m|Katsuji|
 m|Katsujirō|victoire (pour le 2e fils)
 f|Katsuki|espoir de la victoire
 f|Katsuko|enfant de la victoire
-m|Katsumasa|None
+m|Katsumasa|
 x|Katsumi 克己|beauté victorieuse
-m|Katsunobu|None
-m|Katsunori|None
+m|Katsunobu|
+m|Katsunori|
 m|Katsuo|victorieux
-m|Katsutoshi|None
-m|Katsuya|None
+m|Katsutoshi|
+m|Katsuya|
 f|Katsuyo|victoire pendant longtemps
-m|Katsuyuki|None
-f|Kawara|None
-f|Kaya|None
-f|Kayako|None
-f|Kayo|None
-f|Kayoko|None
-f|Kayumi|None
-f|Kazako|None
+m|Katsuyuki|
+f|Kawara|
+f|Kaya|
+f|Kayako|
+f|Kayo|
+f|Kayoko|
+f|Kayumi|
+f|Kazako|
 f|Kazu|obéissante ou paix/harmonie
 m|Kazuaki|harmonie de l'automne
-m|Kazuchika|None
-x|Kazue|None
-f|Kazueko|None
-m|Kazuei|None
-f|Kazuha|None
+m|Kazuchika|
+x|Kazue|
+f|Kazueko|
+m|Kazuei|
+f|Kazuha|
 m|Kazuhide|harmonie/paix supérieure
-m|Kazuhiko|None
+m|Kazuhiko|
 m|Kazuhiro|grande harmonie/paix
-m|Kazuhisa|None
-f|Kazuho|None
-m|Kazuichirō|None
+m|Kazuhisa|
+f|Kazuho|
+m|Kazuichirō|
 m|Kazuki|espoir de paix/harmonie; premier d'une nouvelle génération
-m|Kazukiyo|None
+m|Kazukiyo|
 f|Kazuko|enfant de l'harmonie/la paix ou de l'obéissance
-m|Kazumasa|None
+m|Kazumasa|
 f|Kazumi|belle harmonie/paix
-m|Kazumichi|None
-m|Kazumori|None
-f|Kazuna|None
-m|Kazunaga|None
-f|Kazune|None
-m|Kazunobu|None
+m|Kazumichi|
+m|Kazumori|
+f|Kazuna|
+m|Kazunaga|
+f|Kazune|
+m|Kazunobu|
 m|Kazunori|loi de la paix/l'harmonie
 m|Kazuo|fils 1er né, fils agréable
-f|Kazusa|None
-m|Kazushi|None
-m|Kazushige|None
-m|Kazutaka|None
-m|Kazuto|None
+f|Kazusa|
+m|Kazushi|
+m|Kazushige|
+m|Kazutaka|
+m|Kazuto|
 m|Kazutomo|ami de la paix/l'harmonie
-m|Kazutoshi|None
-x|Kazuya|None
-m|Kazuyasu|None
-f|Kazuyo|None
+m|Kazutoshi|
+x|Kazuya|
+m|Kazuyasu|
+f|Kazuyo|
 x|Kazuyoshi|bonne harmonie/paix
-x|Kazuyuki|None
-f|Keaki|None
+x|Kazuyuki|
+f|Keaki|
 x|Kei|heureux ou vénération ou encore clairvoyance (pour けい)
 m|Keibo|respect, vénération
-m|Keigo|None
-m|Keichi|None
-m|Keichirō|None
-m|Keiji|None
+m|Keigo|
+m|Keichi|
+m|Keichirō|
+m|Keiji|
 m|Keijirō|heureux (pour le 2e fils)
-f|Keika|None
-m|Keikichi|None
+f|Keika|
+m|Keikichi|
 f|Keiko|enfant respectueuse ou enfant heureuse
-f|Keinojō|None
-m|Keishi|None
-m|Keishirō|None
-x|Keisuke|None
-m|Keita|None
-x|Keito|None
-m|Keitarō|None
-m|Keizaburō|None
+f|Keinojō|
+m|Keishi|
+m|Keishirō|
+x|Keisuke|
+m|Keita|
+x|Keito|
+m|Keitarō|
+m|Keizaburō|
 m|Ken 剣|épée. Par extension: fort, en bonne santé
 m|Ken'ichi|Premier enfant fort
-m|Ken'ichirō|None
+m|Ken'ichirō|
 m|Kenji 健治|santé et pouvoir, second enfant fort
-m|Kenjirō|None
-m|Kenryō|None
-m|Kenshi|None
+m|Kenjirō|
+m|Kenryō|
+m|Kenshi|
 m|Kenshin|épée du cœur
-m|Kenshirō|None
-f|Kensuke|None
+m|Kenshirō|
+f|Kensuke|
 m|Kenta|santé et force. Par extension: costaud, sain
-m|Kentarō|None
-m|Kento|None
-m|Kenzō|None
-m|Kiaki|None
+m|Kentarō|
+m|Kento|
+m|Kenzō|
+m|Kiaki|
 f|Kichi|chanceuse ou satisfaite
-f|Kichie|None
-m|Kichigorō|None
-f|Kichiko|None
+f|Kichie|
+m|Kichigorō|
+f|Kichiko|
 x|Kichiro|enfant de la chance
-m|Kidō|None
-f|Kie|None
-f|Kieko|None
-f|Kiho|None
-m|Kiichi|None
-m|Kiichirō|None
-f|Kiiko|None
-m|Kijūrō|None
-f|Kikako|None
-f|Kiko|None
+m|Kidō|
+f|Kie|
+f|Kieko|
+f|Kiho|
+m|Kiichi|
+m|Kiichirō|
+f|Kiiko|
+m|Kijūrō|
+f|Kikako|
+f|Kiko|
 f|Kiku 菊|chrysanthème
-f|Kikue|None
-m|Kikugorō (hist)|None
-m|Kikujirō|None
-f|Kikuko|None
-f|Kikumi|None
-f|Kikuna|None
+f|Kikue|
+m|Kikugorō (hist)|
+m|Kikujirō|
+f|Kikuko|
+f|Kikumi|
+f|Kikuna|
 m|Kikunae 菊苗|plant de chrysanthème
-f|Kikuno|None
-m|Kikunosuke (hist)|None
-f|Kikuo|None
-f|Kikuyo|None
-f|Kikuyoshi|None
-f|Kikyō|None
+f|Kikuno|
+m|Kikunosuke (hist)|
+f|Kikuo|
+f|Kikuyo|
+f|Kikuyoshi|
+f|Kikyō|
 x|Kimi|sans égale, bel arbre/espoir
-f|Kimie|None
-m|Kimifusa|None
-m|Kimihito|None
-f|Kimika|None
-m|Kimikazu|None
+f|Kimie|
+m|Kimifusa|
+m|Kimihito|
+f|Kimika|
+m|Kimikazu|
 f|Kimiko|préférée, enfant noble
-m|Kimio|None
+m|Kimio|
 m|Kimitomo|ami sans égal/préféré
-f|Kimitsu|None
-m|Kimiyasu|None
+f|Kimitsu|
+m|Kimiyasu|
 f|Kimiyo|génération sans égale
 f|Kimoshi|sentiment
 x|Kin|or
-f|Kina|None
-f|Kinako|None
-f|Kineko|None
-m|Kin'ichirō|None
-m|Kinjirō|None
-m|Kinjūrō|None
-f|Kinko|None
-m|Kinmochi|None
+f|Kina|
+f|Kinako|
+f|Kineko|
+m|Kin'ichirō|
+m|Kinjirō|
+m|Kinjūrō|
+f|Kinko|
+m|Kinmochi|
 m|Kinnori|loi dorée
-m|Kinnosuke|None
-f|Kinoko|None
-m|Kintaichi|None
+m|Kinnosuke|
+f|Kinoko|
+m|Kintaichi|
 m|Kintarō|garçon en or
 f|Kinu|soie
-f|Kinue|None
-f|Kinuko|None
-f|Kinuyo|None
-f|Kioi Force, vigeur|None
-f|Kirara|None
-f|Kiri|None
-f|Kirie|None
-f|Kiriko|None
-f|Kirin|None
-m|Kirō|None
-f|Kisa|None
-m|Kisaburō|None
-f|Kisaki|None
-m|Kisanta 鬼三太 (hist)|None
-m|Kisao|None
-f|Kisara|None
-f|Kisaragi|None
-f|Kiseiko|None
-f|Kiseko|None
+f|Kinue|
+f|Kinuko|
+f|Kinuyo|
+f|Kioi Force, vigeur|
+f|Kirara|
+f|Kiri|
+f|Kirie|
+f|Kiriko|
+f|Kirin|
+m|Kirō|
+f|Kisa|
+m|Kisaburō|
+f|Kisaki|
+m|Kisanta 鬼三太 (hist)|
+m|Kisao|
+f|Kisara|
+f|Kisaragi|
+f|Kiseiko|
+f|Kiseko|
 f|Kisetsu|saison
-f|Kishiko|None
-f|Kishin|None
-m|Kisshōmaru|None
-m|Kisuke|None
-f|Kitako|None
-m|Kitarō|None
-m|Kitatsugu|None
-m|Kitori|None
-f|Kiwako|None
+f|Kishiko|
+f|Kishin|
+m|Kisshōmaru|
+m|Kisuke|
+f|Kitako|
+m|Kitarō|
+m|Kitatsugu|
+m|Kitori|
+f|Kiwako|
 f|Kiyo|génération d'espoir/heureuse ou nuit d'espoir
 f|Kiyokô|enfant propre
-f|Kiyoe|None
-m|Kiyohiko|None
-m|Kiyohiro|None
-m|Kiyohisa|None
-f|Kiyoka|None
+f|Kiyoe|
+m|Kiyohiko|
+m|Kiyohiro|
+m|Kiyohisa|
+f|Kiyoka|
 f|Kiyoko|enfant propre
-m|Kiyomasa|None
-f|Kiyomi|None
-m|Kiyomichi|None
-m|Kiyonari|None
-f|Kiyora|None
+m|Kiyomasa|
+f|Kiyomi|
+m|Kiyomichi|
+m|Kiyonari|
+f|Kiyora|
 x|Kiyoshi|pur(e)
-f|Kiyotaka|None
-m|Kiyotarō|None
-m|Kiyoteru|None
-m|Kiyoto|None
-m|Kiyoyasu (hist)|None
-m|Kiyoyuki|None
+f|Kiyotaka|
+m|Kiyotarō|
+m|Kiyoteru|
+m|Kiyoto|
+m|Kiyoyasu (hist)|
+m|Kiyoyuki|
 x|Kō|enfant dévoué(e)
-m|Kōbei (hist)|None
-f|Kodama|None
-f|Kofumi|None
-f|Kofuyu|None
-f|Kohagi|None
+m|Kōbei (hist)|
+f|Kodama|
+f|Kofumi|
+f|Kofuyu|
+f|Kohagi|
 f|Kohana|enfant d'une fleur
 f|Koharu|petit printemps
-m|Kōhei|None
-f|Koi|None
-m|Kōichi (oo et ou)|None
-m|Kōichirō (oo et ou)|None
-f|Koiko|None
-m|Koitarō|None
-f|Koito|None
+m|Kōhei|
+f|Koi|
+m|Kōichi (oo et ou)|
+m|Kōichirō (oo et ou)|
+f|Koiko|
+m|Koitarō|
+f|Koito|
 f|Koizumi|grande source
-m|Kōji (oo et ou)|None
-m|Kōjirō|None
-m|Kōki|None
-f|Kōko|None
+m|Kōji (oo et ou)|
+m|Kōjirō|
+m|Kōki|
+f|Kōko|
 f|Kokoro 心|cœur, âme, esprit
-m|Kokuten|None
-m|Kokushin|None
+m|Kokuten|
+m|Kokushin|
 f|Koma 駒|poney
-f|Komae|None
-f|Komaki|None
+f|Komae|
+f|Komaki|
 f|Komako 駒子|enfant du poney
-m|Komao|None
-f|Komari|None
+m|Komao|
+f|Komari|
 f|Kōme 米|riz
-m|Kōmei|None
-f|Komichi|None
-m|Kōmyō|None
+m|Kōmei|
+f|Komichi|
+m|Kōmyō|
 m|Kon'|âme, esprit
-f|Konami|None
-f|Konatsu|None
-m|Konishiki|None
-f|Konomi|None
-x|Kōnosuke|None
-f|Konpira|None
-m|Korekiyo|None
-m|Koretada|None
-m|Kōrō|None
-f|Kora|None
-m|Kōsei|None
-m|Kōsaburō|None
-m|Kōsaku|None
-m|Kosanta|None
+f|Konami|
+f|Konatsu|
+m|Konishiki|
+f|Konomi|
+x|Kōnosuke|
+f|Konpira|
+m|Korekiyo|
+m|Koretada|
+m|Kōrō|
+f|Kora|
+m|Kōsei|
+m|Kōsaburō|
+m|Kōsaku|
+m|Kosanta|
 m|Koseki 小石 (hist),|petite pierre
-x|Kōshi|None
-m|Kōshichi|None
-f|Koshiko|None
-m|Kōshirō|None
-f|Kosono|None
-m|Kōsuke|None
-f|Kosumo|None
-f|Kosuzu|None
-m|Kota|None
-m|Kōtarō|None
+x|Kōshi|
+m|Kōshichi|
+f|Koshiko|
+m|Kōshirō|
+f|Kosono|
+m|Kōsuke|
+f|Kosumo|
+f|Kosuzu|
+m|Kota|
+m|Kōtarō|
 f|Koto|harpe
-f|Kotoe|None
-f|Kotoko|None
-f|Kotomi|None
-f|Kotone|None
-f|Kotono|None
-f|Kotoyo|None
+f|Kotoe|
+f|Kotoko|
+f|Kotomi|
+f|Kotone|
+f|Kotono|
+f|Kotoyo|
 m|Koubai 紅梅|prunier rouge en fleur
-m|Kouji|None
-f|Koyubi|None
+m|Kouji|
+f|Koyubi|
 f|Koyuki|légère neige
-m|Kōzaburō|None
-m|Kōzō|None
-f|Kozue|None
-f|Kuea|None
-f|Kukiko|None
-f|Kuma|None
-f|Kumako|None
-f|Kumano|None
-f|Kumi|None
-f|Kumie|None
+m|Kōzaburō|
+m|Kōzō|
+f|Kozue|
+f|Kuea|
+f|Kukiko|
+f|Kuma|
+f|Kumako|
+f|Kumano|
+f|Kumi|
+f|Kumie|
 f|Kumiko|enfant éternellement belle
-f|Kumiyo|None
+f|Kumiyo|
 f|Kuni|née à la campagne
-m|Kuniaki|None
-f|Kunie|None
-f|Kunieda|None
-m|Kuniharu|None
-m|Kunihiko|None
-m|Kunihiro|None
-m|Kuniichirō|None
-m|Kunijirō|None
-f|Kunika|None
-m|Kunikazu|None
-f|Kuniko|None
-x|Kunimi|None
-x|Kunimitsu|None
-x|Kunio|None
-m|Kunirō|None
-f|Kuniyo|None
-m|Kuniyoshi|None
-m|Kuniyuki|None
-f|Kunoko|None
-f|Kurage|None
-f|Kurako|None
-f|Kurara|None
-f|Kureha|None
-f|Kurie|None
+m|Kuniaki|
+f|Kunie|
+f|Kunieda|
+m|Kuniharu|
+m|Kunihiko|
+m|Kunihiro|
+m|Kuniichirō|
+m|Kunijirō|
+f|Kunika|
+m|Kunikazu|
+f|Kuniko|
+x|Kunimi|
+x|Kunimitsu|
+x|Kunio|
+m|Kunirō|
+f|Kuniyo|
+m|Kuniyoshi|
+m|Kuniyuki|
+f|Kunoko|
+f|Kurage|
+f|Kurako|
+f|Kurara|
+f|Kureha|
+f|Kurie|
 m|Kuro|neuvième fils
-f|Kuroe|None
+f|Kuroe|
 f|Kuroime|princesse noir
-f|Kuroni|None
+f|Kuroni|
 x|kuragari|ténèbres
-f|Kuriko|None
-f|Kurumi|None
-m|Kusuke|None
-f|Kusuko|None
-f|Kuwako|None
+f|Kuriko|
+f|Kurumi|
+m|Kusuke|
+f|Kusuko|
+f|Kuwako|
 x|Kyō|reconnaissance/approbation ou gingembre
-x|Kyōhei|None
-m|Kyōichi|None
-m|Kyōichirō|None
-m|Kyōji|None
-m|Kyōjirō|None
-f|Kyōka|None
+x|Kyōhei|
+m|Kyōichi|
+m|Kyōichirō|
+m|Kyōji|
+m|Kyōjirō|
+f|Kyōka|
 f|Kyōko|enfant de la reconnaissance/approbation
-f|Kyōmi|None
-f|Kyōna|None
-f|Kyōsuke|None
-m|Kyōta|None
-m|Kyôya|None
-m|Kyū|None
-m|Kyūichirō|None
-m|Kyūjirō|None
-m|Kyūsaburō|None
-m|Kyūsaku|None
+f|Kyōmi|
+f|Kyōna|
+f|Kyōsuke|
+m|Kyōta|
+m|Kyôya|
+m|Kyū|
+m|Kyūichirō|
+m|Kyūjirō|
+m|Kyūsaburō|
+m|Kyūsaku|
 f|Machi 街 ou 町|ville ou marcheur
-f|Machia|None
+f|Machia|
 f|Machiko|enfant de ville/marcheur
-m|madara|None
-f|Madoka|None
-f|Mahiru|None
-m|Mahito|None
+m|madara|
+f|Madoka|
+f|Mahiru|
+m|Mahito|
 f|Maho 麻帆|magie
 f|Mai 舞|danse
-f|Maika|None
+f|Maika|
 f|Maiko|舞子 enfant de la danse
 f|Maiko|fille au vêtement de lin
 f|Maki|arbre/espoir véritable
 x|Makura|Noir/noire
 f|Makiko|enfant d'arbre/espoir véritable
 x|Makoto|sincérité
-f|Mami|None
-f|Mamiko|None
+f|Mami|
+f|Mamiko|
 m|Mamoru|protéger
-f|Mana|None
+f|Mana|
 x|Manabu|apprendre
 f|Manami|sept mers
-f|Manaka|None
-f|Manato|None
-m|Manichi|None
-m|Manjirō|None
-f|Mao|None
+f|Manaka|
+f|Manato|
+m|Manichi|
+m|Manjirō|
+f|Mao|
 f|Mari|vérité
 f|Mariko|enfant de la vérité, enfant de la vraie raison
-f|Marumi|None
+f|Marumi|
 f|Masa|franche
-m|Masaaki|None
-m|Masachika (hist)|None
-f|Masae|None
-m|Masaharu|None
+m|Masaaki|
+m|Masachika (hist)|
+f|Masae|
+m|Masaharu|
 m|Masahiko|arrière petit-fils franc
-m|Masahiro|None
+m|Masahiro|
 m|Masahito|homme franc
-f|Masaho|None
-m|Masaichi|None
-m|Masaichirō|None
-m|Masajūrō|None
-m|Masakage (hist)|None
-m|Masakatsu|None
-m|Masakazu|None
+f|Masaho|
+m|Masaichi|
+m|Masaichirō|
+m|Masajūrō|
+m|Masakage (hist)|
+m|Masakatsu|
+m|Masakazu|
 x|Masaki|esprit franc
 f|Masako|enfant de la franchise
 x|Masami|personne franche
-m|Masamichi|None
-m|Masamitsu|None
-m|Masamori|None
-m|Masamune|None
-m|Masanobu|None
-m|Masanori|None
-m|Masao|None
-m|Masaru|None
-m|Masashi|None
-m|Masataka|None
-m|Masatake|None
-m|Masatane|None
-m|Masato|None
-m|Masatoshi|None
-m|Masatsugu|None
-f|Masayo|None
-m|Masayoshi|None
-m|Masayuki|None
-m|Masazumi 正純|None
-f|Masumi 真澄|None
+m|Masamichi|
+m|Masamitsu|
+m|Masamori|
+m|Masamune|
+m|Masanobu|
+m|Masanori|
+m|Masao|
+m|Masaru|
+m|Masashi|
+m|Masataka|
+m|Masatake|
+m|Masatane|
+m|Masato|
+m|Masatoshi|
+m|Masatsugu|
+f|Masayo|
+m|Masayoshi|
+m|Masayuki|
+m|Masazumi 正純|
+f|Masumi 真澄|
 m|Masuyo|augmenter le monde
 f m|Matsu|pin
-m|Matsugorō|None
-m|Matsusuke|None
-m|Matsuyuki|None
-f|Maya|None
-f|Mayo|None
+m|Matsugorō|
+m|Matsusuke|
+m|Matsuyuki|
+f|Maya|
+f|Mayo|
 f|Mayu|cocon
 f|Mayuki|cocon jaune
 f|Mayuko|繭子 enfant du cocon
 f|Mayuko|真由子　transcription plus courante mais intraduisible vrai libre enfant
 f|Mayumi|véritable arc ou beau cocon
-f|Mayura|None
+f|Mayura|
 x|Megumi|bénédiction ou bonté
 f|Mei|nièce
-f|Meijin|None
-f|Miai|None
+f|Meijin|
+f|Miai|
 f|Michiko|bel enfant sage
-m|Michisaburō|None
-m|Michitaka|None
+m|Michisaburō|
+m|Michitaka|
 m|Michiie 道家 (hist),|maison de la voie
 f|Michiko|belle enfant sage
 f|Michiyo|Trois cent générations
-m|Michizō|None
+m|Michizō|
 f|Midori|verte
 f|Mie|charme
 f|Mieko|enfant lumineux
-f|Mifuyu 美冬|None
+f|Mifuyu 美冬|
 f|Miharu|beau printemps
-f|Miho|None
-f|Mika|None
-f|Mikako|None
+f|Miho|
+f|Mika|
+f|Mikako|
 f|Mikan|mandarine
 f|Mikazuki|croissant de Lune
 x|Miki|bel arbre/espoir ou tronc d'arbre
 x|Mikie|variante de Miki
-f|Mikiko|None
-m|Mikio|None
-f|Miko|None
+f|Mikiko|
+m|Mikio|
+f|Miko|
 f|Miku|Futur
 f|Mina|beauté de Nara
-f|Minako|None
+f|Minako|
 f|Minami|sud
 f|Mine|crête
 f|Mineko|enfant de la crête
-f|Minene|None
-f|Minori|None
+f|Minene|
+f|Minori|
 m|Minoru|semence
-f|Miō 美愛|None
-f|Mioko|None
-f|Mire|None
-f|Miroko|None
+f|Miō 美愛|
+f|Mioko|
+f|Mire|
+f|Miroko|
 f|Minto|menthe
 f|Misa|Messe
 f|Misaki|belle fleur d'arbre
-f|Misako|None
+f|Misako|
 m|Misao|fidélité
-f|Misato 美里|None
-f|Mishima|None
-m|Misho|None
-f|Misuzu|None
+f|Misato 美里|
+f|Mishima|
+m|Misho|
+f|Misuzu|
 x|Mitsu|lumière
 m|Mitsuaki|lumière d'automne
-x|Mitsue|None
-m|Mitsuhide|None
+x|Mitsue|
+m|Mitsuhide|
 x|Mitsuki|美月 belle Lune ou lumière d'espoir /pleine lune
 f|Mitsuko|光子 enfant de lumière
 m|Mitsumasa|lumière franche
 f|Mitsumi|belle lumière
 m|Mitsumichi|lumière inconnue
-f|Mitsune|None
-m|Mitsunori|None
-m|Mitsuo|None
-m|Mitsuru|None
-m|Mitsushige (hist)|None
+f|Mitsune|
+m|Mitsunori|
+m|Mitsuo|
+m|Mitsuru|
+m|Mitsushige (hist)|
 m|Mitsutoshi|ville lumineuse
 f|Mitsuyo|âge de lumière
-m|Mitsuyori|None
-m|Mitsuyoshi|None
+m|Mitsuyori|
+m|Mitsuyoshi|
 f|Miu|belle plume ou beau temps (ou belle pluie à la différence de Myu qui n'a pas de signification)
-f|Miwa|None
-f|Miwako|None
+f|Miwa|
+f|Miwako|
 x|Miyabi|élégant
 f|Miyako|belle enfant de mars
-f|Miyo|None
-f|Miyoko 美代子|None
-f|Miyū|None
+f|Miyo|
+f|Miyoko 美代子|
+f|Miyū|
 f|Miyuki|silence de neige profonde
-x|Mizuho|None
+x|Mizuho|
 f|Mizuki|belle Lune
-f|Mizutomo|None
-m|Mochiaki|None
+f|Mizutomo|
+m|Mochiaki|
 f|Moe|bourgeon
-f|Moeko|None
-f|Moemi|None
+f|Moeko|
+f|Moemi|
 f|Momo 桃|pêche
-f|Momoe|None
+f|Momoe|
 f|Momoka|centaines de pêches
 f|Momoko|enfant des pêches (la pêche est, au Japon, le symbole de la longévité)
 f|Mon|passerelle
-m|Morihei|None
-m|Morihiro 守弘|None
-m|Morisada|None
-m|Moriteru 守央|None
-m|Moritomo 守友|None
-m|Moriyasu|None
-m|Motoaki|None
-m|Motoji 元司|None
-m|Motojirō|None
-f|Motoka|None
-f|Motoko|None
-m|Motonaga|None
-m|Motonobu 元信|None
-m|Motonori|None
+m|Morihei|
+m|Morihiro 守弘|
+m|Morisada|
+m|Moriteru 守央|
+m|Moritomo 守友|
+m|Moriyasu|
+m|Motoaki|
+m|Motoji 元司|
+m|Motojirō|
+f|Motoka|
+f|Motoko|
+m|Motonaga|
+m|Motonobu 元信|
+m|Motonori|
 m|Motoo|origine
-f|Moyamu|None
+f|Moyamu|
 x|Mugetsu|Sans Lune (c'est aussi une marque de Saké)
-m|Muneakira|None
-m|Munehide|None
-m|Munemasa|None
+m|Muneakira|
+m|Munehide|
+m|Munemasa|
 f|Mura|village
-m|Muramasa|None
+m|Muramasa|
 f|Murazaki|pourpre
-m|Muro|None
+m|Muro|
 f|Nadeshiko 撫子|œillet (symbolise la jeune fille japonaise idéale, de par ses qualités morales comme par sa beauté)
-f|Nagako|None
-m|Nakatsu|None
+f|Nagako|
+m|Nakatsu|
 x|Nagisa 渚|rivage, grève
 f|Nami 波|vague
 f|Namie 奈美恵|
 f|Namiko 波子　|enfant des vagues
 f|Nana 七|fleur de pommier ou sept
-f|Nanae|None
-f|Nanako|None
+f|Nanae|
+f|Nanako|
 f|Nanami|Belle fleur de pommier
 x|Nanashi|sans nom
-m|Nankichi|None
+m|Nankichi|
 x|Nao なお|encore, davantage
-m|Naohiro|None
-f|Naoka|None
-m|Naokatsu|None
-m|Naoki|None
+m|Naohiro|
+f|Naoka|
+m|Naokatsu|
+m|Naoki|
 f|Naoko|honnête
 x|Naomi|joie de vivre, par-dessus tout, la beauté
-m|Naonori|None
-m|Naotaka|None
-m|Naoto|None
-m|Naoya|None
-m|Naoyuki|None
-m|Narinobu|None
-m|Narisawa|None
-m|Naritaka|None
-m|Naritami|None
-m|Naritsugu|None
+m|Naonori|
+m|Naotaka|
+m|Naoto|
+m|Naoya|
+m|Naoyuki|
+m|Narinobu|
+m|Narisawa|
+m|Naritaka|
+m|Naritami|
+m|Naritsugu|
 f|Naru 鳴る|sonner, tinter
-m|Naruhiko|None
-m|Naruhito|None
-f|Narumi|None
+m|Naruhiko|
+m|Naruhito|
+f|Narumi|
 m|Naruto ナルト|ingrédient dans le râmen (soupe de nouilles japonaise)
-f|Narusegawa|None
+f|Narusegawa|
 f|Natsu|été
 x|Natsuki　夏|espoir/arbre de l'été ou 7e mois
 f|Natsuko 夏子|enfant de l'été
-x|Natsume|None
+x|Natsume|
 f|Natsumi 夏海　ou 夏海美|mer d'été ou magnifique été
-m|Natsuo|None
-f|Nayuki|None
+m|Natsuo|
+f|Nayuki|
 x|Neji|Spirale
 f|Nemu|Souris
-f|Nene|None
+f|Nene|
 m|Nibori|ascension
 f|Niji|arc-en-ciel
 f|Nijiko|enfant de l'arc-en-ciel
-f|Nina|None
+f|Nina|
 f|Nishi|Ouest
 m|Noboru 昇|paix
 x|Nobu|expansion, vérité
-m|Nobuaki, Nobuakira|None
-m|Nobuchika|None
-m|Nobuharu|None
-m|Nobuhide|None
-m|Nobuhiko|None
-m|Nobukado|None
-m|Nobukimi|None
-f|Nobuko|None
-m|Nobumasa|None
-m|Nobunaga|None
-m|Nobunori|None
-m|Nobuo|None
-m|Noburō|None
-m|Nobushige|None
-m|Nobusuke|None
-m|Nobutaka|None
-m|Nobutatsu|None
-m|Nobuto|None
-m|Nobutomo|None
-m|Nobutsuna|None
-m|Nobutsune|None
-m|Nobuya|None
-m|Nobuyasu|None
-m|Nobuyori|None
-m|Nobuyoshi|None
-m|Nobuyuki, Noboyuki|None
+m|Nobuaki, Nobuakira|
+m|Nobuchika|
+m|Nobuharu|
+m|Nobuhide|
+m|Nobuhiko|
+m|Nobukado|
+m|Nobukimi|
+f|Nobuko|
+m|Nobumasa|
+m|Nobunaga|
+m|Nobunori|
+m|Nobuo|
+m|Noburō|
+m|Nobushige|
+m|Nobusuke|
+m|Nobutaka|
+m|Nobutatsu|
+m|Nobuto|
+m|Nobutomo|
+m|Nobutsuna|
+m|Nobutsune|
+m|Nobuya|
+m|Nobuyasu|
+m|Nobuyori|
+m|Nobuyoshi|
+m|Nobuyuki, Noboyuki|
 f|Nodoka|calme
-x|Noeru|None
+x|Noeru|
 m|Nori|règle, loi
-m|Noriaki|None
-f|Norie|None
-m|Norifumi|None
-m|Norihei|None
-m|Norihiro|None
-m|Norihisa|None
-m|Norihito|None
-m|Noriho|None
+m|Noriaki|
+f|Norie|
+m|Norifumi|
+m|Norihei|
+m|Norihiro|
+m|Norihisa|
+m|Norihito|
+m|Noriho|
 f|Noriko|enfant de la loi
-m|Norimoto|None
-m|Norio|None
-m|Norisuke|None
-x|Noriyuki|None
-f|Nozomi|None
-f|Nozomu|None
-m|Nyozekan|None
-m|Ōgai|None
-f|Orino|None
-m|Ōichirō|None
+m|Norimoto|
+m|Norio|
+m|Norisuke|
+x|Noriyuki|
+f|Nozomi|
+f|Nozomu|
+m|Nyozekan|
+m|Ōgai|
+f|Orino|
+m|Ōichirō|
 f|Oki|haute mer
-m|Okihiro|None
-f|Okiko 興子 (hist)|None
-f|Ōko|None
-x|Okuni|None
-f|Ōmatsu|None
-f|Ōmi|None
-m|Oniroku|None
-f|Onyanko|None
-f|Orie|None
-f|Orine|None
+m|Okihiro|
+f|Okiko 興子 (hist)|
+f|Ōko|
+x|Okuni|
+f|Ōmatsu|
+f|Ōmi|
+m|Oniroku|
+f|Onyanko|
+f|Orie|
+f|Orine|
 f|Orihime|princesse tissée
-f|Orika|None
-f|Orisa|None
-x|Oriza|None
-m|Osachi|None
-f|Osami|None
+f|Orika|
+f|Orisa|
+x|Oriza|
+m|Osachi|
+f|Osami|
 m|Osamu|loi durable (rester fidèle à une loi)
-f|Otoe|None
-m|Otohiko|None
-m|Otojirō|None
-m|Otokazu|None
-f|Pako|None
-f|Peko|None
-f|Pinko|None
-f|Pinoko|None
+f|Otoe|
+m|Otohiko|
+m|Otojirō|
+m|Otokazu|
+f|Pako|
+f|Peko|
+f|Pinko|
+f|Pinoko|
 f|Pika|brillant
-f|Poko|None
-f|Purimo|None
-f|Ramie|None
-f|Ramu|None
+f|Poko|
+f|Purimo|
+f|Ramie|
+f|Ramu|
 x|Ran|orchidée (蘭)
-f|Ranko|None
-f|Rara|None
+f|Ranko|
+f|Rara|
 m|Raito|Lumière (月)
 x|Rei|merci / grâce / glace / 0 / adorer Dieu, une divinité, quelqu'un...
-m|Reihō|None
-m|Reiichi|None
-m|Reiichirō|None
-m|Reijirō|None
+m|Reihō|
+m|Reiichi|
+m|Reiichirō|
+m|Reijirō|
 f|Reika|Éclair
 f|Reiko|bel enfant
-f|Reimi|None
-f|Reina|None
-f|Reira|None
-f|Reiri|None
-m|Reita|None
-m|Reitarō|None
+f|Reimi|
+f|Reina|
+f|Reira|
+f|Reiri|
+m|Reita|
+m|Reitarō|
 f|Reiya|Léa [littéralement : Esprit de la vallée]
-f|Rēko|None
-f|Remi|None
+f|Rēko|
+f|Remi|
 x|Ren|lotus
-f|Rena|None
-f|Renge|None
-m|Renji|None
-m|Renjirō|None
-f|Renko|None
-m|Renzaburō|None
-f|Reon|None
-f|Reona|None
-f|Ria|None
-f|Richiko|None
-f|Rie|None
-f|Rieko|None
-f|Riena|None
-f|Rieo|None
-m|Rihei 利平|None
-f|Riho|None
-f|Rihoko|None
-m|Riichi|None
-m|Riichirō (Richirō)|None
+f|Rena|
+f|Renge|
+m|Renji|
+m|Renjirō|
+f|Renko|
+m|Renzaburō|
+f|Reon|
+f|Reona|
+f|Ria|
+f|Richiko|
+f|Rie|
+f|Rieko|
+f|Riena|
+f|Rieo|
+m|Rihei 利平|
+f|Riho|
+f|Rihoko|
+m|Riichi|
+m|Riichirō (Richirō)|
 f|Rika|science
-f|Rikako|None
-f|Rikiko|None
-f|Riko|None
+f|Rikako|
+f|Rikiko|
+f|Riko|
 x|Riku|terre (sol)
-f|Rikuko|None
-m|Rikuo|None
-f|Rimi|None
-x|Rin|None
-f|Rina 里菜 = Lina|None
-f|Rinako|None
-f|Rinda|None
-m|Rin'ichirō|None
-m|Rinji|None
-m|Rinjirō|None
-f|Rinko|None
-f|Rino|None
-m|Rintarō|None
-f|Rio|None
-f|Rioko|None
-f|Riona|None
-f|Rira|None
-f|Ririko|None
-f|Ririse|None
-f|Riru|None
-f|Risa = Lisa|None
-f|Risako|None
-m|Rissei = Lìchéng|None
-f|Ritsu|None
-f|Ritsuko|None
-f|Riuko|None
-f|Riya|None
-f|Riyako|None
-f|Riyo 理世,|None
-m|Riyō 利陽|None
-f|Riyoko|None
-f|Riyu|None
-f|Roko|None
-m|Rokujirō|None
-m|Rokurō|None
-f|Romi|None
-f|Rōna|None
-f|Rōza|None
-f|Rui|None
-f|Ruika|None
-f|Ruiko|None
-m|Ruito 塁斗|None
-f|Ruka|None
-x|Ruki|None
-f|Rukia|None
-f|Rukina|None
-f|Rukito|None
-f|Rūmi|None
-f|Rumiko|None
-f|Runa|None
-f|Ruri|None
-f|Ruriko|None
-f|Rutsuko|None
+f|Rikuko|
+m|Rikuo|
+f|Rimi|
+x|Rin|
+f|Rina 里菜 = Lina|
+f|Rinako|
+f|Rinda|
+m|Rin'ichirō|
+m|Rinji|
+m|Rinjirō|
+f|Rinko|
+f|Rino|
+m|Rintarō|
+f|Rio|
+f|Rioko|
+f|Riona|
+f|Rira|
+f|Ririko|
+f|Ririse|
+f|Riru|
+f|Risa = Lisa|
+f|Risako|
+m|Rissei = Lìchéng|
+f|Ritsu|
+f|Ritsuko|
+f|Riuko|
+f|Riya|
+f|Riyako|
+f|Riyo 理世,|
+m|Riyō 利陽|
+f|Riyoko|
+f|Riyu|
+f|Roko|
+m|Rokujirō|
+m|Rokurō|
+f|Romi|
+f|Rōna|
+f|Rōza|
+f|Rui|
+f|Ruika|
+f|Ruiko|
+m|Ruito 塁斗|
+f|Ruka|
+x|Ruki|
+f|Rukia|
+f|Rukina|
+f|Rukito|
+f|Rūmi|
+f|Rumiko|
+f|Runa|
+f|Ruri|
+f|Ruriko|
+f|Rutsuko|
 x|Ryō|excellent
-m|Ryōga|None
-m|Ryōhei|None
-m|Ryōichi|None
-m|Ryōichirō|None
-m|Ryōji|None
-f|Ryōka|None
-f|Ryōko|None
+m|Ryōga|
+m|Ryōhei|
+m|Ryōichi|
+m|Ryōichirō|
+m|Ryōji|
+f|Ryōka|
+f|Ryōko|
 m|Ryōku|force, puissance
-m|Ryōma|None
-m|Ryōsen|None
-m|Ryōsuke|None
+m|Ryōma|
+m|Ryōsen|
+m|Ryōsuke|
 m|Ryōta|magnifiquement bâti
-m|Ryōtarō|None
-m|Ryōzō|None
+m|Ryōtarō|
+m|Ryōzō|
 m|Ryū 竜|dragon
-m|Ryūhō|None
-m|Ryūichi|None
-m|Ryūichirō|None
-m|Ryūji|None
-m|Ryūjirō|None
-f|Ryūko|None
+m|Ryūhō|
+m|Ryūichi|
+m|Ryūichirō|
+m|Ryūji|
+m|Ryūjirō|
+f|Ryūko|
 m|Ryūku 竜死|dragon de la mort
-m|Ryūnosuke|None
-m|Ryūsaku|None
-m|Ryūsuke|None
-m|Ryūta|None
-m|Ryūtarō|None
-m|Ryūzaburō|None
-m|Ryūzaki|None
-m|Ryūzō|None
-f|Saaya 紗綾|None
+m|Ryūnosuke|
+m|Ryūsaku|
+m|Ryūsuke|
+m|Ryūta|
+m|Ryūtarō|
+m|Ryūzaburō|
+m|Ryūzaki|
+m|Ryūzō|
+f|Saaya 紗綾|
 m|Saburō|troisième fils
 f|Sachi|bonheur
-f|Sachie|None
-f|Sachiho|None
+f|Sachie|
+f|Sachiho|
 f|Sachiko|grand bonheur, enfant du bonheur
-f|Sachina|None
-f|Sachiyo|None
-m|Sadaaki|None
-f|Sadae|None
-m|Sadaharu = Zhēnzhì|None
-m|Sadajirō|None
-f|Sadaka|None
+f|Sachina|
+f|Sachiyo|
+m|Sadaaki|
+f|Sadae|
+m|Sadaharu = Zhēnzhì|
+m|Sadajirō|
+f|Sadaka|
 f|Sadako|enfant heureux
-f|Sadami|None
-m|Sadanobu|None
-m|Sadao|None
-f|Sadayo|None
-m|Sado|None
-f|Sae|None
-f|Saeka|None
-f|Saeko|None
-f|Saemi|None
-f|Saho|None
-f|Sahoko|None
-f|Sahori|None
+f|Sadami|
+m|Sadanobu|
+m|Sadao|
+f|Sadayo|
+m|Sado|
+f|Sae|
+f|Saeka|
+f|Saeko|
+f|Saemi|
+f|Saho|
+f|Sahoko|
+f|Sahori|
 x|Sai|再 répété / encore . 歳 Âge . 際 À l'occasion de / circonstance
-m|Saiichi|None
-m|Saiichirō|None
-f|Saika|None
-f|Saiko|None
-f|Saika|None
+m|Saiichi|
+m|Saiichirō|
+f|Saika|
+f|Saiko|
+f|Saika|
 f|Sakae|prospérité
-m|Sakashi|None
-f|Saki|None
-f|Sakie|None
-m|Sakihito|None
-f|Sakiho|None
-f|Sakika|None
-f|Sakiko|None
-f|Sakimi|None
-f|Sakina|None
-f|Sakino|None
-m|Sakirō|None
-f|Sakiyo|None
-m|Sakon|None
-m|Saku 佐久|None
+m|Sakashi|
+f|Saki|
+f|Sakie|
+m|Sakihito|
+f|Sakiho|
+f|Sakika|
+f|Sakiko|
+f|Sakimi|
+f|Sakina|
+f|Sakino|
+m|Sakirō|
+f|Sakiyo|
+m|Sakon|
+m|Saku 佐久|
 f|Sakura|fleur de cerisier
-f|Sakurako|None
-m|Sakutarō|None
-m|Sakuzō|None
-f|Sami|None
-f|Sanae|None
-f|Sanako|None
-f|Sanami|None
-m|Sanetomi|None
-m|Sanetsumu|None
-m|Sansei|None
+f|Sakurako|
+m|Sakutarō|
+m|Sakuzō|
+f|Sami|
+f|Sanae|
+f|Sanako|
+f|Sanami|
+m|Sanetomi|
+m|Sanetsumu|
+m|Sansei|
 f|Sango|corail
-m|Sanshirō|None
-f|Saori|None
-f|Sari|None
-f|Sarina|None
-f|Sasara|None
-f|Sashiko|None
+m|Sanshirō|
+f|Saori|
+f|Sari|
+f|Sarina|
+f|Sasara|
+f|Sashiko|
 m|Sasori|scorpion
-m|Sasuke|None
-f|Satoe|None
+m|Sasuke|
+f|Satoe|
 f|Satoko|enfant sage
 f|Satomi|beauté sage
-m|Satoru|None
-m|Satoshi|None
-f|Satoyo|None
-f|Satsu|None
+m|Satoru|
+m|Satoshi|
+f|Satoyo|
+f|Satsu|
 x|Satsuki|5e mois lunaire,azalée
-m|Satushi|None
-f|Sawaka|None
-f|Sawako|None
-f|Saya|None
-f|Sayaka 清|None
-f|Sayako 清子|None
-f|Sayami|None
-f|Sayana|None
-f|Sayano|None
+m|Satushi|
+f|Sawaka|
+f|Sawako|
+f|Saya|
+f|Sayaka 清|
+f|Sayako 清子|
+f|Sayami|
+f|Sayana|
+f|Sayano|
 f|Sayo|née la nuit
-f|Sayori|None
-f|Sayoka|None
-f|Sayoko|None
-f|Sayu|None
-f|Sayuki|None
-f|Sayumi|None
+f|Sayori|
+f|Sayoka|
+f|Sayoko|
+f|Sayu|
+f|Sayuki|
+f|Sayumi|
 f|Sayuri|petite fleur de lys
-f|Seara|None
-f|Sei|None
-m|Seigō|None
-m|Seiichi|None
-m|Seiichirō|None
-m|Seiji|None
-m|Seijirō|None
-m|Seijun (surnom)|None
-m|Seijurō|None
-f|Seika|None
-m|Seiki|None
+f|Seara|
+f|Sei|
+m|Seigō|
+m|Seiichi|
+m|Seiichirō|
+m|Seiji|
+m|Seijirō|
+m|Seijun (surnom)|
+m|Seijurō|
+f|Seika|
+m|Seiki|
 f|Seiko|succès
-f|Seina|None
-f|Seira|None
+f|Seina|
+f|Seira|
 m|Seishi|Spermatozoïde.
-m|Seishirō|None
-m|Seitarō|None
-m|Seiun (hist)|None
-x|Seiya|None
-m|Seizō|None
-m|Sekihiko|None
-f|Sena|None
-f|Senami|None
-m|Senji|None
-m|Senjirō|None
-m|Senjūrō|None
-m|Senri|None
-f|Sēra = Sarah|None
+m|Seishirō|
+m|Seitarō|
+m|Seiun (hist)|
+x|Seiya|
+m|Seizō|
+m|Sekihiko|
+f|Sena|
+f|Senami|
+m|Senji|
+m|Senjirō|
+m|Senjūrō|
+m|Senri|
+f|Sēra = Sarah|
 f|Seran|orchidée bleu
-f|Seshiru|None
-m|Sesshū (Sessue)|None
+f|Seshiru|
+m|Sesshū (Sessue)|
 f|Setsuko 節子|enfant de la fête / enfant de la fidélité
-f|Setsumi 節美|None
-m|Sheiji|None
-m|Shichinosuke|None
-m|Shichirō|None
-f|Shie|None
-f|Shifumi|None
-m|Shigefumi 重文|None
-m|Shigekatsu|None
-m|Shigeki|None
-f|Shigeko 成子|None
-m|Shigemasa|None
-f|Shigemi 繁美|None
-m|Shigemune|None
-m|Shigenobu|None
-m|Shigenori|None
-m|Shigeo|None
-m|Shigeoki|None
-f|Shigeri 茂理|None
-x|Shigeru 茂 ou 繁|None
-m|Shigesato 重里|None
-m|Shigetada|None
-m|Shigeyoshi|None
-f|Shigezō|None
-m|Shigure|None
-f|Shiho 志保|None
-f|Shihoka|None
-f|Shihoko|None
-f|Shihomi|None
-f|Shihona|None
-f|Shihori|None
+f|Setsumi 節美|
+m|Sheiji|
+m|Shichinosuke|
+m|Shichirō|
+f|Shie|
+f|Shifumi|
+m|Shigefumi 重文|
+m|Shigekatsu|
+m|Shigeki|
+f|Shigeko 成子|
+m|Shigemasa|
+f|Shigemi 繁美|
+m|Shigemune|
+m|Shigenobu|
+m|Shigenori|
+m|Shigeo|
+m|Shigeoki|
+f|Shigeri 茂理|
+x|Shigeru 茂 ou 繁|
+m|Shigesato 重里|
+m|Shigetada|
+m|Shigeyoshi|
+f|Shigezō|
+m|Shigure|
+f|Shiho 志保|
+f|Shihoka|
+f|Shihoko|
+f|Shihomi|
+f|Shihona|
+f|Shihori|
 f|Shina|vertu
-f|Shino 紫乃|None
-f|Shinobu|None
-f|Shio|None
-m|Shimei|None
-f|Shimi|None
-m|Shimizu|None
+f|Shino 紫乃|
+f|Shinobu|
+f|Shio|
+m|Shimei|
+f|Shimi|
+m|Shimizu|
 m|Shin|nouveau ou vérité
-m|Shingo|None
-m|Shin'ichi|None
-m|Shin'ichirō|None
+m|Shingo|
+m|Shin'ichi|
+m|Shin'ichirō|
 m|Shinji|confiance
 f|Shinju|perle
-m|Shinjirō|None
-m|Shinkichi|None
-m|Shin'nosuke|None
-x|Shino|None
+m|Shinjirō|
+m|Shinkichi|
+m|Shin'nosuke|
+x|Shino|
 x|Shinobu|Persévérance
-m|Shinrei|None
-m|Shinsuke|None
-m|Shintarō|None
-m|Shinya|None
+m|Shinrei|
+m|Shinsuke|
+m|Shintarō|
+m|Shinya|
 m|Shinzō|cœur
-f|Shio|None
-f|Shiomi|None
-f|Shiori|None
+f|Shio|
+f|Shiomi|
+f|Shiori|
 x|Shirabe|recherche
-f|Shiri|None
+f|Shiri|
 m|Shirō|quatrième fils
-f|Shiuko|None
+f|Shiuko|
 f|Shizu|calme
-f|Shizue|None
-f|Shizuho|None
+f|Shizue|
+f|Shizuho|
 f|Shizuka|calme, paisible
 f|Shizuko|enfant du calme
-x|Shizuru|None
+x|Shizuru|
 f|Shizuyo|génération calme
 m|Shō|vigoureux, prospère, brillant
-m|Shōgo|None
-m|Shōhei|None
-m|Shōichi|None
-m|Shōji|None
-f|Shōko|None
-m|Shōroku|None
-m|Shōsuke|None
-m|Shōta|None
-m|Shōtarō|None
-m|Shōtō|None
-m|Shōzō|None
-m|Shūgorō|None
+m|Shōgo|
+m|Shōhei|
+m|Shōichi|
+m|Shōji|
+f|Shōko|
+m|Shōroku|
+m|Shōsuke|
+m|Shōta|
+m|Shōtarō|
+m|Shōtō|
+m|Shōzō|
+m|Shūgorō|
 m|Shūhei|Soldat discipliné
-m|Shūichi|None
-m|Shūichirō|None
-m|Shūji|None
-m|Shūkō 秀行 (Hideyuki)|None
-f|Shūko|None
-m|Shūmei|None
-x|Shun|None
-m|Shunsuke|None
-m|Shuntarō|None
-m|Shūsuke|None
-m|Shūta|None
-m|Shūtarō|None
-x|Shūya|None
-m|Shūzō|None
-m|Sōji|None
-f|Sōko|None
-f|Sonoka|None
-f|Sonoe|None
-x|Sonoka|None
-f|Sonoko|None
+m|Shūichi|
+m|Shūichirō|
+m|Shūji|
+m|Shūkō 秀行 (Hideyuki)|
+f|Shūko|
+m|Shūmei|
+x|Shun|
+m|Shunsuke|
+m|Shuntarō|
+m|Shūsuke|
+m|Shūta|
+m|Shūtarō|
+x|Shūya|
+m|Shūzō|
+m|Sōji|
+f|Sōko|
+f|Sonoka|
+f|Sonoe|
+x|Sonoka|
+f|Sonoko|
 f|Sonomia|ciel
 x|Sora|ciel
-m|Sōta|None
-f|Sugako|None
-f|Sugata|None
+m|Sōta|
+f|Sugako|
+f|Sugata|
 f|Sugi|cèdre
-f|Sugina|None
-m|Sugisaku|None
+f|Sugina|
+m|Sugisaku|
 x|Sui|pluie
 m|Suiteki|goutte d'eau
 f|Suiteka|féminin de Suiteki
 f|Suki|aimée
-f|Sumi|None
-f|Sumie|None
-f|Sumika|None
-f|Sumiko|None
-f|Sumina|None
-m|Sumio|None
+f|Sumi|
+f|Sumie|
+f|Sumika|
+f|Sumiko|
+f|Sumina|
+m|Sumio|
 f|Sumire|violette
-f|Sumiyo|None
-m|Sunaiki|None
-x|Sunao|None
+f|Sumiyo|
+m|Sunaiki|
+x|Sunao|
 m|Susumu|avancement
-f|Suzu|None
-f|Suzuha|None
+f|Suzu|
+f|Suzuha|
 f|Suzuka 涼風|vent frais
-f|Suzumi|None
-f|Suzuna|None
+f|Suzumi|
+f|Suzuna|
 f|Suzune, Suzume|moineau
-m|Syōhei|None
-m|Syūn'ichi|None
-m|Tachio|None
-m|Tadanobu|None
-m|Tadao|None
-m|Tadaoki|None
-m|Tadashi|None
-m|Tadayasu|None
-m|Tadayoshi|None
-f|Taeko|None
-m|Taiji 泰司|None
-m|Taiki|None
-m|Taishō|None
-m|Taiyō|None
-m|Taizō|None
-m|Takaaki|None
-m|Takahiko|None
-m|Takahiro|None
-m|Takahito|None
-m|Takakazu|None
-x|Takami|None
-m|Takanobu|None
+m|Syōhei|
+m|Syūn'ichi|
+m|Tachio|
+m|Tadanobu|
+m|Tadao|
+m|Tadaoki|
+m|Tadashi|
+m|Tadayasu|
+m|Tadayoshi|
+f|Taeko|
+m|Taiji 泰司|
+m|Taiki|
+m|Taishō|
+m|Taiyō|
+m|Taizō|
+m|Takaaki|
+m|Takahiko|
+m|Takahiro|
+m|Takahito|
+m|Takakazu|
+x|Takami|
+m|Takanobu|
 f|Takako|noble
-m|Takanobu|None
-m|Takanori|None
-m|Takao|None
+m|Takanobu|
+m|Takanori|
+m|Takao|
 f|Takara|trésor ou précieuse
 m|Takashi|nombreux dons, éminence
-m|Takaya|None
-m|Takayoshi|None
-m|Takayuki|None
-m|Takeaki|None
-m|Takeji|None
-m|Takeo|None
+m|Takaya|
+m|Takayoshi|
+m|Takayuki|
+m|Takeaki|
+m|Takeji|
+m|Takeo|
 m|Takehiko|avisé
-m|Takeru|None
+m|Takeru|
 m|Takeshi|brave, bambou
-m|Taketoshi|None
-m|Takeyuki|None
-m|Takezō|None
-m|Takio|None
+m|Taketoshi|
+m|Takeyuki|
+m|Takezō|
+m|Takio|
 m|Taku|maison (chez soi), ou brûler
 m|Takuboku (啄木),|pivert
-m|Takuma|None
+m|Takuma|
 m|Takumi|artisan
-m|Takuji|None
-m|Takurō|None
-m|Takuto|None
-m|Takuya|None
+m|Takuji|
+m|Takurō|
+m|Takuto|
+m|Takuya|
 f|Tama|âme, esprit/ c'est aussi un nom courant pour un chat
-x|Tamaki|None
-f|Tamano|None
-m|Tamasaburō|None
-m|Tamezō|None
-f|Tami|None
-m|Tamiki|None
+x|Tamaki|
+f|Tamano|
+m|Tamasaburō|
+m|Tamezō|
+f|Tami|
+m|Tamiki|
 f|Tamiko|enfant du peuple, enfant de l'abondance
-m|Tamio|None
+m|Tamio|
 f|Tani|vallée
 x|Tampopo|Pissenlit (prénom rare, souvent donné aux animaux comme les oiseaux (de couleur jaune))
-m|Tanzan 湛山|None
+m|Tanzan 湛山|
 m|Tarō|grand garçon, premier-né
-m|Tasaburō|None
-m|Tashiyuki|None
+m|Tasaburō|
+m|Tashiyuki|
 f|Tatsuki|dragon lunaire
-m|Tatsumi|None
-m|Tatsunosuke|None
-m|Tatsurō|None
+m|Tatsumi|
+m|Tatsunosuke|
+m|Tatsurō|
 m|Tatsuya|flèche de dragon 竜也
-m|Tatsuzō|None
-f|Tayuya|None
-f|Temari|None
-m|Tenchi|None
-m|Tenryū (hist)|None
-m|Tenzen (hist)|None
+m|Tatsuzō|
+f|Tayuya|
+f|Temari|
+m|Tenchi|
+m|Tenryū (hist)|
+m|Tenzen (hist)|
 x|Teruki|esprit/espoir brillant
-f|Terukiyo|None
+f|Terukiyo|
 f|Teruko|enfant brillant
-f|Terumi|None
-m|Terumichi|None
-m|Terumoto|None
-m|Teruo|None
-m|Teruyuki|None
+f|Terumi|
+m|Terumichi|
+m|Terumoto|
+m|Teruo|
+m|Teruyuki|
 m|Tetsu|fer
-m|Tetsuji|None
-m|Tetsushi|None
+m|Tetsuji|
+m|Tetsushi|
 m|Tetsuya|magnifique
-m|Tetsuzō|None
-f|Tokie|None
-m|Tokiyori|None
-m|Toma|None
-f|Tomie|None
-m|Tomiichi|None
-m|Tomio 冨夫|None
+m|Tetsuzō|
+f|Tokie|
+m|Tokiyori|
+m|Toma|
+f|Tomie|
+m|Tomiichi|
+m|Tomio 冨夫|
 x|Tomo|ami
 m|Tomoaki|qui accompagne l'automne
-f|Tomoe|None
+f|Tomoe|
 m|Tomoharu|qui accompagne le printemps
-m|Tomohisa|None
-m|Tomokazu|None
+m|Tomohisa|
+m|Tomokazu|
 f|Tomoko|enfant de l'ami ou enfant de lune
 x|Tomomi|bel(le), ami(e)
-m|Tomonori|None
+m|Tomonori|
 m|Tomoo|l'ami et naître
-m|Tomosaburō|None
-m|Tomoya|None
-f|Tomoyo|None
-m|Tomoyuki|None
-x|Tomu|None
-m|Toramasa|None
-m|Toramori|None
-m|Toratane|None
-m|Torayasu|None
+m|Tomosaburō|
+m|Tomoya|
+f|Tomoyo|
+m|Tomoyuki|
+x|Tomu|
+m|Toramasa|
+m|Toramori|
+m|Toratane|
+m|Torayasu|
 f|Tori|oiseau
-m|Tōru|None
+m|Tōru|
 m|Toshi|intelligent
-m|Toshiaki|None
-m|Toshifumi|None
-m|Toshiharu|None
-m|Toshihide|None
-m|Toshihiko|None
-m|Toshihiro|None
-m|Toshiki|None
-m|Toshio|None
-m|Toshirō|None
-m|Toshitsugu|None
-m|Toshiya|None
-m|Toshiyuki|None
-m|Toshizō|None
-m|Tōson|None
-f|Towa|None
+m|Toshiaki|
+m|Toshifumi|
+m|Toshiharu|
+m|Toshihide|
+m|Toshihiko|
+m|Toshihiro|
+m|Toshiki|
+m|Toshio|
+m|Toshirō|
+m|Toshitsugu|
+m|Toshiya|
+m|Toshiyuki|
+m|Toshizō|
+m|Tōson|
+f|Towa|
 m|Toya|fleur de pêcher
-f|Toyoko|None
-m|Tōyō|None
-m|Toyo'o|None
+f|Toyoko|
+m|Tōyō|
+m|Toyo'o|
 f|Tsubaki|camélia
 m|Tsubasa|ailes
-m|Tsuchiya|None
-m|Tsugito|None
-m|Tsuguo|None
-m|Tsuguhiko|None
-m|Tsukasa|None
+m|Tsuchiya|
+m|Tsugito|
+m|Tsuguo|
+m|Tsuguhiko|
+m|Tsukasa|
 f|Tsuki 月|lune
 f|Tsukiko月子|enfant de la lune
 f|Tsukiyo月夜|nuit éclairée par la lune
 f|Tsukushi|mauvaise herbe
-f|Tsunade|None
-m|Tsunachika (hist)|None
-m|Tsunayoshi|None
-m|Tsunehiro|None
-m|Tsunetami|None
-m|Tsuneo|None
-m|Tsuneyasu|None
+f|Tsunade|
+m|Tsunachika (hist)|
+m|Tsunayoshi|
+m|Tsunehiro|
+m|Tsunetami|
+m|Tsuneo|
+m|Tsuneyasu|
 m|Tsuno|corne
 f|Tsurara|stalactite
-f|Tsuruyo|None
-m|Tsutomi|None
-m|Tsutomu|None
+f|Tsuruyo|
+m|Tsutomi|
+m|Tsutomu|
 f|Tsuya|éclat
-m|Tsuyoshi|None
-m|Tuyoshi|None
-m|Tyōzaburō|None
-m|Tsunayoshi|None
-f|Ui|None
-f|Uiba|None
-m|Ūichi|None
-m|Uichirō|None
-f|Uiko|None
-f|Ūka|None
-m|Ukichirō|None
-f|Ukie|None
-f|Ukiko|None
-m|Ukyō|None
+m|Tsuyoshi|
+m|Tuyoshi|
+m|Tyōzaburō|
+m|Tsunayoshi|
+f|Ui|
+f|Uiba|
+m|Ūichi|
+m|Uichirō|
+f|Uiko|
+f|Ūka|
+m|Ukichirō|
+f|Ukie|
+f|Ukiko|
+m|Ukyō|
 m|Uma|cheval
 f|Umako|enfant du cheval
 f|Ume|fleur de prunier
-m|Umejirō|None
-f|Umeka|None
+m|Umejirō|
+f|Umeka|
 f|Umeko|enfant de fleur de prunier
-f|Umeno|None
-m|Umetarō|None
-f|Umeya|None
+f|Umeno|
+m|Umetarō|
+f|Umeya|
 f|Umi|mer
 f|Umiko|enfant de la mer
 f|Une|crête
 f|Uneko|enfant de la crête
-m|Unomatsu|None
-f|Unonosarara (鸕野讚良) (hist)|None
-m|Unshō|None
-f|Unsuku|None
-m|Urahara|None
-f|Urako|None
-f|Uran|None
-f|Urara|None
-f|Uriko|None
-x|Uruha|None
-f|Ururu|None
+m|Unomatsu|
+f|Unonosarara (鸕野讚良) (hist)|
+m|Unshō|
+f|Unsuku|
+m|Urahara|
+f|Urako|
+f|Uran|
+f|Urara|
+f|Uriko|
+x|Uruha|
+f|Ururu|
 m|Uryu|dragon de pluie (雨竜)
-m|Usaburō|None
+m|Usaburō|
 f|Usagi|petit lapin
-m|Usaji|None
-f|Usami|None
-m|Ushio|None
+m|Usaji|
+f|Usami|
+m|Ushio|
 m|Usui|eau de pluie
-f|Usune|None
+f|Usune|
 f|Uta|mélodie
-f|Utada|None
-f|Utae|None
-m|Utaemon|None
+f|Utada|
+f|Utae|
+m|Utaemon|
 f|Utako|enfant de la mélodie
-m|Utarō|None
-f|Utashiro|None
+m|Utarō|
+f|Utashiro|
 f|Utau|chanter
-f|Utayo|None
-f|Utsumi|None
-f|Uyo|None
-m|Uzaemon|None
-m|Waichirō|None
-f|Waka|None
-f|Wakaba|None
-m|Wakahanada|None
-f|Wakako|None
-f|Wakame|None
-f|Wakana|None
-m|Wakanohana|None
-f|Waki|None
-f|Wakiko|None
-m|Wakio|None
-m|Wakitarō|None
-f|Wako|None
-f|Waku|None
-f|Wakuko|None
-f|Wakuni|None
-f|Wakuri|None
-m|Wasaburō|None
-f|Watako|None
-m|Watanuki|None
-m|Wataru|None
-f|Wayu|None
-f|Wayuki|None
-f|Wazuka|None
-f|Wofusa|None
+f|Utayo|
+f|Utsumi|
+f|Uyo|
+m|Uzaemon|
+m|Waichirō|
+f|Waka|
+f|Wakaba|
+m|Wakahanada|
+f|Wakako|
+f|Wakame|
+f|Wakana|
+m|Wakanohana|
+f|Waki|
+f|Wakiko|
+m|Wakio|
+m|Wakitarō|
+f|Wako|
+f|Waku|
+f|Wakuko|
+f|Wakuni|
+f|Wakuri|
+m|Wasaburō|
+f|Watako|
+m|Watanuki|
+m|Wataru|
+f|Wayu|
+f|Wayuki|
+f|Wazuka|
+f|Wofusa|
 f|Yachiru|Mille torents
-f|Yae|None
-f|Yaeko|None
+f|Yae|
+f|Yaeko|
 m|Yahiko|Enfant de l'eau fraiche
 f|Yamamura|Village de montagne
-m|Yamato|None
+m|Yamato|
 m|Yasahiro|grande tranquillité
 m|Yashiro|Sanctuaire
 f|Yasu|calme/paisible
-f|Yasua|None
-f|Yasue|None
-m|Yasuhide|None
-m|Yasuhiko, Yasuhikoō|None
-m|Yasuhiro|None
-m|Yasuhito|None
-m|Yasukazu|None
-f|Yasuko|None
-m|Yasumasa|None
-m|Yasumichi|None
-m|Yasunao|None
-m|Yasunobu|None
-m|Yasunori|None
+f|Yasua|
+f|Yasue|
+m|Yasuhide|
+m|Yasuhiko, Yasuhikoō|
+m|Yasuhiro|
+m|Yasuhito|
+m|Yasukazu|
+f|Yasuko|
+m|Yasumasa|
+m|Yasumichi|
+m|Yasunao|
+m|Yasunobu|
+m|Yasunori|
 m|Yasuo|calme au m
 m|Yasurō|homme calme
-m|Yasushi|None
-m|Yasushige (hist)|None
-m|Yasusuke|None
-m|Yasutaka|None
-m|Yasutō|None
-m|Yasuyuki|None
-m|Yasuzō|None
-m|Yaten|None
-f|Yayoi|None
+m|Yasushi|
+m|Yasushige (hist)|
+m|Yasusuke|
+m|Yasutaka|
+m|Yasutō|
+m|Yasuyuki|
+m|Yasuzō|
+m|Yaten|
+f|Yayoi|
 m|Yemon|porte
-f|Yishiko|None
+f|Yishiko|
 m|Yō (Yoh),|Soleil
-m|Yoan|None
-m|Yōichi|None
-m|Yōichirō|None
-m|Yōji|None
-m|Yōjirō|None
-f|Yōka|None
+m|Yoan|
+m|Yōichi|
+m|Yōichirō|
+m|Yōji|
+m|Yōjirō|
+f|Yōka|
 f|Yōko|enfant du soleil
 m|Yori|dépendance
 m|Yoru|nuit
-m|Yorifumi (hist)|None
-f|Yoriko|None
-m|Yorimichi (hist)|None
-m|Yorinari (hist)|None
-m|Yorishige (hist)|None
-m|Yoritaka (hist)|None
-m|Yoritsugu (hist)|None
-m|Yoritsune (hist)|None
+m|Yorifumi (hist)|
+f|Yoriko|
+m|Yorimichi (hist)|
+m|Yorinari (hist)|
+m|Yorishige (hist)|
+m|Yoritaka (hist)|
+m|Yoritsugu (hist)|
+m|Yoritsune (hist)|
 f|Yoshe|belle
 x|Yoshi|bonté, chance, meilleur(e), ou libre
-m|Yoshiaki|None
-f|Yoshie|None
-m|Yoshifumi|None
-m|Yoshiharu (hist)|None
-m|Yoshihiko|None
-m|Yoshihiro|None
-m|Yoshihito|None
-m|Yoshikatsu|None
-m|Yoshikazu|None
-m|Yoshiki|None
-m|Yoshikichi|None
+m|Yoshiaki|
+f|Yoshie|
+m|Yoshifumi|
+m|Yoshiharu (hist)|
+m|Yoshihiko|
+m|Yoshihiro|
+m|Yoshihito|
+m|Yoshikatsu|
+m|Yoshikazu|
+m|Yoshiki|
+m|Yoshikichi|
 f|Yoshiko|bonne enfant, meilleure enfant ou enfant de la liberté
-m|Yoshikuni|None
-m|Yoshima|None
-m|Yoshimaru|None
-m|Yoshimasa|None
-f|Yoshimi|None
-m|Yoshimichi|None
-m|Yoshimitsu (hist)|None
-m|Yoshimune|None
-m|Yoshinaga (hist)|None
-f|Yoshino|None
-m|Yoshinori|None
-m|Yoshio|None
-m|Yoshirō|None
-m|Yoshitaka|None
-m|Yoshiteru 義輝|None
-m|Yoshitoki (hist)|None
-m|Yoshitoyo|None
-m|Yoshitsugu|None
-m|Yoshiyuki|None
-m|Yosinori|None
-m|Yōsuke|None
-m|Yōtarō|None
-m|Yōzō|None
+m|Yoshikuni|
+m|Yoshima|
+m|Yoshimaru|
+m|Yoshimasa|
+f|Yoshimi|
+m|Yoshimichi|
+m|Yoshimitsu (hist)|
+m|Yoshimune|
+m|Yoshinaga (hist)|
+f|Yoshino|
+m|Yoshinori|
+m|Yoshio|
+m|Yoshirō|
+m|Yoshitaka|
+m|Yoshiteru 義輝|
+m|Yoshitoki (hist)|
+m|Yoshitoyo|
+m|Yoshitsugu|
+m|Yoshiyuki|
+m|Yosinori|
+m|Yōsuke|
+m|Yōtarō|
+m|Yōzō|
 m|Yū|eau chaude
-f|Yue|None
-f|Yūga|None
+f|Yue|
+f|Yūga|
 m|Yūgo|勇心 coeur courageux
-f|Yūhi|None
-f|Yūho|None
-f|Yui|None
-m|Yūichi|None
-m|Yūichirō|None
-m|Yūji|None
-f|Yuka|None
+f|Yūhi|
+f|Yūho|
+f|Yui|
+m|Yūichi|
+m|Yūichirō|
+m|Yūji|
+f|Yuka|
 f|Yūka|excellent parfum
-f|Yukari|None
+f|Yukari|
 x|Yuki 雪|neige, chance
-f|Yukie|None
-m|Yukihide|None
-m|Yukihira|None
-m|Yukihiro|None
-m|Yukihisa|None
+f|Yukie|
+m|Yukihide|
+m|Yukihira|
+m|Yukihiro|
+m|Yukihisa|
 f|Yukiko|enfant de neige et d'espoir
-m|Yukikata|None
-m|Yukimasa|None
+m|Yukikata|
+m|Yukimasa|
 m|Yukimichi|chemin enneigé
-m|Yukimitsu|None
+m|Yukimitsu|
 m|Yukimori|forêt enneigée
-m|Yukimura|None
-m|Yukinaga|None
-x|Yukio m, fils issu de la neige|None
-m|Yukisada|None
+m|Yukimura|
+m|Yukinaga|
+x|Yukio m, fils issu de la neige|
+m|Yukisada|
 m|Yukito|lapin des neiges
-m|Yukiya|None
+m|Yukiya|
 f|Yūko|gracieuse ou géniale
-f|Yuma|None
+f|Yuma|
 f|Yume 夢|rêve
-f|Yumeka|None
+f|Yumeka|
 f|Yumi|magnifique révérence (yu=révérence, mi=magnifique)
 f|Yumiko|enfant de verte beauté/l'arc
-f|Yumino|None
+f|Yumino|
 f|Yuna|Lune (dialectal)
 f|Yuri 百合|lys, lilas
 f|Yurie|= Julie
-f|Yurika|None
+f|Yurika|
 f|Yuriko|enfant de lys
-m|Yūsaku|None
-m|Yūsei|None
-m|Yūshō|None
-m|Yūsuke|None
-m|Yūta|None
-x|Yūtaka|None
-m|Yūto|None
+m|Yūsaku|
+m|Yūsei|
+m|Yūshō|
+m|Yūsuke|
+m|Yūta|
+x|Yūtaka|
+m|Yūto|
 m|Yutsuki|excellente Lune
 f|Yuuki|Petite Princesse
 x|Yuuki 勇気|courage
-x|Yūya|None
-m|Yūzō|None
-f|Yuzu|None
-m|Zabuza|None
-m|Zaijirō|None
-m|Zakurai|None
-x|Zakuro|None
-m|Zen'ichirō|None
-m|Zenji|None
-m|Zenjirō|None
-m|Zenkō|None
-m|Zennosuk|None
+x|Yūya|
+m|Yūzō|
+f|Yuzu|
+m|Zabuza|
+m|Zaijirō|
+m|Zakurai|
+x|Zakuro|
+m|Zen'ichirō|
+m|Zenji|
+m|Zenjirō|
+m|Zenkō|
+m|Zennosuk|

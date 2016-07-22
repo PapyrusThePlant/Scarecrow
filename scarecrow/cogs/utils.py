@@ -9,16 +9,6 @@ def setup(bot):
     pass
 
 
-def get_insult():
-    """Picks a random insult."""
-    return random_line('data/insults.txt')
-
-
-def get_weeb_name():
-    """Picks a random weeb name."""
-    return random_line('data/weeb_names.txt')
-
-
 def indented_entry_to_str(entries, indent=0, sep=' '):
     """Pretty formatting."""
     # Get the longest keys' width
@@ -39,9 +29,10 @@ def indented_entry_to_str(entries, indent=0, sep=' '):
     return ''.join(output)
 
 
-def random_line(file_name):
+def random_line(file_name, predicate=None):
     """Reservoir algorithm to randomly draw one line from a file."""
     with open(file_name, 'r', encoding='utf-8') as file:
+        file = filter(predicate, file)
         line = next(file)
         for num, aline in enumerate(file):
             if random.randrange(num + 2):

@@ -90,7 +90,7 @@ class Admin:
 
         if server.id in self.banned_servers:
             # Hiiiik ! A bad server ! let's scare it and run away
-            await self.bot.send_message(server.default_channel, utils.get_insult())
+            await self.bot.send_message(server.default_channel, utils.random_line('data/insults.txt'))
             await self.bot.leave_server(server)
 
             # Reassure our owner

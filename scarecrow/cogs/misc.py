@@ -38,27 +38,22 @@ class Misc:
     @commands.command()
     async def insult(self):
         """Poke the bear."""
-        await self.bot.say(utils.get_insult())
+        await self.bot.say(utils.random_line('data/insults.txt'))
 
     @commands.command()
-    async def weebname(self, wanted_gender=None):
+    async def weebnames(self, wanted_gender=None):
         """Looking for a name for your new waifu ?
 
         A prefered gender can be specified between f(emale), m(ale), x(mixed).
         """
-        # Get a random name
         content = ''
         for i in range(1, 10):
-            gender, name, remark = utils.get_weeb_name()[:-1].split('|')
+            # Get a random name satisfying the wanted gender and kick the '\n' out
+            def predicate(line):
+                return line[0] == wanted_gender
+            line = utils.random_line('data/weeb_names.txt', predicate if wanted_gender else None)
+            gender, name, remark = line[:-1].split('|')
 
-            # Loop until the gender is satisfied
-            while wanted_gender is not None and gender != wanted_gender:
-                gender, name, remark = utils.get_weeb_name()[:-1].split('|')
-
-            content += '[{}] {}'.format(gender, name)
-            if remark != '':
-                content += ' ({})\n'.format(remark)
-            else:
-                content += '\n'
+            content += '[{}] {} {}\n'.format(gender, name, '({})'.format(remark) if remark else '')
 
         await self.bot.say_block(content)
