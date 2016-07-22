@@ -1,12 +1,41 @@
 """
 This gather stuff that for the most part should be written elsewhere but is not because ¯\_(ツ)_/¯
 """
+import aiohttp
+import asyncio
 import random
 import string
 
 
 def setup(bot):
     pass
+
+
+async def fetch_page(url, timeout=None, session=None):
+    """Fetches a web page and return its text or json content."""
+    # Create a session if none has been given
+    if session:
+        _session = session
+    else:
+        _session = aiohttp.ClientSession()
+
+    try:
+        resp = await asyncio.wait_for(_session.get(url), timeout)
+    except asyncio.TimeoutError:
+        data = None
+    else:
+        if resp.status != 200:
+            data = 'Http error {}.'.format(resp.status)
+        elif resp.headers['content-type'] == 'application/json':
+            data = await resp.json()
+        else:
+            data = await resp.text()
+
+    # Close the session if we created it especially for this fetch
+    if not session:
+        _session.close()
+
+    return data
 
 
 def indented_entry_to_str(entries, indent=0, sep=' '):

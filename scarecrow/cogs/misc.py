@@ -1,6 +1,4 @@
-import json
-
-import aiohttp
+import random
 
 import discord
 import discord.ext.commands as commands
@@ -30,10 +28,21 @@ class Misc:
     @commands.command(aliases=['meow'])
     async def cat(self):
         """Meow !"""
-        with aiohttp.ClientSession(loop=self.bot.loop) as session:
-            resp = await session.get('http://random.cat/meow')
-            data = json.loads(await resp.text())
-            await self.bot.say(data['file'])
+        providers = [
+            ('http://random.cat/meow', lambda d: d['file']),
+            ('http://edgecats.net/random', lambda d: d)
+        ]
+        provider = random.choice(providers)
+        url = provider[0]
+        loader = provider[1]
+
+        data = await utils.fetch_page(url, 5)
+        if data is None:
+            content = 'Timed out on {} .'.format(url)
+        else:
+            content = loader(data)
+
+        await self.bot.say(content)
 
     @commands.command()
     async def insult(self):
