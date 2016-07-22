@@ -16,8 +16,6 @@ log = logging.getLogger(__name__)
 class ScarecrowConfig(config.Config):
     def __init__(self, file, **options):
         self.description = None
-        self.username = None
-        self.owner = None
         self.commands_prefixes = None
         self.banned_servers = None
         self.token = None
@@ -33,6 +31,7 @@ class ScarecrowConfig(config.Config):
 class Scarecrow(commands.Bot):
     """Ooooooh ! Scary."""
     def __init__(self, conf_path=config.SCARECROW_CONFIG):
+        self.app_info = None
         self.owner = None
         self.do_restart = False
         self.do_reload = False
@@ -95,12 +94,9 @@ class Scarecrow(commands.Bot):
         log.error(content)
 
     async def on_ready(self):
-        self.owner = dutils.get(self.get_all_members(), id=self.conf.owner)
+        self.app_info = await self.application_info()
+        self.owner = self.app_info.owner
         log.info('Logged in Discord as {0.name} (id: {0.id})'.format(self.user))
-
-    async def on_member_update(self, before, after):
-        if before == self.owner:
-            self.owner = after
 
     async def on_message(self, message):
         # Ignore bot messages (that includes our own)

@@ -7,6 +7,8 @@ import psutil
 
 import discord
 import discord.ext.commands as commands
+import discord.utils as dutils
+
 import scarecrow.cogs.utils as utils
 
 
@@ -52,7 +54,8 @@ class Info:
     async def avatar(self, member: discord.Member=None):
         """Retreives a member's avatar link.
 
-        If no member is given, the bot's avatar link is given"""
+        If no member is given, the bot's avatar link is given.
+        """
         if member is None:
             await self.bot.say(self.bot.user.avatar_url)
         else:
@@ -119,11 +122,12 @@ class Info:
     async def info_group(self):
         """Shows informations about the bot."""
         entries = [
-            ('Author', '{0} (Discord ID: {0.id})'.format(self.bot.owner)),
+            ('Author', '{0.name} (Discord ID: {0.id})'.format(self.bot.owner)),
             ('Library', 'discord.py (Python)'),
             ('Uptime', self._get_uptime_str()),
             ('Memory', self._get_memory_str()),
-            ('Support', 'https://discord.me/mad-plants')
+            ('Support', 'https://discord.me/mad-plants'),
+            ('Invite', dutils.oauth_url(self.bot.app_info.id))
         ]
         content = utils.indented_entry_to_str(entries)
 
