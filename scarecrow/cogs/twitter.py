@@ -42,7 +42,6 @@ class FollowConfig(config.ConfigElement):
     def __init__(self, data):
         self.id = None
         self.screen_name = None
-        self.received_count = None
         self.discord_channels = None
 
         super().__init__(data)
@@ -50,16 +49,17 @@ class FollowConfig(config.ConfigElement):
         if self.discord_channels is None:
             self.discord_channels = []
 
-        if self.received_count is None:
-            self.received_count = 0
-
 
 class DiscordChannelConfig(config.ConfigElement):
     def __init__(self, data):
         self.id = None
         self.format = None
+        self.received_count = None
 
         super().__init__(data)
+
+        if self.received_count is None:
+            self.received_count = 0
 
 
 class Twitter:
@@ -96,7 +96,7 @@ class Twitter:
             content = 'Invalid format, falling back to the default one.'
             return_fmt = None
 
-        await self.bot.say(content)
+        await self.bot.say(content, delete_after=10)
         return return_fmt
 
     @commands.group(name='twitter')
@@ -143,7 +143,7 @@ class Twitter:
     @checks.is_server_owner()
     async def twitter_format(self, ctx, channel, *, format=None):
         """Edits the format a channel is displayed with.
-        
+
         The format is a python string that will be formatted with the
         arguments 'author', 'text' and 'url' corresponding to
         the tweet's author, the tweet's content and the tweet's
@@ -210,15 +210,24 @@ class Twitter:
         following = []
         for chan_conf in follows:
             discord_channels = set(c.id for c in chan_conf.discord_channels)
-            # TODO : arrange this avoid duplicating code in server and channel scopes
+
+            # switch (scope):
+            #    case 'channel':
+            #        if not ctx.message.channel.id in discord_channels:
+            #            break
+            #    case 'server':
+            #        if not discord_channels & set(c.id for c in ctx.message.server.channels):
+            #            break
+            #        received_count += chan_conf.received_count
+            #    case 'global':
+            #        following.append(chan_conf.screen_name)
+            #        break
             if scope == 'global':
                 following.append(chan_conf.screen_name)
-            elif scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels):
+            elif (scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels))\
+                    or(scope == 'channel' and ctx.message.channel.id in discord_channels):
                 following.append(chan_conf.screen_name)
-                received_count += chan_conf.received_count
-            elif scope == 'channel' and ctx.message.channel.id in discord_channels:
-                following.append(chan_conf.screen_name)
-                received_count += chan_conf.received_count
+                received_count += sum(c.received_count for c in chan_conf.discord_channels)
 
         if not following:
             following.append('No one')
@@ -255,12 +264,13 @@ class Twitter:
 
     def tweepy_on_status(self, author_id, author, text, status_id):
         """Called by the stream when a tweet is received."""
-        conf = dutils.get(self.conf.follows, id=author_id)
-        conf.received_count += 1
+        self.conf.received_count += 1
 
+        chan_conf = dutils.get(self.conf.follows, id=author_id)
         url = 'http://twitter.com/{}/status/{}'.format(author, status_id)
 
-        for channel in conf.discord_channels:
+        for channel in chan_conf.discord_channels:
+            channel.received_count += 1
             if channel.format is not None:
                 fmt = channel.format
             else:
@@ -295,20 +305,24 @@ class SubProcessStream:
         this class inheriting from it.
         Finally tweepy.Stream has to be instanciated here too to register the listener.
 
-        This feels fucking ugly.
+        This feels kinda ugly.
         """
         log.info('Creating and starting tweepy stream.')
         api = TweepyAPI(self.conf)  # Re-creation, much efficient, wow
-        listener = tweepy.StreamListener(api)
-        listener.on_data = self.on_data  # Beautiful inheritance
-        stream = tweepy.Stream(api.auth, listener)  # Most legit thing in this function
-        stream.filter(follow=self.follows)
+        listener = SubProcessStream.TweepyListener(self.mp_queue, api)
+        stream = tweepy.Stream(api.auth, listener)
         log.info('Tweepy stream ready.')
+        stream.filter(follow=self.follows)
 
-    def on_data(self, data):
-        """Called when raw data is received from connection."""
-        # Send the data to the parent process
-        self.mp_queue.put(data)
+    class TweepyListener(tweepy.StreamListener):
+        def __init__(self, mp_queue, api=None):
+            tweepy.StreamListener.__init__(self, api)
+            self.mp_queue = mp_queue
+
+        def on_data(self, data):
+            """Called when raw data is received from connection."""
+            # Send the data to the parent process
+            self.mp_queue.put(data)
 
 
 class TweepyStream(tweepy.StreamListener):
@@ -354,14 +368,24 @@ class TweepyStream(tweepy.StreamListener):
 
     async def _run(self):
         """Polling daemon that checks the multi-processes queue for data and dispatches it to `on_data`."""
-        log.info('Starting sub process (pid {}).'.format(self.sub_process.pid))
         self.sub_process.start()
+        log.info('Started sub process (pid {}).'.format(self.sub_process.pid))
+
+        # Wait until the process is actually started to not consider it dead when it's not even born yet
+        while not self.sub_process.is_alive():
+            try:
+                # Wtb milliseconds async sleep omg
+                await asyncio.wait_for(asyncio.sleep(1), 0.1)
+            except asyncio.TimeoutError:
+                pass
+
+        # ERMAHGERD ! MAH FRAVRIT LERP !
         while True:
             try:
                 data = self.mp_queue.get(False)  # Do not block
             except QueueEmpty:
                 if not self.sub_process.is_alive():
-                    log.info('Sub process (pid {}) appears dead, un-reference it.'.format(self.sub_process.pid))
+                    log.info('Sub process (pid {}) appears dead, clean it up.'.format(self.sub_process.pid))
                     # When the subprocess is killed, clean things up and return
                     self.mp_queue = None
                     self.sub_process = None
@@ -439,23 +463,21 @@ class TweepyStream(tweepy.StreamListener):
                                        hasattr(status, 'retweeted_status'),
                                        status.text)
 
-        self.conf.received_count += 1
-
         # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
-            log.info(('Ignoring tweet (reply): ' + log_status))
+            log.info('Ignoring tweet (reply): ' + log_status)
             return
         # Ignore quotes
         elif status.is_quote_status:
-            log.info(('Ignoring tweet (quote): ' + log_status))
+            log.info('Ignoring tweet (quote): ' + log_status)
             return
         # Ignore retweets
         elif hasattr(status, 'retweeted_status'):
-            log.info(('Ignoring tweet (retweet): ' + log_status))
+            log.info('Ignoring tweet (retweet): ' + log_status)
             return
         # Ignore tweets from authors we're not following (shouldn't happen)
         elif status.author.id_str not in self._get_follows():
-            log.info(('Ignoring tweet (bad author): ' + log_status))
+            log.info('Ignoring tweet (bad author): ' + log_status)
             return
         else:
             log.info('Dispatching tweet to handler: ' + log_status)
