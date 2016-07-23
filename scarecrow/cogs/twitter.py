@@ -2,6 +2,7 @@ import asyncio
 import logging
 import multiprocessing
 from queue import Empty as QueueEmpty
+from time import sleep
 
 import tweepy
 
@@ -70,8 +71,8 @@ class Twitter:
         self.api = TweepyAPI(self.conf)
         self.stream = TweepyStream(self, self.conf, self.api)
 
-    @classmethod
-    def __about(cls):
+    @staticmethod
+    def __about():
         entries = [
             ('Twitter library', 'tweepy (Python)'),
             ('Get it on', 'https://github.com/tweepy/tweepy')
@@ -365,6 +366,10 @@ class TweepyStream(tweepy.StreamListener):
         """Prepares for a safe unloading."""
         self.stop()
         self.handler = None
+
+        # Wait until the sub-process properly exits before quitting
+        while self.sub_process:
+            sleep(0.1)
 
     async def _run(self):
         """Polling daemon that checks the multi-processes queue for data and dispatches it to `on_data`."""
