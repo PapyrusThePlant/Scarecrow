@@ -3,6 +3,7 @@ This gather stuff that for the most part should be written elsewhere but is not 
 """
 import aiohttp
 import asyncio
+import collections
 import random
 import re
 
@@ -75,6 +76,39 @@ class HTTPError(Exception):
 def dict_keys_to_int(d):
     """#HowToBeLazy"""
     return {int(k): v for k, v in d.items()}
+
+
+class OrderedCounter(collections.Counter, collections.OrderedDict):
+    """A counter that remembers the order elements are first encountered."""
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, repr(collections.OrderedDict(self)))
+
+    def __reduce__(self):
+        return self.__class__, (collections.OrderedDict(self),)
+
+    def item_at(self, index):
+        return self[list(self.keys())[index]]
+
+
+def duration_to_str(duration):
+    # Extract minutes, hours and days
+    minutes, seconds = divmod(duration, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+
+    # Create the string format
+    if days > 0:
+        fmt = '{d} days, {h} hours, {m} minutes, {s} seconds'
+    elif hours > 0:
+        fmt = '{h} hours, {m} minutes, {s} seconds'
+    elif minutes > 0:
+        fmt = '{m} minutes, {s} seconds'
+    else:
+        fmt = '{s} seconds'
+
+    # Create the string and return it
+    return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
 
 async def fetch_page(url, **kwargs):

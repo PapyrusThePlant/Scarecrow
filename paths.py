@@ -13,6 +13,7 @@ TWITTER_CONFIG = CONFIG + 'twitter.json'
 
 DATA = WORKDIR + '/data/'
 INSULTS = DATA + 'insults.txt'
+POLLS = DATA + 'polls.json'
 WEEBNAMES = DATA + 'weeb_names.txt'
 OEMBED_PROVIDERS = DATA + 'oEmbed_providers.json'
 

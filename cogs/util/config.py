@@ -1,5 +1,6 @@
 import inspect
 import json
+import collections
 
 
 class Config:
@@ -13,7 +14,7 @@ class Config:
 
         try:
             with open(self.file, 'r', encoding=self.encoding) as fp:
-                self._data = json.load(fp, object_hook=self.object_hook)
+                self._data = json.load(fp, object_pairs_hook=self.object_hook)
         except FileNotFoundError:
             pass
 
@@ -70,18 +71,26 @@ class _ConfigDecoder:
         self._globals = inspect.currentframe().f_back.f_back.f_globals
 
     def decode(self, o):
+        o = collections.OrderedDict(o)
         if '__class__' in o:
             name = o['__class__']
 
-            # Get the top level class in the given name
+            # Get the top level module/class in the given name
             parts = name.split('.')
-            cls = self._globals[parts[0]]
+            obj = self._globals[parts[0]]
 
             # Walk the rest of the dotted path if any
             for part in parts[1:]:
-                cls = cls.__dict__[part]
+                if inspect.ismodule(obj):
+                    obj = getattr(obj, part, None)
+                    if obj is None:
+                        raise KeyError('Could not find {} in {}'.format(part, obj.__name__))
+                elif inspect.isclass(obj):
+                    obj = obj.__dict__[part]
+                else:
+                    raise TypeError('Expected Class or Module.')
 
             del o['__class__']
-            return cls(**o)
+            return obj(**o)
         else:
             return o
