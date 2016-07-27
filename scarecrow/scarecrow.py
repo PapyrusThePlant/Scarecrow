@@ -108,7 +108,7 @@ class Scarecrow(commands.Bot):
 
     def _clean_shutdown(self):
         # Unload every cog
-        for extension in self.extensions.copy().values():
+        for extension in self.extensions.copy().keys():
             self.unload_extension(extension)
 
         # Log out of Discord
