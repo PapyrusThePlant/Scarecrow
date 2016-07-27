@@ -308,12 +308,31 @@ class SubProcessStream:
 
         This feels kinda ugly.
         """
+        # Setup the logging for the sub-process
+        log = logging.getLogger()
+        log.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(config.LOGS + 'sub-process.log', encoding='utf-8')
+        handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
+        log.addHandler(handler)
+
+        # Create the tweepy stream
         log.info('Creating and starting tweepy stream.')
         api = TweepyAPI(self.conf)  # Re-creation, much efficient, wow
         listener = SubProcessStream.TweepyListener(self.mp_queue, api)
         stream = tweepy.Stream(api.auth, listener)
         log.info('Tweepy stream ready.')
-        stream.filter(follow=self.follows)
+
+        # ERMAHGERD ! MAH FRAVRIT LERP !
+        while True:
+            try:
+                log.info('Starting Tweepy stream.')
+                stream.filter(follow=self.follows)
+            except Exception as e:
+                log.exception('Recovering from exception : {}'.format(e))
+                sleep(2)
+            else:
+                log.info('Exiting sub-process.')
+                return
 
     class TweepyListener(tweepy.StreamListener):
         def __init__(self, mp_queue, api=None):
@@ -323,6 +342,7 @@ class SubProcessStream:
         def on_data(self, data):
             """Called when raw data is received from connection."""
             # Send the data to the parent process
+            logging.debug('Received raw data : ' + str(data))
             self.mp_queue.put(data)
 
 

@@ -2,10 +2,11 @@ from os import curdir
 import json
 
 WORKDIR          = curdir
-COGS             = WORKDIR + '/scarecrow/cogs'
-CONFIG           = WORKDIR + '/config'
-SCARECROW_CONFIG = CONFIG + '/scarecrow.json'
-TWITTER_CONFIG   = CONFIG + '/twitter.json'
+COGS             = WORKDIR + '/scarecrow/cogs/'
+CONFIG           = WORKDIR + '/config/'
+LOGS             = WORKDIR + '/logs/'
+SCARECROW_CONFIG = CONFIG + 'scarecrow.json'
+TWITTER_CONFIG   = CONFIG + 'twitter.json'
 
 # TODO : rework the config
 
