@@ -105,7 +105,7 @@ def main():
     # ERMAHGERD ! MAH FRAVRIT LERP !
     while True:
         # Create the bot, let it crash on exceptions
-        bot = scarecrow.Scarecrow()
+        bot = scarecrow.Bot()
 
         # Start it
         try:
