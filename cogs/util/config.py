@@ -1,99 +1,73 @@
+import inspect
 import json
 
-# TODO : rework the config
 
-class ConfigElement(object):
-    """Internal data class for Config, basically replaces a dict, because why not."""
-    def __init__(self, data=None):
-        if data is None:
-            data = {}
-
-        for key, val in data.items():
-            # Transformations
-            if isinstance(val, (list, tuple)):
-                val = [ConfigElement(v) if isinstance(v, dict) else v for v in val]
-            elif isinstance(val, dict):
-                val = ConfigElement(val)
-
-            # Registering element
-            if getattr(self, key, None) is not None:
-                # Because fuck your config, it will not shadow my beautiful attributes
-                raise KeyError('Could not register attribute {}. An attribute with that name already exists.'.format(key))
-            setattr(self, key, val)
-
-    def delete(self, key):
-        delattr(self, key)
-
-    def get(self, key, default=None):
-        return getattr(self, key, default)
-
-    def set(self, key, val):
-        setattr(self, key, val)
-
-    def to_dict(self):
-        return self.__dict__
-
-    def __contains__(self, item):
-        return self.__dict__.__contains__(str(item))
-
-    def __iter__(self):
-        return ConfigIterator(self)
-
-    def __len__(self):
-        return len(self.__dict__)
-
-    def __setattr__(self, key, val):
-        super().__setattr__(key, ConfigElement(val) if isinstance(val, dict) else val)
-
-
-class Config(ConfigElement):
-    """The config object we should mostly care about, created from a json file"""
-    _excludes = ['file', 'encoding', 'object_hook', 'encoder']
-
+class Config:
+    """The config object, created from a json file"""
     def __init__(self, file, **options):
         self.file = file
         self.encoding = options.pop('encoding', None)
-        self.object_hook = options.pop('object_hook', None)
-        self.encoder = options.pop('encoder', DefaultConfigEncoder)
+        self.object_hook = options.pop('object_hook', _ConfigDecoder().decode)
+        self.encoder = options.pop('encoder', _ConfigEncoder)
 
         try:
-            with open(self.file, 'r', encoding=self.encoding) as f:
-                data = json.load(f, object_hook=self.object_hook)
+            with open(self.file, 'r', encoding=self.encoding) as fp:
+                self._data = json.load(fp, object_hook=self.object_hook)
         except FileNotFoundError:
-            data = {}
-
-        super().__init__(data)
-
-    def to_dict(self):
-        """Return a dict of the config data related attributes"""
-        return {k: v for k, v in self.__dict__.items() if k not in self.__class__._excludes}
+            self._data = {}
 
     def save(self):
         """Saves the config on disk"""
         with open(self.file, 'w', encoding=self.encoding) as fp:
-            json.dump(self, fp, ensure_ascii=True, cls=self.encoder)
+            json.dump(self._data, fp, ensure_ascii=True, cls=self.encoder)
+
+    # utility
+
+    def __contains__(self, *args, **kwargs):
+        return self._data.__contains__(*args, **kwargs)
+
+    def __len__(self):
+        return self._data.__len__()
+
+    def __getattr__(self, item, default=None):
+        return getattr(self._data, item, default)
 
 
-class DefaultConfigEncoder(json.JSONEncoder):
-    def default(self, obj):
-        return obj.to_dict()
+class ConfigElement:
+    pass
 
 
-class ConfigIterator:
-    def __init__(self, conf):
-        self.elements = [{'key': key, 'val': val} for key, val in conf.to_dict().items()]
-        self.index = 0
-        self.len = len(conf)
+class _ConfigEncoder(json.JSONEncoder):
+    """Default JSON encoder."""
+    def default(self, o):
+        if isinstance(o, ConfigElement):
+            d = o.__dict__.copy()
+            d['__class__'] = o.__class__.__qualname__
+            return d
 
-    def __iter__(self):
-        return self
+        return json.JSONEncoder.default(self, o)
 
-    def __next__(self):
-        if self.index >= self.len:
-            raise StopIteration
 
-        elem = self.elements[self.index]
-        self.index += 1
-        return elem['key'], elem['val']
+class _ConfigDecoder:
+    """Default JSON decoder, do not instantiate as the inspect magic involved is not tailored for it."""
+    def __init__(self):
+        # Back once to reach Config.__init__
+        # Back twice to reach the caller
+        self._globals = inspect.currentframe().f_back.f_back.f_globals
 
-__all__ = ['Config', 'ConfigElement']
+    def decode(self, o):
+        if '__class__' in o:
+            name = o['__class__']
+
+            # Get the top level class in the given name
+            parts = name.split('.')
+            cls = self._globals[parts[0]]
+
+            # Walk the rest of the dotted path if any
+            for part in parts[1:]:
+                cls = cls.__dict__[part]
+
+            del o['__class__']
+            return cls(**o)
+        else:
+            return o

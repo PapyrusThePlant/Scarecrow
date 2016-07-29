@@ -13,19 +13,12 @@ from cogs.util import config
 log = logging.getLogger(__name__)
 
 
-class BotConfig(config.Config):
-    def __init__(self, file, **options):
-        self.description = None
-        self.commands_prefixes = None
-        self.banned_servers = None
-        self.token = None
-
-        super().__init__(file, **options)
-
-        if self.commands_prefixes is None:
-            self.commands_prefixes = ['mention']
-        if self.banned_servers is None:
-            self.banned_servers = []
+class BotConfig(config.ConfigElement):
+    def __init__(self, token, description, **kwargs):
+        self.description = description
+        self.commands_prefixes = kwargs.pop('commands_prefixes', ['mention'])
+        self.token = token
+        self.banned_servers = kwargs.pop('banned_servers', [])
 
 
 class Bot(commands.Bot):
@@ -36,7 +29,7 @@ class Bot(commands.Bot):
         self.do_restart = False
         self.do_reload = False
         self.start_time = time.time()
-        self.conf = BotConfig(conf_path, encoding='utf-8')
+        self.conf = config.Config(conf_path, encoding='utf-8')
 
         prefixes = self.conf.commands_prefixes
         if 'mention' in prefixes:
@@ -81,7 +74,7 @@ class Bot(commands.Bot):
 
         content = 'Ignoring exception in command {}:\n' \
                   '{}'.format(context.command,
-                              ''.join(traceback.format_exception(type(exception),exception,exception.__traceback__)))
+                              ''.join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
         log.error(content)
 
     async def on_error(self, event_method, *args, **kwargs):

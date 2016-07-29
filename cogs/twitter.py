@@ -21,53 +21,43 @@ def setup(bot):
     bot.add_cog(Twitter(bot))
 
 
-class TwitterConfig(config.Config):
-    def __init__(self, file, **options):
-        self.consumer_key = None
-        self.consumer_secret = None
-        self.access_token = None
-        self.access_token_secret = None
+class TwitterConfig(config.ConfigElement):
+    def __init__(self, credentials, **kwargs):
+        self.credentials = credentials
 
-        self.default_format = None
-        self.received_count = None
-        self.follows = None
+        self.default_format = kwargs.pop('default_format', "<{url}>\n**{author} :** {text}")
+        self.received_count = kwargs.pop('received_count', 0)
+        self.follows = kwargs.pop('follows', [])
 
-        super().__init__(file, **options)
 
-        if self.follows is None:
-            self.follows = []
+class TwitterCredentials(config.ConfigElement):
+    def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret):
+        self.consumer_key = consumer_key
+        self.consumer_secret = consumer_secret
+        self.access_token = access_token
+        self.access_token_secret = access_token_secret
 
 
 class FollowConfig(config.ConfigElement):
-    def __init__(self, data):
-        self.id = None
-        self.screen_name = None
-        self.discord_channels = None
-
-        super().__init__(data)
-
-        if self.discord_channels is None:
-            self.discord_channels = []
+    def __init__(self, id, screen_name, **kwargs):
+        self.id = id
+        self.screen_name = screen_name
+        self.discord_channels = kwargs.pop('discord_channels', [])
 
 
-class DiscordChannelConfig(config.ConfigElement):
-    def __init__(self, data):
-        self.id = None
-        self.format = None
-        self.received_count = None
-
-        super().__init__(data)
-
-        if self.received_count is None:
-            self.received_count = 0
+class ChannelConfig(config.ConfigElement):
+    def __init__(self, id, format, **kwargs):
+        self.id = id
+        self.format = format
+        self.received_count = kwargs.pop('received_count', 0)
 
 
 class Twitter:
     """Twitter commands and events"""
     def __init__(self, bot):
         self.bot = bot
-        self.conf = TwitterConfig(paths.TWITTER_CONFIG, encoding='utf-8')
-        self.api = TweepyAPI(self.conf)
+        self.conf = config.Config(paths.TWITTER_CONFIG, encoding='utf-8')
+        self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
 
     @staticmethod
@@ -133,8 +123,7 @@ class Twitter:
         format = await self._validate_format(format)
 
         # Add new discord channel
-        conf_elem = DiscordChannelConfig({'id': channel_id, 'format': format})
-        conf.discord_channels.append(conf_elem)
+        conf.discord_channels.append(ChannelConfig(channel_id, format))
         self.conf.save()
 
         await self.bot.say(':ok_hand:')
@@ -292,9 +281,9 @@ class TweepyAPI(tweepy.API):
 
 class SubProcessStream:
     """Aggregation of things to run a tweepy stream in a sub-process."""
-    def __init__(self, mp_queue, conf, follows):
+    def __init__(self, mp_queue, credentials, follows):
         self.mp_queue = mp_queue
-        self.conf = conf
+        self.credentials = credentials
         self.follows = follows
 
     def run(self):
@@ -316,7 +305,7 @@ class SubProcessStream:
 
         # Create the tweepy stream
         log.info('Creating and starting tweepy stream.')
-        api = TweepyAPI(self.conf)  # Re-creation, much efficient, wow
+        api = TweepyAPI(self.credentials)  # Re-creation, much efficient, wow
         listener = SubProcessStream.TweepyListener(self.mp_queue, api)
         stream = tweepy.Stream(api.auth, listener)
         log.info('Tweepy stream ready.')
@@ -364,7 +353,7 @@ class TweepyStream(tweepy.StreamListener):
         """
         # Get the twitter id
         user = self.api.get_user(name)
-        chan_conf = FollowConfig({"id": user.id_str, "screen_name": name})
+        chan_conf = FollowConfig(user.id_str, name)
         self.conf.follows.append(chan_conf)
 
         # Update the stream filter
@@ -448,7 +437,7 @@ class TweepyStream(tweepy.StreamListener):
 
         # Create a new multi-processes queue, a new stream object and a new Process
         self.mp_queue = multiprocessing.Queue()
-        stream = SubProcessStream(self.mp_queue, self.conf, self._get_follows())
+        stream = SubProcessStream(self.mp_queue, self.conf.credentials, self._get_follows())
         self.sub_process = multiprocessing.Process(target=stream.run,
                                                    name='Tweepy_Stream')
         log.info('Created new sub_process (pid {}).'.format(self.sub_process.pid))
