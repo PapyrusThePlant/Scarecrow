@@ -13,4 +13,5 @@ INSULTS = DATA + 'insults.txt'
 WEEBNAMES = DATA + 'weeb_names.txt'
 
 LOGS = WORKDIR + '/logs/'
+SCARECROW_LOG = LOGS + 'scarecrow.log'
 SUBPROCESS_LOG = LOGS + 'sub-process.log'

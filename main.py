@@ -4,6 +4,7 @@ import multiprocessing
 import sys
 import types
 
+import paths
 import scarecrow
 
 
@@ -17,7 +18,6 @@ class Settings:
         'https://github.com/PapyrusThePlant/Scarecrow'
     ]
 
-    log_file = None
     log_level = logging.INFO
     log_handler = logging.NullHandler()
 
@@ -37,11 +37,11 @@ class Settings:
                 cls.log_level = logging.getLevelName(iter.__next__().upper())
 
             if '--logs' == arg or '-l' == arg:
-                cls.log_file = iter.__next__()
-                if cls.log_file == 'cons':
+                log_mode = iter.__next__()
+                if log_mode == 'cons':
                     cls.log_handler = logging.StreamHandler()
-                elif cls.log_file is not None:
-                    cls.log_handler = logging.FileHandler(filename=cls.log_file, encoding='utf-8', mode='w')
+                elif log_mode == 'file':
+                    cls.log_handler = logging.FileHandler(filename=paths.SCARECROW_LOG, encoding='utf-8', mode='w')
 
 
 class Reloader:

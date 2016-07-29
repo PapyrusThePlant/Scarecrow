@@ -23,5 +23,5 @@ then
 fi
 
 echo Starting bot...
-python3 -B main.py --logs logs/scarecrow.log &
+python3 -B main.py --logs file &
 
