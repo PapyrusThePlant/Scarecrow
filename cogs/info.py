@@ -65,7 +65,8 @@ class Info:
     async def charinfo(self, *, data: str):
         """Shows informations about a character.
 
-        'data' can either be a character, a unicode escape sequence or a unicode character name.
+        'data' can either be a character, a unicode escape sequence, a unicode character name or a string.
+        If 'data' is a string only a summary of each character's info will be displayed.
         """
         data = data.lower()
 
@@ -78,45 +79,53 @@ class Info:
                 await self.bot.say('Invalid unicode escape sequence.')
                 return
             else:
-                char = ''.join([chr(cp) for cp in code_points])
+                data = ''.join([chr(cp) for cp in code_points])
         elif len(data) > 1:
             # Maybe we've been given the character's name ?
             try:
-                char = unicodedata.lookup(data)
+                data = unicodedata.lookup(data)
             except KeyError:
-                await self.bot.say('Cannot make sense of the input data.')
-                return
-        else:
-            # Yay no parsing!
-            char = data
+                pass
 
         # Normalise the input
-        char = unicodedata.normalize('NFC', char)
+        data = unicodedata.normalize('NFC', data)
+        url_fmt = '<http://unicode-table.com/en/{:X}>'
 
-        # Aggregate the informations
-        entries = [
-            ('Character', char),
-            ('Name', unicodedata.name(char, 'None')),
-            ('Code point', '{:04x}'.format(ord(char)))
-        ]
-        decomposition = unicodedata.decomposition(char)
-        if decomposition != '':
-            entries.append(('Decomposition', decomposition))
+        if len(data) == 1:
+            # Detailed info on the character
+            entries = [
+                ('Character', data),
+                ('Name', unicodedata.name(data, 'None')),
+                ('Code point', '{:04x}'.format(ord(data)))
+            ]
+            decomposition = unicodedata.decomposition(data)
+            if decomposition != '':
+                entries.append(('Decomposition', decomposition))
 
-        combining = unicodedata.combining(char)
-        if combining:
-            entries.append(('Combining class', combining))
+            combining = unicodedata.combining(data)
+            if combining:
+                entries.append(('Combining class', combining))
 
-        entries.append(('Category', unicodedata.category(char)))
-        bidirectional = unicodedata.bidirectional(char)
-        entries.append(('Bidirectional', bidirectional if bidirectional != '' else 'None'))
-        entries.append(('Mirrored', 'True' if unicodedata.mirrored(char) == 1 else 'False'))
-        entries.append(('East asian width', unicodedata.east_asian_width(char)))
-        entries.append(('Url', 'http://unicode-table.com/en/' + '{:X}'.format(ord(char))))
+            entries.append(('Category', unicodedata.category(data)))
+            bidirectional = unicodedata.bidirectional(data)
+            entries.append(('Bidirectional', bidirectional if bidirectional != '' else 'None'))
+            entries.append(('Mirrored', 'True' if unicodedata.mirrored(data) == 1 else 'False'))
+            entries.append(('East asian width', unicodedata.east_asian_width(data)))
+            entries.append(('Url', url_fmt.format(ord(data))))
 
-        # Create the message's content and send it
-        content = utils.indented_entry_to_str(entries)
-        await self.bot.say_block(content)
+            # Create the message's content and send it
+            content = utils.indented_entry_to_str(entries)
+            await self.bot.say_block(content)
+        else:
+            # Minimal info for each character
+            entries = []
+            for char in data:
+                entries.append('{} | `\\u{:04x}` | {} | {}'.format(char,
+                                                                    ord(char),
+                                                                    unicodedata.name(char, 'None'),
+                                                                    url_fmt.format(ord(char))))
+            content = '\n'.join(entries)
+            await self.bot.say(content)
 
     @commands.group(name='info', aliases=['infos'], invoke_without_command=True)
     async def info_group(self):
