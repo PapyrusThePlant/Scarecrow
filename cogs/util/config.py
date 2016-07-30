@@ -32,6 +32,9 @@ class Config:
     def __getattr__(self, item, default=None):
         return getattr(self._data, item, default)
 
+    def set(self, key, val):
+        self._data[key] = val
+
 
 class ConfigElement:
     pass
