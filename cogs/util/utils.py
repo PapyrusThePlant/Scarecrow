@@ -44,14 +44,14 @@ def indented_entry_to_str(entries, indent=0, sep=' '):
 
     # Set the format for each line
     if indent > 0:
-        fmt = '{0:{indent}}{1:{width}}{sep}{2}\n'
+        fmt = '{0:{indent}}{1:{width}}{sep}{2}'
     else:
-        fmt = '{1:{width}}{sep}{2}\n'
+        fmt = '{1:{width}}{sep}{2}'
 
     for name, entry in entries:
         output.append(fmt.format('', name, entry, width=width, indent=indent, sep=sep))
 
-    return ''.join(output)
+    return '\n'.join(output)
 
 
 def random_line(file_name, predicate=None):
