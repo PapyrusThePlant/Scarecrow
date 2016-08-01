@@ -14,4 +14,4 @@ WEEBNAMES = DATA + 'weeb_names.txt'
 
 LOGS = WORKDIR + '/logs/'
 SCARECROW_LOG = LOGS + 'scarecrow.log'
-SUBPROCESS_LOG = LOGS + 'sub-process.log'
+TWITTER_SUBPROCESS_LOG = LOGS + 'twitter-sub-process-{pid}.log'

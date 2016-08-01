@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import multiprocessing
+import os
 from queue import Empty as QueueEmpty
 from time import sleep
 
@@ -18,6 +19,7 @@ log = logging.getLogger(__name__)
 
 
 def setup(bot):
+    log.info('Loading extension.')
     bot.add_cog(Twitter(bot))
 
 
@@ -69,6 +71,7 @@ class Twitter:
         return utils.indented_entry_to_str(entries)
 
     def __unload(self):
+        log.info('Unloading cog.')
         self.stream.quit()
 
     async def _validate_format(self, fmt):
@@ -266,7 +269,7 @@ class Twitter:
                 fmt = self.conf.default_format
 
             content = fmt.format(author=author, text=text, url=url)
-            log.info('Scheduling discord message on channel ({}) : {}'.format(channel.id, content))
+            log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, content))
             asyncio.ensure_future(self.bot.send_message(discord.Object(id=channel.id), content), loop=self.bot.loop)
 
 
@@ -297,11 +300,11 @@ class SubProcessStream:
         This feels kinda ugly.
         """
         # Setup the logging for the sub-process
-        log = logging.getLogger()
-        log.setLevel(logging.DEBUG)
-        handler = logging.FileHandler(paths.SUBPROCESS_LOG, encoding='utf-8')
+        rlog = logging.getLogger()
+        rlog.setLevel(logging.INFO)
+        handler = logging.FileHandler(paths.TWITTER_SUBPROCESS_LOG.format(pid=os.getpid()), encoding='utf-8')
         handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
-        log.addHandler(handler)
+        rlog.addHandler(handler)
 
         # Create the tweepy stream
         log.info('Creating and starting tweepy stream.')
@@ -317,7 +320,6 @@ class SubProcessStream:
                 stream.filter(follow=self.follows)
             except Exception as e:
                 log.exception('Recovering from exception : {}'.format(e))
-                sleep(2)
             else:
                 log.info('Exiting sub-process.')
                 return
@@ -398,7 +400,7 @@ class TweepyStream(tweepy.StreamListener):
                 data = self.mp_queue.get(False)  # Do not block
             except QueueEmpty:
                 if not self.sub_process.is_alive():
-                    log.info('Sub process (pid {}) appears dead, clean it up.'.format(self.sub_process.pid))
+                    log.warning('Sub process (pid {}) appears dead, clean it up.'.format(self.sub_process.pid))
                     # When the subprocess is killed, clean things up and return
                     self.mp_queue = None
                     self.sub_process = None
@@ -427,6 +429,8 @@ class TweepyStream(tweepy.StreamListener):
         if not self.conf.follows:
             return
 
+        log.info('Creating new sub-process.')
+
         # Kill the current subprocess before starting a new one
         if self.running:
             self.stop()
@@ -440,7 +444,7 @@ class TweepyStream(tweepy.StreamListener):
         stream = SubProcessStream(self.mp_queue, self.conf.credentials, self._get_follows())
         self.sub_process = multiprocessing.Process(target=stream.run,
                                                    name='Tweepy_Stream')
-        log.info('Created new sub_process (pid {}).'.format(self.sub_process.pid))
+        log.info('Created new sub-process.')
 
         # Schedule the polling daemon (it will take care of starting the child process)
         asyncio.ensure_future(self._run())
@@ -478,22 +482,22 @@ class TweepyStream(tweepy.StreamListener):
 
         # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
-            log.info('Ignoring tweet (reply): ' + log_status)
+            log.debug('Ignoring tweet (reply): ' + log_status)
             return
         # Ignore quotes
         elif status.is_quote_status:
-            log.info('Ignoring tweet (quote): ' + log_status)
+            log.debug('Ignoring tweet (quote): ' + log_status)
             return
         # Ignore retweets
         elif hasattr(status, 'retweeted_status'):
-            log.info('Ignoring tweet (retweet): ' + log_status)
+            log.debug('Ignoring tweet (retweet): ' + log_status)
             return
         # Ignore tweets from authors we're not following (shouldn't happen)
         elif status.author.id_str not in self._get_follows():
-            log.info('Ignoring tweet (bad author): ' + log_status)
+            log.debug('Ignoring tweet (bad author): ' + log_status)
             return
         else:
-            log.info('Dispatching tweet to handler: ' + log_status)
+            log.debug('Dispatching tweet to handler: ' + log_status)
 
         # Feed the handler with the tweet
         self.handler.tweepy_on_status(status.author.id_str, status.author.screen_name, status.text, status.id)
