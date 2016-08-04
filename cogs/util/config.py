@@ -45,6 +45,12 @@ class _ConfigEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, ConfigElement):
             d = o.__dict__.copy()
+
+            # Ignore 'private' attributes
+            for k in o.__dict__.keys():
+                if k[0] == '_':
+                    del d[k]
+
             d['__class__'] = o.__class__.__qualname__
             return d
 
