@@ -317,8 +317,9 @@ class SubProcessStream:
         def on_data(self, data):
             """Called when raw data is received from connection."""
             # Send the data to the parent process
-            logging.debug('Received raw data : ' + str(data))
-            self.mp_queue.put(data)
+            if data is not None:
+                logging.debug('Received raw data : ' + str(data))
+                self.mp_queue.put(data)
 
 
 class TweepyStream(tweepy.StreamListener):
@@ -401,8 +402,9 @@ class TweepyStream(tweepy.StreamListener):
                 self.sub_process = None
                 return
             else:
-                # Process the data sent by the subprocess
-                self.on_data(data)
+                if data is not None:
+                    # Process the data sent by the subprocess
+                    self.on_data(data)
 
     @property
     def running(self):
