@@ -386,25 +386,24 @@ class TweepyStream(tweepy.StreamListener):
                 data = self.mp_queue.get(False)  # Do not block
             except QueueEmpty:
                 if not self.sub_process.is_alive():
-                    log.warning('Sub process (pid {}) appears dead, clean it up.'.format(self.sub_process.pid))
-                    # When the subprocess is killed, clean things up and return
-                    self.mp_queue = None
-                    self.sub_process = None
-                    # Lol cleanup, gc, halp :3
-                    return
+                    log.warning('Sub process (pid {}) appears dead.'.format(self.sub_process.pid))
+                    break
 
                 # Arbitrary sleep time after an unsuccessful poll
                 await asyncio.sleep(4)
             except Exception as e:
                 # Might be triggered when the sub_process is terminated while putting data in the queue
                 log.error('Queue polling error: ' + str(e))
-                self.mp_queue = None
-                self.sub_process = None
-                return
+                break
             else:
                 if data is not None:
                     # Process the data sent by the subprocess
                     self.on_data(data)
+
+        # Cleanup the subprocess before exiting
+        log.info('Cleaning sub-process (pid {}) and exiting polling daemon.'.format(self.sub_process.pid))
+        self.mp_queue = None
+        self.sub_process = None
 
     @property
     def running(self):
