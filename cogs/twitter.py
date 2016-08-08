@@ -51,7 +51,6 @@ class ChannelConfig(config.ConfigElement):
     def __init__(self, id, format, **kwargs):
         self.id = id
         self.format = format
-        self.received_count = kwargs.pop('received_count', 0)
 
 
 class Twitter:
@@ -196,24 +195,12 @@ class Twitter:
             await self.bot.say("Invalid scope '{}'. Value must picked from {}.".format(scope, str(scopes)))
             return
 
-        received_count = self.conf.received_count if scope == 'global' else 0
-
+        received_count = 0
         follows = self.conf.follows
         following = []
         for chan_conf in follows:
             discord_channels = set(c.id for c in chan_conf.discord_channels)
 
-            # switch (scope):
-            #    case 'channel':
-            #        if not ctx.message.channel.id in discord_channels:
-            #            break
-            #    case 'server':
-            #        if not discord_channels & set(c.id for c in ctx.message.server.channels):
-            #            break
-            #        received_count += chan_conf.received_count
-            #    case 'global':
-            #        following.append(chan_conf.screen_name)
-            #        break
             if scope == 'global':
                 following.append(chan_conf.screen_name)
             elif (scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels))\
@@ -256,8 +243,6 @@ class Twitter:
 
     def tweepy_on_status(self, author_id, author, text, status_id):
         """Called by the stream when a tweet is received."""
-        self.conf.received_count += 1
-
         chan_conf = dutils.get(self.conf.follows, id=author_id)
         url = 'http://twitter.com/{}/status/{}'.format(author, status_id)
 
