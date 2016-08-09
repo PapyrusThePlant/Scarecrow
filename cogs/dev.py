@@ -20,7 +20,7 @@ class Dev:
         elif name in self.bot.extensions:
             return name
         elif name in [ext.split('.')[-1] for ext in self.bot.extensions.keys()]:
-            return 'scarecrow.cogs.{}'.format(name)
+            return 'cogs.{}'.format(name)
         else:
             return None
 
@@ -53,8 +53,7 @@ class Dev:
     @checks.is_owner()
     async def cogs_load(self, *, name: str):
         """Loads a cog from name."""
-        module_path = 'scarecrow.cogs.{}'.format(name)
-
+        module_path = 'cogs.{}'.format(name)
         if module_path in self.bot.extensions:
             await self.bot.say('{} already loaded.'.format(name))
         else:
