@@ -3,7 +3,6 @@ import logging
 import multiprocessing
 import os
 from queue import Empty as QueueEmpty
-from time import sleep
 
 import tweepy
 
@@ -20,6 +19,12 @@ log = logging.getLogger(__name__)
 
 def setup(bot):
     log.info('Loading extension.')
+
+    # Delete irrelevant sub-process logs
+    for entry in os.scandir(paths.LOGS):
+        if entry.is_file() and 'twitter' in entry.name:
+            os.remove(entry.path)
+
     bot.add_cog(Twitter(bot))
 
 
