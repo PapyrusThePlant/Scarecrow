@@ -105,10 +105,12 @@ def main():
     # ERMAHGERD ! MAH FRAVRIT LERP !
     while True:
         # Create the bot, let it crash on exceptions
+        log.info('Creating bot...')
         bot = scarecrow.Bot()
 
         # Start it
         try:
+            log.info('Running bot...')
             bot.run()
         except Exception as e:
             log.exception('Recovering from exception : {}'.format(e))
@@ -121,6 +123,7 @@ def main():
             Reloader.reload(bot.__module__)
 
         # Clear state
+        log.info('Deleting the bot.')
         del bot
 
     exit()

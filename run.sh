@@ -22,6 +22,5 @@ then
   exit 1
 fi
 
-echo Starting bot...
 python3 -B main.py --logs file &
 
