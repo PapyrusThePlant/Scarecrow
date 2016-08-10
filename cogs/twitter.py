@@ -298,6 +298,9 @@ class SubProcessStream:
         handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
         rlog.addHandler(handler)
 
+        # Do not join the queue's bg thread on exit
+        self.mp_queue.cancel_join_thread()
+
         # Create the tweepy stream
         log.info('Creating and starting tweepy stream.')
         api = TweepyAPI(self.credentials)  # Re-creation, much efficient, wow
@@ -405,6 +408,7 @@ class TweepyStream(tweepy.StreamListener):
 
         # Cleanup the subprocess before exiting
         log.info('Cleaning sub-process (pid {}) and exiting polling daemon.'.format(self.sub_process.pid))
+        self.mp_queue.close()
         self.mp_queue = None
         self.sub_process = None
 
@@ -418,18 +422,17 @@ class TweepyStream(tweepy.StreamListener):
         if not self.conf.follows:
             return
 
-        log.info('Creating new sub-process.')
-
         # Kill the current subprocess before starting a new one
-        if self.running:
-            self.stop()
+        self.stop()
 
         # Wait for the cleanup in the polling daemon before creating a new subprocess
         while self.sub_process:
             await asyncio.sleep(1)
 
         # Create a new multi-processes queue, a new stream object and a new Process
+        log.info('Creating new sub-process.')
         self.mp_queue = multiprocessing.Queue()
+        self.mp_queue.cancel_join_thread()
         stream = SubProcessStream(self.mp_queue, self.conf.credentials, self._get_follows())
         self.sub_process = multiprocessing.Process(target=stream.run,
                                                    name='Tweepy_Stream')
@@ -443,6 +446,8 @@ class TweepyStream(tweepy.StreamListener):
         if self.running:
             log.info('Stopping sub process (pid {}).'.format(self.sub_process.pid))
             self.sub_process.terminate()
+            self.sub_process.join()
+            log.info('Stopped sub process (pid {}).'.format(self.sub_process.pid))
 
     def unfollow(self, name):
         """Removes a twitter channel from the follow list and update the tweepy Stream."""
