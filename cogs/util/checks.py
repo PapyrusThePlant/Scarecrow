@@ -62,7 +62,7 @@ def has_roles(**roles):
 def is_server_owner():
     """Commands decorator adding a check which makes the command available to the server owner only."""
     def predicate(ctx):
-        return ctx.message.author in [ctx.bot.owner, ctx.server.owner]
+        return ctx.message.author in [ctx.bot.owner, ctx.message.server.owner]
 
     return commands.check(predicate)
 
