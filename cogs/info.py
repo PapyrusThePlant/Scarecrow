@@ -144,6 +144,7 @@ class Info:
 
     @info_group.command(name='cog')
     async def info_cog(self, cog_name):
+        """Shows information about a cog."""
         if cog_name not in self.bot.cogs:
             await self.bot.say('Cog not loaded.')
             return
