@@ -33,7 +33,6 @@ class TwitterConfig(config.ConfigElement):
         self.credentials = credentials
 
         self.default_format = kwargs.pop('default_format', "<{url}>\n**{author} :** {text}")
-        self.received_count = kwargs.pop('received_count', 0)
         self.follows = kwargs.pop('follows', [])
 
 
@@ -56,6 +55,7 @@ class ChannelConfig(config.ConfigElement):
     def __init__(self, id, format, **kwargs):
         self.id = id
         self.format = format
+        self.received_count = kwargs.pop('received_count', 0)
 
 
 class Twitter:
