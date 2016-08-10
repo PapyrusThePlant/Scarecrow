@@ -262,6 +262,8 @@ class Twitter:
             log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, content))
             asyncio.ensure_future(self.bot.send_message(discord.Object(id=channel.id), content), loop=self.bot.loop)
 
+        self.conf.save()
+
 
 class TweepyAPI(tweepy.API):
     """Auto login tweepy api object."""
