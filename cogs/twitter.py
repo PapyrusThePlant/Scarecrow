@@ -368,10 +368,6 @@ class TweepyStream(tweepy.StreamListener):
         self.stop()
         self.handler = None
 
-        # Wait until the sub-process properly exits before quitting
-        while self.sub_process:
-            sleep(0.1)
-
     async def _run(self):
         """Polling daemon that checks the multi-processes queue for data and dispatches it to `on_data`."""
         self.sub_process.start()
