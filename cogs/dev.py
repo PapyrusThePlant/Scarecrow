@@ -58,6 +58,7 @@ class Dev:
     @checks.is_owner()
     async def cogs_load(self, *, name: str):
         """Loads a cog from name."""
+        name = name.lower()
         module_path = 'cogs.{}'.format(name)
         if module_path in self.bot.extensions:
             await self.bot.say('{} already loaded.'.format(name))
