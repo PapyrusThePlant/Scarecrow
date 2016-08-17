@@ -6,6 +6,24 @@ import asyncio
 import random
 import string
 
+import discord.utils as dutils
+from discord.ext.commands import BadArgument, Converter
+
+
+class ServerConverter(Converter):
+    def convert(self):
+        bot = self.ctx.bot
+
+        result = dutils.get(bot.servers, name=self.argument)
+        if result is None:
+            result = bot.get_server(self.argument)
+
+        if result is None:
+            raise BadArgument('Member "{}" not found'.format(self.argument))
+
+        return result
+
+
 
 async def fetch_page(url, timeout=None, session=None):
     """Fetches a web page and return its text or json content."""

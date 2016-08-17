@@ -19,21 +19,81 @@ class Admin:
     """Bot management commands and events"""
     def __init__(self, bot):
         self.bot = bot
-        self.banned_servers = []
         self.commands_used = Counter()
 
-    @commands.command(hidden=True)
-    @checks.is_owner()
-    async def ban_server(self, server_id=None):
-        """Adds a server to the bot's banned server list.
+    def __check(self, ctx):
+        """A global check used on every command."""
+        author = ctx.message.author
+        if author == ctx.bot.owner:
+            return True
 
-        Usage : ban_server <server id>
+        conf = self.bot.conf
+        server = ctx.message.server
 
-        Upon being invited to a banned server the bot will automatically leave it.
+        # Check if we're ignoring the server
+        if server.id in conf.ignored_servers:
+            return False
+
+        # Check if the user is banned from using the bot
+        if author in conf.ignored_users[server.id]:
+            return False
+
+        # Check if the channel is banned, bypass this if the user has the administrator permission
+        channel = ctx.message.channel
+        perms = channel.permissions_for(author)
+        if not perms.administrator and channel.id in conf.ignored_channels:
+            return False
+
+        return True
+
+    def resolve_target(self, ctx, target):
+        conf = self.bot.conf
+
+        if target == 'channel':
+            target = ctx.message.channel, conf.ignored_channels
+        elif target == 'server':
+            return ctx.message.server, conf.ignored_servers
+
+        # Try converting to a channel
+        try:
+            channel = commands.ChannelConverter(ctx, target).convert()
+        except commands.errors.BadArgument:
+            pass
+        else:
+            return channel, conf.ignored_channels
+
+        # Try converting to a user
+        try:
+            user = commands.MemberConverter(ctx, target).convert()
+        except commands.errors.BadArgument:
+            pass
+        else:
+            return user, conf.ignored_users[ctx.message.server.id]
+
+        # Try converting to a channel
+        server = utils.ServerConverter(ctx, target).convert()
+        return server, conf.ignored_servers
+
+    @commands.command(pass_context=True)
+    @checks.has_permissions(manage_server=True)
+    async def ignore(self, ctx, *, target):
+        """Ignores either a channel, a user (server-wide), or a whole server.
+
+        If the bot is invited to an ignored server, it will leave.
         """
-        if server_id is not None:
-            self.banned_servers.append(server_id)
-            await self.bot.say(':ok_hand:')
+        target, conf = self.resolve_target(ctx, target)
+        conf.append(target.id)
+        self.bot.conf.save()
+        await self.bot.say(':ok_hand:')
+
+    @commands.command(pass_context=True)
+    @checks.has_permissions(manage_server=True)
+    async def unignore(self, ctx, *, target):
+        """Un-ignores either a channel, a user (server-wide), or a whole server."""
+        target, conf = self.resolve_target(ctx, target)
+        conf.remove(target.id)
+        self.bot.conf.save()
+        await self.bot.say(':ok_hand:')
 
     @commands.command(hidden=True)
     @checks.is_owner()
@@ -42,8 +102,8 @@ class Admin:
 
         Usage : unban_server <server id>
         """
-        if server_id in self.banned_servers:
-            self.banned_servers.remove(server_id)
+        if server_id in self.bot.conf.ignored_servers:
+            self.bot.conf.ignored_servers.remove(server_id)
             await self.bot.say(':ok_hand:')
 
     @commands.command(hidden=True)
@@ -89,7 +149,7 @@ class Admin:
         await self.bot.send_message(self.bot.owner, "Joined new server {0.name} ({0.id}).\n"
                                                     "Owner is {1.name} ({1.id})".format(server, server.owner))
 
-        if server.id in self.banned_servers:
+        if server.id in self.bot.conf.ignored_servers:
             # Hiiiik ! A bad server ! let's scare it and run away
             await self.bot.send_message(server.default_channel, utils.random_line(paths.INSULTS))
             await self.bot.leave_server(server)

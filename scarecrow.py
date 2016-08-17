@@ -16,9 +16,11 @@ log = logging.getLogger(__name__)
 class BotConfig(config.ConfigElement):
     def __init__(self, token, description, **kwargs):
         self.description = description
-        self.commands_prefixes = kwargs.pop('commands_prefixes', ['mention'])
         self.token = token
-        self.banned_servers = kwargs.pop('banned_servers', [])
+        self.commands_prefixes = kwargs.pop('commands_prefixes', ['mention'])
+        self.ignored_servers = kwargs.pop('ignored_servers', [])
+        self.ignored_users = kwargs.pop('ignored_users', {})
+        self.ignored_channels = kwargs.pop('ignored_channels', [])
 
 
 class Bot(commands.Bot):
