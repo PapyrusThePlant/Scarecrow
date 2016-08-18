@@ -1,143 +1,79 @@
-import asyncio
 import logging
-import os
-import re
-import time
-import traceback
-
-import discord.ext.commands as commands
+import multiprocessing
+import sys
 
 import paths
-from cogs.util import config
+from bot import Bot
+
 
 log = logging.getLogger(__name__)
 
 
-class BotConfig(config.ConfigElement):
-    def __init__(self, token, description, **kwargs):
-        self.description = description
-        self.token = token
-        self.commands_prefixes = kwargs.pop('commands_prefixes', ['mention'])
-        self.ignored_servers = kwargs.pop('ignored_servers', [])
-        self.ignored_users = kwargs.pop('ignored_users', {})
-        self.ignored_channels = kwargs.pop('ignored_channels', [])
+class Settings:
+    """Startup script's settings"""
+    requirements = [
+        'https://github.com/PapyrusThePlant/discord.py',
+        'https://github.com/PapyrusThePlant/Scarecrow'
+    ]
 
+    log_level = logging.INFO
+    log_handler = logging.NullHandler()
 
-class Bot(commands.Bot):
-    """Ooooooh ! Scary."""
-    def __init__(self, conf_path=paths.SCARECROW_CONFIG):
-        self.app_info = None
-        self.owner = None
-        self.do_restart = False
-        self.do_reload = False
-        self.start_time = time.time()
-        self.conf = config.Config(conf_path, encoding='utf-8')
-
-        prefixes = self.conf.commands_prefixes
-        if 'mention' in prefixes:
-            prefixes_cpy = prefixes.copy()
-            prefixes_cpy.remove('mention')
-            prefixes = commands.when_mentioned_or(*prefixes_cpy)
-            del prefixes_cpy
-
-        super().__init__(description=self.conf.description,
-                         command_prefix=prefixes,
-                         help_attrs={'hidden': True})
-
-        self.load_extensions(paths.COGS)
-
-        # Accept restarts after everything has been initialised without issue
-        self.do_restart = True
-
-    def load_extensions(self, path):
-        # Load all the cogs we find in the given path
-        for entry in os.scandir(path):
-            if entry.is_file():
-                # Let's construct the module name from the file path
-                tokens = re.findall('\w+', entry.path)
-                if tokens[-1] != 'py':
-                    continue
-                del tokens[-1]
-                extension = '.'.join(tokens)
-
-                try:
-                    self.load_extension(extension)
-                except Exception as e:
-                    logging.warning('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
-
-    async def on_command_error(self, exception, context):
-        # Skip if a cog defines this event
-        if self.extra_events.get('on_command_error', None):
-            return
-
-        # Skip if the command defines an error handler
-        if hasattr(context.command, "on_error"):
-            return
-
-        content = 'Ignoring exception in command {}:\n' \
-                  '{}'.format(context.command,
-                              ''.join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
-        log.error(content)
-
-    async def on_error(self, event_method, *args, **kwargs):
-        # Skip if a cog defines this event
-        if self.extra_events.get('on_error', None):
-            return
-
-        content = 'Ignoring exception in {}:\n' \
-                  '{}'.format(event_method, ''.join(traceback.format_exc()))
-        log.error(content)
-
-    async def on_ready(self):
-        self.app_info = await self.application_info()
-        self.owner = self.app_info.owner
-        log.info('Logged in Discord as {0.name} (id: {0.id})'.format(self.user))
-
-    async def on_message(self, message):
-        # Ignore bot messages (that includes our own)
-        if message.author.bot:
-            return
-
-        # if message.content.startswith ... :3
-        await self.process_commands(message)
-
-    def _clean_shutdown(self):
-        # Unload every cog
-        for extension in self.extensions.copy().keys():
-            self.unload_extension(extension)
-
-        # Log out of Discord
-        asyncio.ensure_future(self.logout())
-
-    def shutdown(self):
-        self.do_restart = False
-        self._clean_shutdown()
-
-    def reload(self):
-        self.do_restart = True
-        self.do_reload = True
-        self._clean_shutdown()
-
-    def restart(self):
-        self.do_restart = True
-        self._clean_shutdown()
-
-    def run(self):
-        try:
-            self.loop.run_until_complete(self.start(self.conf.token))
-        except KeyboardInterrupt:
-            self._clean_shutdown()
-        finally:
-            # Cancel pending tasks
-            pending = asyncio.Task.all_tasks()
-            gathered = asyncio.gather(*pending)
-            try:
-                gathered.cancel()
-                self.loop.run_until_complete(gathered)
-                gathered.exception()
-            except:
+    @classmethod
+    def parse_arguments(cls, args):
+        iter = args[1:].__iter__()
+        for arg in iter:
+            if '--update' == arg or '-u' == arg:
+                # TODO : update the requirements
+                exit()
+            elif '--help' == arg or '-h' == arg:
+                # TODO : print help
                 pass
+            elif '--loglevel' == arg:
+                cls.log_level = logging.getLevelName(iter.__next__().upper())
+            elif '--logs' == arg or '-l' == arg:
+                log_mode = iter.__next__()
+                if log_mode == 'cons':
+                    cls.log_handler = logging.StreamHandler()
+                elif log_mode == 'file':
+                    cls.log_handler = logging.FileHandler(filename=paths.SCARECROW_LOG, encoding='utf-8', mode='w')
 
-    def say_block(self, content):
-        content = '```\n{}\n```'.format(content)
-        return self.say(content)
+
+def main():
+    Settings.parse_arguments(sys.argv)
+
+    # Setup the logging
+    rlog = logging.getLogger()
+    rlog.setLevel(Settings.log_level)
+    Settings.log_handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
+    rlog.addHandler(Settings.log_handler)
+
+    log.info('Started with Python {0.major}.{0.minor}.{0.micro}'.format(sys.version_info))
+
+    # ERMAHGERD ! MAH FRAVRIT LERP !
+    while True:
+        # Create the bot, let it crash on exceptions
+        log.info('Creating bot...')
+        bot = Bot()
+
+        # Start it
+        try:
+            log.info('Running bot...')
+            bot.run()
+        except Exception as e:
+            log.exception('Recovering from exception : {}'.format(e))
+
+        if bot.do_shutdown:
+            if bot.do_restart:
+                exit(10)
+            else:
+                exit(0)
+
+        # Clear state
+        log.info('Deleting the bot.')
+        del bot
+
+
+if __name__ == '__main__':
+    multiprocessing.set_start_method('spawn')
+    main()

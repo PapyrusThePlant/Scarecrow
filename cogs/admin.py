@@ -97,17 +97,6 @@ class Admin:
 
     @commands.command(hidden=True)
     @checks.is_owner()
-    async def unban_server(self, server_id):
-        """Removes a server from the bot's banned server list.
-
-        Usage : unban_server <server id>
-        """
-        if server_id in self.bot.conf.ignored_servers:
-            self.bot.conf.ignored_servers.remove(server_id)
-            await self.bot.say(':ok_hand:')
-
-    @commands.command(hidden=True)
-    @checks.is_owner()
     async def kill(self, who):
         if who == 'yourself':
             # Aww mean D:
@@ -116,15 +105,12 @@ class Admin:
 
     @commands.command()
     @checks.is_owner()
-    async def restart(self):
+    async def restart(self, mode=None):
         """Restarts the bot."""
-        self.bot.restart()
-
-    @commands.command()
-    @checks.is_owner()
-    async def reload(self):
-        """Reloads the bot."""
-        self.bot.reload()
+        if mode is not None and mode != 'deep':
+            await self.bot.say("Unknown restart mode.")
+            return
+        self.bot.restart(mode)
 
     @commands.command()
     @checks.is_owner()
