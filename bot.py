@@ -111,6 +111,7 @@ class Bot(commands.Bot):
 
     def shutdown(self):
         self.do_shutdown = True
+        self.do_restart = False
         self._clean_shutdown()
 
     def restart(self, mode):
