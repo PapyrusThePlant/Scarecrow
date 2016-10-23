@@ -12,9 +12,10 @@ fi
 
 if [ "$1" == 'update' ]
 then
+  # TODO : Check for a running instance of the bot?
   echo Updating requirements...
   git pull
-  python3 -m pip install --user -U git+https://github.com/Rapptz/discord.py
+  python3 -m pip install --user -U git+https://github.com/PapyrusThePlant/discord.py
   exit 0
 elif [ $# -gt 0 ]
 then

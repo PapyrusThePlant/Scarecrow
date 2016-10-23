@@ -23,13 +23,7 @@ class Settings:
     def parse_arguments(cls, args):
         iter = args[1:].__iter__()
         for arg in iter:
-            if '--update' == arg or '-u' == arg:
-                # TODO : update the requirements
-                exit()
-            elif '--help' == arg or '-h' == arg:
-                # TODO : print help
-                pass
-            elif '--loglevel' == arg:
+            if '--loglevel' == arg:
                 cls.log_level = logging.getLevelName(iter.__next__().upper())
             elif '--logs' == arg or '-l' == arg:
                 log_mode = iter.__next__()
