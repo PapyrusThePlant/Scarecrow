@@ -79,12 +79,24 @@ class Admin:
     async def ignore(self, ctx, *, target):
         """Ignores either a channel, a user (server-wide), or a whole server.
 
-        If the bot is invited to an ignored server, it will leave.
+        A server owner cannot be ignored on his own server.
+        If the bot is invited to an ignored server, it will leave it.
         """
         target, conf = self.resolve_target(ctx, target)
+
+        # Do not ignore the server owner
+        if isinstance(target, discord.Member) and ctx.server.owner_id == target.id:
+            return
+
+        # Save the ignore
         conf.append(target.id)
         self.bot.conf.save()
-        await self.bot.say(':ok_hand:')
+
+        # Leave the server or acknowledge the ignore being successful
+        if isinstance(target, discord.Server):
+            await self.bot.leave_server(target)
+        else:
+            await self.bot.say(':ok_hand:')
 
     @commands.command(pass_context=True)
     @checks.has_permissions(manage_server=True)
