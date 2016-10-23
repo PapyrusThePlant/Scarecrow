@@ -59,7 +59,7 @@ class ChannelConfig(config.ConfigElement):
 
 
 class Twitter:
-    """Twitter commands and events"""
+    """Twitter commands and events."""
     def __init__(self, bot):
         self.bot = bot
         self.conf = config.Config(paths.TWITTER_CONFIG, encoding='utf-8')
@@ -205,13 +205,13 @@ class Twitter:
         following = []
         for chan_conf in follows:
             discord_channels = set(c.id for c in chan_conf.discord_channels)
+            received_count += sum(c.received_count for c in discord_channels)
 
             if scope == 'global':
                 following.append(chan_conf.screen_name)
             elif (scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels))\
                     or(scope == 'channel' and ctx.message.channel.id in discord_channels):
                 following.append(chan_conf.screen_name)
-                received_count += sum(c.received_count for c in chan_conf.discord_channels)
 
         if not following:
             following.append('No one')
@@ -287,7 +287,7 @@ class SubProcessStream:
         The tweepy.API object isn't pickable so let's just re-create it in the sub-process.
         The tweepy.StreamListener instance then has to be created here too as a separate object instead of
         this class inheriting from it.
-        Finally tweepy.Stream has to be instanciated here too to register the listener.
+        Finally tweepy.Stream has to be instantiated here too to register the listener.
 
         This feels kinda ugly.
         """
@@ -326,8 +326,8 @@ class SubProcessStream:
 
         def on_data(self, data):
             """Called when raw data is received from connection."""
-            # Send the data to the parent process
             if data is not None:
+                # Send the data to the parent process
                 logging.debug('Received raw data : ' + str(data))
                 self.mp_queue.put(data)
 
@@ -345,8 +345,14 @@ class TweepyStream(tweepy.StreamListener):
 
         asyncio.ensure_future(self.start())
 
+    @property
+    def running(self):
+        """Returns whether or not a twitter stream is running."""
+        return self.sub_process and self.sub_process.is_alive()
+
     def follow(self, name):
         """Adds a twitter channel to the follow list.
+
         If the channel name is incorrect the exception from the user lookup will be forwarded upward.
         """
         # Get the twitter id
@@ -359,19 +365,59 @@ class TweepyStream(tweepy.StreamListener):
 
         return chan_conf
 
-    def _get_follows(self):
-        """Returns a list containing the twitter ID of the channels we're following."""
-        return [c.id for c in self.conf.follows]
+    def unfollow(self, name):
+        """Removes a twitter channel from the follow list and update the tweepy Stream."""
+        for chan_conf in self.conf.follows:
+            if chan_conf.screen_name == name:
+                self.conf.follows.remove(chan_conf)
+                break
 
-    @property
-    def initialised(self):
-        """Returns wether or not the stream object has been initialised."""
-        return True if self.sub_process else False
+        # Update the tweepy stream
+        if len(self.conf.follows) > 0:
+            asyncio.ensure_future(self.start())
+        else:
+            self.stop()
+
+    async def start(self):
+        """Starts the tweepy Stream."""
+        if not self.conf.follows:
+            return
+
+        # Kill the current subprocess before starting a new one
+        self.stop()
+
+        # Wait for the cleanup in the polling daemon before creating a new subprocess
+        while self.sub_process:
+            await asyncio.sleep(1)
+
+        # Create a new multi-processes queue, a new stream object and a new Process
+        log.info('Creating new sub-process.')
+        self.mp_queue = multiprocessing.Queue()
+        self.mp_queue.cancel_join_thread()
+        stream = SubProcessStream(self.mp_queue, self.conf.credentials, self.get_follows())
+        self.sub_process = multiprocessing.Process(target=stream.run,
+                                                   name='Tweepy_Stream')
+        log.info('Created new sub-process.')
+
+        # Schedule the polling daemon (it will take care of starting the child process)
+        asyncio.ensure_future(self._run())
+
+    def stop(self):
+        """Stops the tweepy Stream."""
+        if self.running:
+            log.info('Stopping sub process (pid {}).'.format(self.sub_process.pid))
+            self.sub_process.terminate()
+            self.sub_process.join()
+            log.info('Stopped sub process (pid {}).'.format(self.sub_process.pid))
 
     def quit(self):
         """Prepares for a safe unloading."""
         self.stop()
         self.handler = None
+
+    def get_follows(self):
+        """Returns a list containing the twitter ID of the channels we're following."""
+        return [c.id for c in self.conf.follows]
 
     async def _run(self):
         """Polling daemon that checks the multi-processes queue for data and dispatches it to `on_data`."""
@@ -409,58 +455,8 @@ class TweepyStream(tweepy.StreamListener):
         # Cleanup the subprocess before exiting
         log.info('Cleaning sub-process (pid {}) and exiting polling daemon.'.format(self.sub_process.pid))
         self.mp_queue.close()
-        self.mp_queue = None
-        self.sub_process = None
-
-    @property
-    def running(self):
-        """Returns wether or not a twitter stream is running."""
-        return self.sub_process and self.sub_process.is_alive()
-
-    async def start(self):
-        """Starts the tweepy Stream."""
-        if not self.conf.follows:
-            return
-
-        # Kill the current subprocess before starting a new one
-        self.stop()
-
-        # Wait for the cleanup in the polling daemon before creating a new subprocess
-        while self.sub_process:
-            await asyncio.sleep(1)
-
-        # Create a new multi-processes queue, a new stream object and a new Process
-        log.info('Creating new sub-process.')
-        self.mp_queue = multiprocessing.Queue()
-        self.mp_queue.cancel_join_thread()
-        stream = SubProcessStream(self.mp_queue, self.conf.credentials, self._get_follows())
-        self.sub_process = multiprocessing.Process(target=stream.run,
-                                                   name='Tweepy_Stream')
-        log.info('Created new sub-process.')
-
-        # Schedule the polling daemon (it will take care of starting the child process)
-        asyncio.ensure_future(self._run())
-
-    def stop(self):
-        """Stops the tweepy Stream."""
-        if self.running:
-            log.info('Stopping sub process (pid {}).'.format(self.sub_process.pid))
-            self.sub_process.terminate()
-            self.sub_process.join()
-            log.info('Stopped sub process (pid {}).'.format(self.sub_process.pid))
-
-    def unfollow(self, name):
-        """Removes a twitter channel from the follow list and update the tweepy Stream."""
-        for chan_conf in self.conf.follows:
-            if chan_conf.screen_name == name:
-                self.conf.follows.remove(chan_conf)
-                break
-
-        # Update the tweepy stream
-        if len(self.conf.follows) > 0:
-            asyncio.ensure_future(self.start())
-        else:
-            self.stop()
+        del self.mp_queue
+        del self.sub_process
 
     def on_status(self, status):
         """Called when a new status arrives."""
@@ -487,7 +483,7 @@ class TweepyStream(tweepy.StreamListener):
             log.debug('Ignoring tweet (retweet): ' + log_status)
             return
         # Ignore tweets from authors we're not following (shouldn't happen)
-        elif status.author.id_str not in self._get_follows():
+        elif status.author.id_str not in self.get_follows():
             log.debug('Ignoring tweet (bad author): ' + log_status)
             return
         else:

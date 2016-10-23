@@ -16,7 +16,7 @@ def setup(bot):
 
 
 class Admin:
-    """Bot management commands and events"""
+    """Bot management commands and events."""
     def __init__(self, bot):
         self.bot = bot
         self.commands_used = Counter()

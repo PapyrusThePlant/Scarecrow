@@ -14,7 +14,7 @@ def setup(bot):
 
 
 class Dev:
-    """Dev tools and commands, owner only"""
+    """Dev tools and commands, mostly owner only."""
     def __init__(self, bot):
         self.bot = bot
         self.repl_sessions = set()
@@ -30,7 +30,6 @@ class Dev:
             return None
 
     @commands.group(name='cogs', pass_context=True, invoke_without_command=True)
-    @checks.is_owner()
     async def cogs_group(self, ctx):
         """Cogs management commands.
 
@@ -58,7 +57,6 @@ class Dev:
     @checks.is_owner()
     async def cogs_load(self, *, name: str):
         """Loads a cog from name."""
-        name = name.lower()
         module_path = 'cogs.{}'.format(name)
         if module_path in self.bot.extensions:
             await self.bot.say('{} already loaded.'.format(name))
@@ -73,7 +71,7 @@ class Dev:
     @cogs_group.command(name='reload')
     @checks.is_owner()
     async def cogs_reload(self, name: str):
-        """Reloads a cog from name."""
+        """Reloads a cog."""
         module_path = self._resolve_module_name(name)
         if module_path is None:
             await self.bot.say('{} not loaded.'.format(name))
@@ -87,7 +85,7 @@ class Dev:
     @cogs_group.command(name='unload')
     @checks.is_owner()
     async def cogs_unload(self, *, name: str):
-        """Unloads a cog from name."""
+        """Unloads a cog."""
         module_path = self._resolve_module_name(name)
         if module_path is None:
             await self.bot.say('{} not loaded.'.format(name))
@@ -99,7 +97,7 @@ class Dev:
     @commands.command(pass_context=True, hidden=True)
     @checks.is_owner()
     async def debug(self, ctx, *, code: str):
-        """eval()"""
+        """Yet another eval command."""
         code = code.strip('` ')
 
         env = {
@@ -127,6 +125,7 @@ class Dev:
     @commands.command(pass_context=True, hidden=True)
     @checks.is_owner()
     async def repl(self, ctx):
+        """Yet another Read-Eval-Print-Loop."""
         msg = ctx.message
 
         variables = {

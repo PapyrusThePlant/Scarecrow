@@ -12,7 +12,7 @@ def setup(bot):
 
 
 class Misc:
-    """Miscellaneous commands"""
+    """Miscellaneous commands."""
     def __init__(self, bot):
         self.bot = bot
 
@@ -24,8 +24,7 @@ class Misc:
     @agarify.command()
     async def user(self, *, user: discord.Member=None):
         """Agarifies a user's name."""
-        name = user.nick if user.nick is not None else user.name
-        await self.bot.say(utils.agarify(name, True))
+        await self.bot.say(utils.agarify(user.display_name, True))
 
     @commands.command(aliases=['meow'])
     async def cat(self):
@@ -53,7 +52,7 @@ class Misc:
 
     @commands.command()
     async def weebnames(self, wanted_gender=None):
-        """Looking for a name for your new waifu ?
+        """Looking for a name for your new waifu?
 
         A prefered gender can be specified between f(emale), m(ale), x(mixed).
         """

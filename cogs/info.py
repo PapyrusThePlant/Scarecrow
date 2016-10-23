@@ -17,7 +17,7 @@ def setup(bot):
 
 
 class Info:
-    """Information listing commands"""
+    """Information listing commands."""
     def __init__(self, bot):
         self.bot = bot
 
@@ -63,7 +63,7 @@ class Info:
 
     @commands.command(aliases=['charinfos'])
     async def charinfo(self, *, data: str):
-        """Shows informations about a character.
+        """Shows information about one or several characters.
 
         'data' can either be a character, a unicode escape sequence, a unicode character name or a string.
         If 'data' is a string only a summary of each character's info will be displayed.
@@ -121,9 +121,9 @@ class Info:
             entries = []
             for char in data:
                 entries.append('{} | `\\u{:04x}` | {} | {}'.format(char,
-                                                                    ord(char),
-                                                                    unicodedata.name(char, 'None'),
-                                                                    url_fmt.format(ord(char))))
+                                                                   ord(char),
+                                                                   unicodedata.name(char, 'None'),
+                                                                   url_fmt.format(ord(char))))
             content = '\n'.join(entries)
             await self.bot.say(content)
 
@@ -175,13 +175,8 @@ class Info:
 
         if str(channel.type) == 'text':
             entries.append(('Private', 'Yes' if channel.is_private else 'No'))
-
             if not channel.is_private:
-                default_channel = None
-                for channel in channel.server.channels:
-                    if channel.is_default:
-                        default_channel = channel
-                entries.append(('Default channel', 'Yes' if channel == default_channel else 'No'))
+                entries.append(('Default channel', 'Yes' if channel.is_default else 'No'))
         else:
             entries.append(('Bitrate', str(channel.bitrate)))
             entries.append(('Members', len(channel.voice_members)))
@@ -256,7 +251,7 @@ class Info:
         roles = [role.name.replace('@', '@\u200b') for role in member.roles]
         shared = sum(1 for m in self.bot.get_all_members() if m.id == member.id)
 
-        voice = member.voice_channel
+        voice = member.voice.voice_channel
         if voice is not None:
             other_people = len(voice.voice_members) - 1
             voice_fmt = '{} with {} others' if other_people else '{} by themselves'
