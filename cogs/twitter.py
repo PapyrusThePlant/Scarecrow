@@ -189,13 +189,17 @@ class Twitter:
             await self.bot.say(page)
 
     @twitter_group.command(name='status', pass_context=True)
-    async def twitter_status(self, ctx, scope='channel'):
+    async def twitter_status(self, ctx, scope='server'):
         """Displays the status of the twitter stream.
 
         The scope can either be 'channel' 'server' or 'global'.
-        If nothing is specified the default scope is 'channel'.
+        If nothing is specified the default scope is 'server'.
         """
-        scopes = ('channel', 'server', 'global')
+        scopes = {
+            'channel',
+            'server',
+            'global'
+        }
         if scope not in scopes:
             await self.bot.say("Invalid scope '{}'. Value must picked from {}.".format(scope, str(scopes)))
             return
@@ -205,13 +209,17 @@ class Twitter:
         following = []
         for chan_conf in follows:
             discord_channels = set(c.id for c in chan_conf.discord_channels)
-            received_count += sum(c.received_count for c in discord_channels)
 
             if scope == 'global':
                 following.append(chan_conf.screen_name)
-            elif (scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels))\
-                    or(scope == 'channel' and ctx.message.channel.id in discord_channels):
+                received_count += sum(c.received_count for c in chan_conf.discord_channels)
+            elif scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels):
                 following.append(chan_conf.screen_name)
+                server_channels = set(ch.id for ch in ctx.message.server.channels)
+                received_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in server_channels)
+            elif scope == 'channel' and ctx.message.channel.id in discord_channels:
+                following.append(chan_conf.screen_name)
+                received_count += sum(c.received_count for c in chan_conf.discord_channels if c.id == ctx.message.channel.id)
 
         if not following:
             following.append('No one')
@@ -387,6 +395,7 @@ class TweepyStream(tweepy.StreamListener):
         self.stop()
 
         # Wait for the cleanup in the polling daemon before creating a new subprocess
+        # TODO : Fix cog reloading, the second process is created before the first one is cleaned up
         while self.sub_process:
             await asyncio.sleep(1)
 
