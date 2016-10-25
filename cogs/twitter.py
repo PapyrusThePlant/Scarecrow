@@ -156,16 +156,16 @@ class Twitter:
 
         # Validate the new format
         if format == 'default':
-            format == self.conf.default_format
+            format = self.conf.default_format
         elif format is None:
             format = chan_conf.format
         format = await self._validate_format(format)
 
-        # Apply the new format
-        chan_conf.format = format
-        self.conf.save()
-
-        await self.bot.say(':ok_hand:')
+        if format != chan_conf.format:
+            # Apply the new format
+            chan_conf.format = format
+            self.conf.save()
+            await self.bot.say(':ok_hand:')
 
     @twitter_group.command(name='search')
     async def twitter_search(self, query, limit=5):
