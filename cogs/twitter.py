@@ -87,13 +87,13 @@ class Twitter:
             return_fmt = fmt
 
         try:
-            content = 'Sample tweet with {} format:\n'.format('new' if return_fmt else 'default')
+            content = 'Sample tweet with format `{}`:\n'.format(return_fmt)
             content += fmt.format(author='SAMPLE_AUTHOR', text='SAMPLE TEXT', url='https://sample-url.com')
         except:
             content = 'Invalid format, falling back to the default one.'
             return_fmt = None
 
-        await self.bot.say(content, delete_after=10)
+        await self.bot.say(content)
         return return_fmt
 
     @commands.group(name='twitter')
