@@ -350,6 +350,7 @@ class TweepyStream(tweepy.StreamListener):
         self.conf = conf
         self.sub_process = None
         self.mp_queue = None
+        self.daemon = None
 
         asyncio.ensure_future(self.start())
 
@@ -391,11 +392,14 @@ class TweepyStream(tweepy.StreamListener):
         if not self.conf.follows:
             return
 
+        # TODO : Avoid being rate limited when restarting the stream with the same follow list.
+        # Starting the stream with the same follow list than the moment it was shut down gets us rate limited by the
+        # Twitter api, the subprocess exits with no error and the daemon cleans the stream up before exiting too
+
         # Kill the current subprocess before starting a new one
         self.stop()
 
         # Wait for the cleanup in the polling daemon before creating a new subprocess
-        # TODO : Fix cog reloading, the second process is created before the first one is cleaned up
         while self.sub_process:
             await asyncio.sleep(1)
 
@@ -409,7 +413,7 @@ class TweepyStream(tweepy.StreamListener):
         log.info('Created new sub-process.')
 
         # Schedule the polling daemon (it will take care of starting the child process)
-        asyncio.ensure_future(self._run())
+        self.daemon = asyncio.ensure_future(self._run())
 
     def stop(self):
         """Stops the tweepy Stream."""
@@ -418,6 +422,15 @@ class TweepyStream(tweepy.StreamListener):
             self.sub_process.terminate()
             self.sub_process.join()
             log.info('Stopped sub process (pid {}).'.format(self.sub_process.pid))
+            self.daemon.cancel()
+            log.info('Cancelled polling daemon for sub process {}.'.format(self.sub_process.pid))
+
+            # Cleanup the stream
+            log.info('Cleaning sub-process (pid {}).'.format(self.sub_process.pid))
+            self.mp_queue.close()
+            self.mp_queue = None
+            self.sub_process = None
+            self.daemon = None
 
     def quit(self):
         """Prepares for a safe unloading."""
@@ -448,7 +461,7 @@ class TweepyStream(tweepy.StreamListener):
             except QueueEmpty:
                 if not self.sub_process.is_alive():
                     log.warning('Sub process (pid {}) appears dead.'.format(self.sub_process.pid))
-                    break
+                    asyncio.ensure_future(self.stop())
 
                 # Arbitrary sleep time after an unsuccessful poll
                 await asyncio.sleep(4)
@@ -460,12 +473,6 @@ class TweepyStream(tweepy.StreamListener):
                 if data is not None:
                     # Process the data sent by the subprocess
                     self.on_data(data)
-
-        # Cleanup the subprocess before exiting
-        log.info('Cleaning sub-process (pid {}) and exiting polling daemon.'.format(self.sub_process.pid))
-        self.mp_queue.close()
-        del self.mp_queue
-        del self.sub_process
 
     def on_status(self, status):
         """Called when a new status arrives."""
@@ -499,4 +506,4 @@ class TweepyStream(tweepy.StreamListener):
             log.debug('Dispatching tweet to handler: ' + log_status)
 
         # Feed the handler with the tweet
-        self.handler.tweepy_on_status(status.author.id_str, status.author.screen_name, status.text, status.id)
+        self.handler.tweepy_on_status(status)
