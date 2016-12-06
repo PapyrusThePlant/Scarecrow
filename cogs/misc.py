@@ -37,7 +37,7 @@ class Misc:
         url = provider[0]
         loader = provider[1]
 
-        data = await utils.fetch_page(url, 5)
+        data = await utils.fetch_page(url, timeout=5)
         if data is None:
             content = 'Timed out on {} .'.format(url)
         else:

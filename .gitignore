@@ -2,3 +2,4 @@
 conf
 logs
 *.json
+!/data/*.json

@@ -11,6 +11,7 @@ TWITTER_CONFIG = CONFIG + 'twitter.json'
 DATA = WORKDIR + '/data/'
 INSULTS = DATA + 'insults.txt'
 WEEBNAMES = DATA + 'weeb_names.txt'
+OEMBED_PROVIDERS = DATA + 'oEmbed_providers.json'
 
 LOGS = WORKDIR + '/logs/'
 SCARECROW_LOG = LOGS + 'scarecrow.log'

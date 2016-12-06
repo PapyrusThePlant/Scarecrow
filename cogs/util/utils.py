@@ -24,17 +24,16 @@ class ServerConverter(Converter):
         return result
 
 
-
-async def fetch_page(url, timeout=None, session=None):
+async def fetch_page(url, **kwargs):
     """Fetches a web page and return its text or json content."""
+    session = kwargs.pop('session', None)
+    timeout = kwargs.pop('timeout', None)
+
     # Create a session if none has been given
-    if session:
-        _session = session
-    else:
-        _session = aiohttp.ClientSession()
+    _session = session or aiohttp.ClientSession()
 
     try:
-        resp = await asyncio.wait_for(_session.get(url), timeout)
+        resp = await asyncio.wait_for(_session.get(url, **kwargs), timeout)
     except asyncio.TimeoutError:
         data = None
     else:
@@ -44,10 +43,11 @@ async def fetch_page(url, timeout=None, session=None):
             data = await resp.json()
         else:
             data = await resp.text()
-
-    # Close the session if we created it especially for this fetch
-    if not session:
-        _session.close()
+    finally:
+        await resp.release()
+        # Close the session if we created it especially for this fetch
+        if not session:
+            _session.close()
 
     return data
 

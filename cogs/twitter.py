@@ -12,7 +12,7 @@ import discord.utils as dutils
 from discord.ext.commands.formatter import Paginator
 
 import paths
-from .util import checks, config, utils
+from .util import checks, config, oembed, utils
 
 log = logging.getLogger(__name__)
 
@@ -31,8 +31,6 @@ def setup(bot):
 class TwitterConfig(config.ConfigElement):
     def __init__(self, credentials, **kwargs):
         self.credentials = credentials
-
-        self.default_format = kwargs.pop('default_format', "<{url}>\n**{author} :** {text}")
         self.follows = kwargs.pop('follows', [])
 
 
@@ -52,9 +50,8 @@ class FollowConfig(config.ConfigElement):
 
 
 class ChannelConfig(config.ConfigElement):
-    def __init__(self, id, format, **kwargs):
+    def __init__(self, id, **kwargs):
         self.id = id
-        self.format = format
         self.received_count = kwargs.pop('received_count', 0)
 
 
@@ -78,39 +75,17 @@ class Twitter:
         log.info('Unloading cog.')
         self.stream.quit()
 
-    async def _validate_format(self, fmt):
-        """Validates a custom format for the tweets or falls back to the default's."""
-        if fmt is None:
-            fmt = self.conf.default_format
-            return_fmt = None
-        else:
-            return_fmt = fmt
-
-        try:
-            content = 'Sample tweet with format `{}`:\n'.format(return_fmt)
-            content += fmt.format(author='SAMPLE_AUTHOR', text='SAMPLE TEXT', url='https://sample-url.com')
-        except:
-            content = 'Invalid format, falling back to the default one.'
-            return_fmt = None
-
-        await self.bot.say(content)
-        return return_fmt
-
     @commands.group(name='twitter')
     async def twitter_group(self):
         pass
 
     @twitter_group.command(name='follow', pass_context=True)
     @checks.has_permissions(manage_server=True)
-    async def twitter_follow(self, ctx, channel, *, format=None):
+    async def twitter_follow(self, ctx, channel):
         """Follows a twitter channel.
 
         The tweets from the given twitter channel will be
         sent to the channel this command was used in.
-        The format is a python string that will be formatted with the
-        arguments 'author', 'text' and 'url' corresponding to
-        the tweet's author, the tweet's content and the tweet's
-        url.
         """
         conf = dutils.get(self.conf.follows, screen_name=channel)
         channel_id = ctx.message.channel.id
@@ -124,48 +99,14 @@ class Twitter:
             try:
                 conf = self.stream.follow(channel)
             except tweepy.error.TweepError as e:
-                await self.bot.say(e.args[0]['message'])
+                await self.bot.say(e.args[0][0]['message'])  # Wtf Tweepy...
                 return
 
-        format = await self._validate_format(format)
-
         # Add new discord channel
-        conf.discord_channels.append(ChannelConfig(channel_id, format))
+        conf.discord_channels.append(ChannelConfig(channel_id))
         self.conf.save()
 
         await self.bot.say(':ok_hand:')
-
-    @twitter_group.command(name='format', pass_context=True)
-    @checks.is_server_owner()
-    async def twitter_format(self, ctx, channel, *, format=None):
-        """Edits the format a channel is displayed with.
-
-        The format is a python string that will be formatted with the
-        arguments 'author', 'text' and 'url' corresponding to
-        the tweet's author, the tweet's content and the tweet's
-        url.
-        """
-        conf = dutils.get(self.conf.follows, screen_name=channel)
-        if conf is None:
-            await self.bot.say('Not following {}.'.format(channel))
-            return
-        chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id)
-        if chan_conf is None:
-            await self.bot.say('Not following {} on this channel.'.format(channel))
-            return
-
-        # Validate the new format
-        if format == 'default':
-            format = self.conf.default_format
-        elif format is None:
-            format = chan_conf.format
-        format = await self._validate_format(format)
-
-        if format != chan_conf.format:
-            # Apply the new format
-            chan_conf.format = format
-            self.conf.save()
-            await self.bot.say(':ok_hand:')
 
     @twitter_group.command(name='search')
     async def twitter_search(self, query, limit=5):
@@ -224,12 +165,12 @@ class Twitter:
         if not following:
             following.append('No one')
 
-        entries = [
-            ('Stream status', 'online' if self.stream.running else 'offline'),
-            (str(scope).title() + ' follows', ', '.join(following)),
-            ('Tweets received', received_count)
-        ]
-        await self.bot.say_block(utils.indented_entry_to_str(entries, sep=': '))
+        embed = discord.Embed()
+        embed.colour = (255 << 8) if self.stream.running else 255 << 16
+        embed.add_field(name=str(scope).title() + ' follows', value=', '.join(following))
+        embed.add_field(name='Tweets received', value=received_count)
+
+        await self.bot.say(embed=embed)
 
     @twitter_group.command(name='unfollow', pass_context=True)
     @checks.is_server_owner()
@@ -254,23 +195,54 @@ class Twitter:
 
         await self.bot.say(':ok_hand:')
 
-    def tweepy_on_status(self, author_id, author, text, status_id):
+    async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
-        chan_conf = dutils.get(self.conf.follows, id=author_id)
-        url = 'http://twitter.com/{}/status/{}'.format(author, status_id)
+        author = tweet.author
+        chan_conf = dutils.get(self.conf.follows, id=author.id_str)
+        author_url = 'http://twitter.com/{}'.format(author.screen_name)
+        tweet_url = '{}/status/{}'.format(author_url, tweet.id)
+
+        urls = tweet.entities.get('urls')
+        media = tweet.entities.get('media')
+
+        # Remove the links to the attached media
+        for medium in media:
+            tweet.text = tweet.text.replace(medium['url'], '')
+
+        # Replace links in the tweet with the expanded url for lisibility
+        for url in urls:
+            tweet.text = tweet.text.replace(url['url'], url['expanded_url'])
+
+        # Build the embed
+        embed = discord.Embed(colour=discord.Colour(int(author.profile_link_color, 16)),
+                              title=author.name,
+                              url=tweet_url,
+                              description=tweet.text,
+                              timestamp=tweet.created_at)
+        embed.set_author(name='@{}'.format(author.screen_name), icon_url=author.profile_image_url, url=author_url)
+
+        # Parse the tweet's entities to extract media and include them as the embed's image
+        if media:
+            embed.set_image(url=media[0]['media_url_https'])
+        elif urls:
+            # Fetch oembed data from the url and use it as the embed's image
+            try:
+                data = await oembed.fetch_oembed_data(urls[0]['expanded_url'])
+            except Exception as e:
+                log.error(e)
+            else:
+                if data['type'] == 'photo':
+                    embed.set_image(url=data['url'])
+                else:
+                    embed.set_image(url=data.get('thumbnail_url', None) or data.get('url', None))
 
         for channel in chan_conf.discord_channels:
             channel.received_count += 1
-            if channel.format is not None:
-                fmt = channel.format
-            else:
-                fmt = self.conf.default_format
+            self.conf.save()
 
-            content = fmt.format(author=author, text=text, url=url)
-            log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, content))
-            asyncio.ensure_future(self.bot.send_message(discord.Object(id=channel.id), content), loop=self.bot.loop)
-
-        self.conf.save()
+            # Send the embed to the appropriate channel
+            log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
+            await self.bot.send_message(self.bot.get_channel(channel.id), embed=embed)
 
 
 class TweepyAPI(tweepy.API):
@@ -506,4 +478,4 @@ class TweepyStream(tweepy.StreamListener):
             log.debug('Dispatching tweet to handler: ' + log_status)
 
         # Feed the handler with the tweet
-        self.handler.tweepy_on_status(status)
+        asyncio.ensure_future(self.handler.tweepy_on_status(status))
