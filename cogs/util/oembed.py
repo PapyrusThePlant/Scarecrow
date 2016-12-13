@@ -54,7 +54,7 @@ async def fetch_oembed_data(url):
         return await utils.fetch_page(endpoint, data={'url': url, 'format': 'json'})
     else:
         for endpoint_url in discovery:
-            data = await utils.fetch_page(endpoint_url, params={'url': url})
+            data = await utils.fetch_page(endpoint_url, params={'url': url, 'format': 'json'})
             if isinstance(data, dict):
                 return data
 

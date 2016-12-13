@@ -24,6 +24,21 @@ class ServerConverter(Converter):
         return result
 
 
+class HTTPError(Exception):
+    def __init__(self, resp, message):
+        self.response = resp
+        if type(message) is dict:
+            self.resp_message = message.get('message', '')
+            self.code = message.get('code', 0)
+        else:
+            self.resp_message = message
+
+        fmt = '{0.reason} (status code: {0.status})'
+        if len(self.resp_message):
+            fmt += ': {1}'
+
+        super().__init__(fmt.format(self.response, self.resp_message))
+
 async def fetch_page(url, **kwargs):
     """Fetches a web page and return its text or json content."""
     session = kwargs.pop('session', None)
@@ -32,20 +47,22 @@ async def fetch_page(url, **kwargs):
     # Create a session if none has been given
     _session = session or aiohttp.ClientSession()
 
+    resp = None
     try:
         resp = await asyncio.wait_for(_session.get(url, **kwargs), timeout)
     except asyncio.TimeoutError:
         data = None
     else:
-        if resp.status != 200:
-            data = 'Http error {}.'.format(resp.status)
-        elif resp.headers['content-type'] == 'application/json':
+        if resp.headers['content-type'] == 'application/json':
             data = await resp.json()
         else:
             data = await resp.text()
+
+        if resp.status != 200:
+            raise HTTPError(resp, data)
     finally:
-        await resp.release()
-        # Close the session if we created it especially for this fetch
+        if resp:
+            await resp.release()
         if not session:
             _session.close()
 

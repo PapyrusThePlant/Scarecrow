@@ -47,6 +47,7 @@ class FollowConfig(config.ConfigElement):
         self.id = id
         self.screen_name = screen_name
         self.discord_channels = kwargs.pop('discord_channels', [])
+        self.latest_received = kwargs.pop('latest_received', 0)
 
 
 class ChannelConfig(config.ConfigElement):
@@ -88,10 +89,10 @@ class Twitter:
         sent to the channel this command was used in.
         """
         conf = dutils.get(self.conf.follows, screen_name=channel)
-        channel_id = ctx.message.channel.id
+        discord_channel = ctx.message.channel
         if conf is not None:
             # Already following on twitter, check if the discord channel is new
-            if dutils.get(conf.discord_channels, id=channel_id):
+            if dutils.get(conf.discord_channels, id=discord_channel.id):
                 await self.bot.say('Already following ' + channel + ' on this channel.')
                 return
         else:
@@ -103,8 +104,12 @@ class Twitter:
                 return
 
         # Add new discord channel
-        conf.discord_channels.append(ChannelConfig(channel_id))
+        conf.discord_channels.append(ChannelConfig(discord_channel.id))
         self.conf.save()
+
+        member = discord_channel.server.me
+        if not discord_channel.permissions_for(member).embed_links:
+            await self.bot.say(':warning: I need embed links permission in this channel to display tweets properly.')
 
         await self.bot.say(':ok_hand:')
 
@@ -166,6 +171,7 @@ class Twitter:
             following.append('No one')
 
         embed = discord.Embed()
+        embed.description = 'Online' if self.stream.running else 'Offline'
         embed.colour = (255 << 8) if self.stream.running else 255 << 16
         embed.add_field(name=str(scope).title() + ' follows', value=', '.join(following))
         embed.add_field(name='Tweets received', value=received_count)
@@ -195,6 +201,38 @@ class Twitter:
 
         await self.bot.say(':ok_hand:')
 
+    @twitter_group.command(name='fetch')
+    @checks.is_owner()
+    async def twitter_fetch(self):
+        """Fetches the tweets that might have been missed during downtime or for other reasons."""
+        await self._fetch_missed_tweets()
+
+    async def _fetch_missed_tweets(self):
+        missed = []
+        for chan_conf in self.conf.follows:
+            missed += self.fetch_from_channel(chan_conf)
+
+        missed.sort(key=lambda t: t.id)
+        for tweet in missed:
+            if self.stream.valid_to_dispatch(tweet):
+                await self.tweepy_on_status(tweet)
+
+    async def on_ready(self):
+        # Check if we've missed any tweet
+        asyncio.ensure_future(self._fetch_missed_tweets())
+
+    def fetch_from_channel(self, chan_conf):
+        # TODO : Use the 'since_id' parameter, atm twitter answers that it's not a valid parameter
+        latest_tweets = self.api.user_timeline(user_id=chan_conf.id, exclude_replies=True, include_rts=False)
+
+        # Gather the missed tweets
+        missed = []
+        for tweet in latest_tweets:
+            if tweet.id > chan_conf.latest_received:
+                missed.append(tweet)
+
+        return missed
+
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
         author = tweet.author
@@ -202,8 +240,8 @@ class Twitter:
         author_url = 'http://twitter.com/{}'.format(author.screen_name)
         tweet_url = '{}/status/{}'.format(author_url, tweet.id)
 
-        urls = tweet.entities.get('urls')
-        media = tweet.entities.get('media')
+        urls = tweet.entities.get('urls', [])
+        media = tweet.entities.get('media', [])
 
         # Remove the links to the attached media
         for medium in media:
@@ -226,23 +264,29 @@ class Twitter:
             embed.set_image(url=media[0]['media_url_https'])
         elif urls:
             # Fetch oembed data from the url and use it as the embed's image
+            url = urls[0]['expanded_url']
             try:
-                data = await oembed.fetch_oembed_data(urls[0]['expanded_url'])
+                data = await oembed.fetch_oembed_data(url)
             except Exception as e:
-                log.error(e)
+                log.error('Failed to retrieve oembed data for url \'{}\' : {}'.format(url, e))
             else:
                 if data['type'] == 'photo':
                     embed.set_image(url=data['url'])
                 else:
                     embed.set_image(url=data.get('thumbnail_url', None) or data.get('url', None))
 
-        for channel in chan_conf.discord_channels:
-            channel.received_count += 1
-            self.conf.save()
+        # Make sure we're ready to send messages
+        await self.bot.wait_until_ready()
 
+        for channel in chan_conf.discord_channels:
             # Send the embed to the appropriate channel
             log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
             await self.bot.send_message(self.bot.get_channel(channel.id), embed=embed)
+
+            # Increment the received tweets count and save the id of the last tweet received from this channel
+            channel.received_count += 1
+            chan_conf.latest_received = tweet.id
+            self.conf.save()
 
 
 class TweepyAPI(tweepy.API):
@@ -446,10 +490,8 @@ class TweepyStream(tweepy.StreamListener):
                     # Process the data sent by the subprocess
                     self.on_data(data)
 
-    def on_status(self, status):
-        """Called when a new status arrives."""
-        log.debug('Received status: ' + str(status._json))
-
+    def valid_to_dispatch(self, status):
+        """Returns True if the given Twitter status is valid to be dispatched to handlers."""
         log_status = 'author: {}, reply_to_status: {}, reply_to_user: {}, quoting: {}, retweet: {}, text: {}'
         log_status = log_status.format(status.author.screen_name,
                                        status.in_reply_to_status_id,
@@ -461,21 +503,27 @@ class TweepyStream(tweepy.StreamListener):
         # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
             log.debug('Ignoring tweet (reply): ' + log_status)
-            return
+            return False
         # Ignore quotes
         elif status.is_quote_status:
             log.debug('Ignoring tweet (quote): ' + log_status)
-            return
+            return False
         # Ignore retweets
         elif hasattr(status, 'retweeted_status'):
             log.debug('Ignoring tweet (retweet): ' + log_status)
-            return
+            return False
         # Ignore tweets from authors we're not following (shouldn't happen)
         elif status.author.id_str not in self.get_follows():
             log.debug('Ignoring tweet (bad author): ' + log_status)
-            return
+            return False
         else:
             log.debug('Dispatching tweet to handler: ' + log_status)
+            return True
 
-        # Feed the handler with the tweet
-        asyncio.ensure_future(self.handler.tweepy_on_status(status))
+    def on_status(self, status):
+        """Called when a new status arrives."""
+        log.debug('Received status: ' + str(status._json))
+
+        if self.valid_to_dispatch(status):
+            # Feed the handler with the tweet
+            asyncio.ensure_future(self.handler.tweepy_on_status(status))
