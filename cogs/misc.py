@@ -50,6 +50,17 @@ class Misc:
         """Poke the bear."""
         await self.bot.say(utils.random_line(paths.INSULTS))
 
+    @commands.command(pass_context=True)
+    async def nsfw(self, ctx):
+        """Tries to add the NSFW role to a member."""
+        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_roles:
+            return
+
+        role = discord.utils.get(ctx.message.server.roles, name='NSFW')
+        if role is not None:
+            await self.bot.add_roles(ctx.message.author, role)
+            await self.bot.delete_message(ctx.message)
+
     @commands.command()
     async def weebnames(self, wanted_gender=None):
         """Looking for a name for your new waifu?
