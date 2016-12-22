@@ -4,7 +4,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from .util import utils
+from .util import agarify, utils
 
 
 def setup(bot):
@@ -19,12 +19,12 @@ class Misc:
     @commands.group(invoke_without_command=True)
     async def agarify(self, *, content):
         """Agarifies a string."""
-        await self.bot.say(utils.agarify(content))
+        await self.bot.say(agarify.agarify(content))
 
     @agarify.command()
     async def user(self, *, user: discord.Member=None):
         """Agarifies a user's name."""
-        await self.bot.say(utils.agarify(user.display_name, True))
+        await self.bot.say(agarify.agarify(user.display_name, True))
 
     @commands.command(aliases=['meow'])
     async def cat(self):
