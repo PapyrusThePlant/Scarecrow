@@ -6,7 +6,7 @@ import discord.ext.commands as commands
 import discord.utils
 
 import paths
-from .util import checks, utils
+from .util import checks, config, utils
 
 log = logging.getLogger(__name__)
 
@@ -15,64 +15,73 @@ def setup(bot):
     bot.add_cog(Admin(bot))
 
 
+class IgnoredConfig(config.ConfigElement):
+    def __init__(self, **kwargs):
+        self.channels = kwargs.pop('channels', [])
+        self.servers = kwargs.pop('servers', [])
+        self.users = kwargs.pop('users', {})
+
+
 class Admin:
     """Bot management commands and events."""
     def __init__(self, bot):
         self.bot = bot
         self.commands_used = Counter()
+        self.ignored = config.Config(paths.IGNORED_CONFIG, encoding='utf-8')
 
     def __check(self, ctx):
         """A global check used on every command."""
         author = ctx.message.author
-        if author == ctx.bot.owner:
+        if author == ctx.bot.owner or author == ctx.message.server.owner:
             return True
 
-        conf = self.bot.conf
         server = ctx.message.server
 
         # Check if we're ignoring the server
-        if server.id in conf.ignored_servers:
+        if server.id in self.ignored.servers:
             return False
 
         # Check if the user is banned from using the bot
-        if author in conf.ignored_users[server.id]:
+        if author.id in self.ignored.users.get(server.id, {}):
             return False
 
         # Check if the channel is banned, bypass this if the user has the administrator permission
         channel = ctx.message.channel
         perms = channel.permissions_for(author)
-        if not perms.administrator and channel.id in conf.ignored_channels:
+        if not perms.administrator and channel.id in self.ignored.channels:
             return False
 
         return True
 
     def resolve_target(self, ctx, target):
-        conf = self.bot.conf
-
         if target == 'channel':
-            target = ctx.message.channel, conf.ignored_channels
+            target = ctx.message.channel, self.ignored.channels
         elif target == 'server':
-            return ctx.message.server, conf.ignored_servers
+            return ctx.message.server, self.ignored.servers
 
         # Try converting to a channel
         try:
             channel = commands.ChannelConverter(ctx, target).convert()
-        except commands.errors.BadArgument:
+        except commands.BadArgument:
             pass
         else:
-            return channel, conf.ignored_channels
+            return channel, self.ignored.channels
 
         # Try converting to a user
         try:
             user = commands.MemberConverter(ctx, target).convert()
-        except commands.errors.BadArgument:
+        except commands.BadArgument:
             pass
         else:
-            return user, conf.ignored_users[ctx.message.server.id]
+            server_id = ctx.message.server.id
+            r_conf = self.ignored.users.get(server_id, None)
+            if r_conf is None:
+                self.ignored.users[server_id] = []
+            return user, self.ignored.users[server_id]
 
-        # Try converting to a channel
+        # Convert to a server, let it raise commands.errors.BadArgument if we still can't make sense of the target
         server = utils.ServerConverter(ctx, target).convert()
-        return server, conf.ignored_servers
+        return server, self.ignored.servers
 
     @commands.command(pass_context=True)
     @checks.has_permissions(manage_server=True)
@@ -84,13 +93,17 @@ class Admin:
         """
         target, conf = self.resolve_target(ctx, target)
 
-        # Do not ignore the server owner
-        if isinstance(target, discord.Member) and ctx.server.owner_id == target.id:
-            return
+        if isinstance(target, discord.Member):
+            # Do not ignore the bot owner
+            if self.bot.owner.id == target.id:
+                await self.bot.say('Cannot ignore the bot owner.')
+            # Do not ignore the server owner if it's not the bot owner that issues the command
+            elif ctx.message.server.owner_id == target.id and ctx.message.author.id != self.bot.owner.id:
+                await self.bot.say('Cannot ignore the server owner.')
 
         # Save the ignore
         conf.append(target.id)
-        self.bot.conf.save()
+        self.ignored.save()
 
         # Leave the server or acknowledge the ignore being successful
         if isinstance(target, discord.Server):
@@ -103,8 +116,15 @@ class Admin:
     async def unignore(self, ctx, *, target):
         """Un-ignores either a channel, a user (server-wide), or a whole server."""
         target, conf = self.resolve_target(ctx, target)
+
+        # Only let the bot owner unignore a server owner
+        if isinstance(target, discord.Member)\
+                and target.id == ctx.message.server.owner.id\
+                and ctx.message.author.id != self.bot.owner.id:
+            await self.bot.say('Only the bot owner can unignore the owner of a server.')
+
         conf.remove(target.id)
-        self.bot.conf.save()
+        self.ignored.save()
         await self.bot.say(':ok_hand:')
 
     @commands.command(hidden=True)
@@ -147,7 +167,7 @@ class Admin:
         await self.bot.send_message(self.bot.owner, "Joined new server {0.name} ({0.id}).\n"
                                                     "Owner is {1.name} ({1.id})".format(server, server.owner))
 
-        if server.id in self.bot.conf.ignored_servers:
+        if server.id in self.ignored.servers:
             # Hiiiik ! A bad server ! let's scare it and run away
             await self.bot.send_message(server.default_channel, utils.random_line(paths.INSULTS))
             await self.bot.leave_server(server)

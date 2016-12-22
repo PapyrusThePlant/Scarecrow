@@ -18,9 +18,6 @@ class BotConfig(config.ConfigElement):
         self.description = description
         self.token = token
         self.commands_prefixes = kwargs.pop('commands_prefixes', ['mention'])
-        self.ignored_servers = kwargs.pop('ignored_servers', [])
-        self.ignored_users = kwargs.pop('ignored_users', {})
-        self.ignored_channels = kwargs.pop('ignored_channels', [])
 
 
 class Bot(commands.Bot):
@@ -72,6 +69,10 @@ class Bot(commands.Bot):
 
         # Skip if the command defines an error handler
         if hasattr(context.command, "on_error"):
+            return
+
+        # Skip check failures
+        if isinstance(exception, commands.CheckFailure):
             return
 
         content = 'Ignoring exception in command {}:\n' \

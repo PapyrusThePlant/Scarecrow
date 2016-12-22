@@ -5,6 +5,7 @@ WORKDIR = curdir
 COGS = WORKDIR + '/cogs/'
 
 CONFIG = WORKDIR + '/conf/'
+IGNORED_CONFIG = CONFIG + 'ignored.json'
 SCARECROW_CONFIG = CONFIG + 'scarecrow.json'
 TWITTER_CONFIG = CONFIG + 'twitter.json'
 
