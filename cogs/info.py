@@ -130,17 +130,20 @@ class Info:
     @commands.group(name='info', aliases=['infos'], invoke_without_command=True)
     async def info_group(self):
         """Shows informations about the bot."""
-        entries = [
-            ('Author', '{0.name} (Discord ID: {0.id})'.format(self.bot.owner)),
-            ('Library', 'discord.py (Python)'),
-            ('Uptime', self._get_uptime_str()),
-            ('Memory', self._get_memory_str()),
-            ('Support', 'https://discord.me/mad-plants'),
-            ('Invite', dutils.oauth_url(self.bot.app_info.id))
-        ]
-        content = utils.indented_entry_to_str(entries)
+        members_count = sum(len(server.members) for server in self.bot.servers)
+        unique_members_count = len(set(self.bot.get_all_members()))
+        members_str = '{} ({} unique)'.format(members_count, unique_members_count)
 
-        await self.bot.say_block(content)
+        embed = discord.Embed(title='Bot support server invite', url='https://discord.gg/ZWnENfx', colour=0x738bd7)
+        embed.set_author(name=self.bot.owner.name, icon_url=self.bot.owner.avatar_url)
+        embed.add_field(name='Servers', value=str(len(self.bot.servers)))
+        embed.add_field(name='Members', value=members_str)
+        embed.add_field(name='Invite', value=dutils.oauth_url(self.bot.app_info.id))
+        embed.add_field(name='Memory', value=self._get_memory_str())
+        embed.add_field(name='Uptime', value=self._get_uptime_str())
+        embed.set_footer(text='Powered by discord.py', icon_url='http://i.imgur.com/5BFecvA.png')
+
+        await self.bot.say(embed=embed)
 
     @info_group.command(name='cog')
     async def info_cog(self, cog_name):
@@ -161,37 +164,38 @@ class Info:
         await self.bot.say_block(content)
 
     @info_group.command(name='channel', pass_context=True)
-    async def info_channel(self, ctx):
+    async def info_channel(self, ctx, *, channel: discord.Channel=None):
         """Shows informations about the channel."""
-        channel = ctx.message.channel
+        if channel is None:
+            channel = ctx.message.channel
 
-        entries = [
-            ('Name', channel.name),
-            ('ID', channel.id),
-            ('Server', channel.server.name),
-            ('Type', channel.type),
-            ('Position', '#' + str(channel.position + 1))
-        ]
+        embed = discord.Embed(description='<#{}>'.format(channel.id), colour=0x738bd7)
+        embed.add_field(name='ID', value=channel.id)
+        embed.add_field(name='Server', value=channel.server.name)
+        embed.add_field(name='Type', value=channel.type)
+        embed.add_field(name='Position', value='#' + str(channel.position + 1))
 
         if str(channel.type) == 'text':
-            entries.append(('Private', 'Yes' if channel.is_private else 'No'))
+            embed.add_field(name='Private', value='Yes' if channel.is_private else 'No')
             if not channel.is_private:
-                entries.append(('Default channel', 'Yes' if channel.is_default else 'No'))
+                embed.add_field(name='Default channel', value='Yes' if channel.is_default else 'No')
         else:
-            entries.append(('Bitrate', str(channel.bitrate)))
-            entries.append(('Members', len(channel.voice_members)))
-            entries.append(('User limit', str(channel.user_limit)))
+            embed.add_field(name='Bitrate', value=str(channel.bitrate))
+            embed.add_field(name='Members', value=str(len(channel.voice_members)))
+            embed.add_field(name='User limit', value=str(channel.user_limit))
 
-        content = utils.indented_entry_to_str(entries)
-        await self.bot.say_block(content)
+        await self.bot.say(embed=embed)
 
     @info_group.command(name='server', no_pm=True, pass_context=True)
     async def info_server(self, ctx):
         """Shows informations about the server."""
         server = ctx.message.server
 
-        # Avoid mentions when listing the roles
-        roles = [role.name.replace('@', '@\u200b') for role in server.roles]
+        # Order the roles and avoid mentions when listing them
+        ordered_roles = server.roles.copy()
+        ordered_roles.sort(key=lambda s: s.position)
+        roles = [role.name.replace('@', '@\u200b') for role in ordered_roles]
+        del ordered_roles
 
         # Create a default member to test locked channels
         default_member = copy.copy(server.me)
@@ -216,31 +220,53 @@ class Info:
 
         # Count the channels
         voice_channels = len(server.channels) - text_channels
-        channels_fmt = '{} Text ({} locked) / {} Voice ({} locked)'
+        channels_fmt = 'Text : {} ({} locked)\n' \
+                       'Voice : {} ({} locked)'
         channels = channels_fmt.format(text_channels, locked_text, voice_channels, locked_voice)
 
         # Count the members
         members_by_status = Counter('{}{}'.format(str(m.status), '_bot' if m.bot else '') for m in server.members)
-        members_fmt = '{0} ({1[online]} online ({1[online_bot]} bots), ' \
-                      '{1[idle]} idle ({1[idle_bot]} bots), ' \
-                      '{1[offline]} offline ({1[offline_bot]} bots))'
+        members_fmt = 'Total : {0}\n' \
+                      'Online : {1[online]} ({1[online_bot]} bots)\n' \
+                      'Idle : {1[idle]} ({1[idle_bot]} bots)\n' \
+                      'Offline : {1[offline]} ({1[offline_bot]} bots)'
         members = members_fmt.format(len(server.members), members_by_status)
 
-        entries = [
-            ('Name', server.name),
-            ('ID', server.id),
-            ('Icon', server.icon_url),
-            ('Owner', server.owner),
-            ('Created', server.created_at),
-            ('Region', server.region),
-            ('Members', members),
-            ('Roles', ', '.join(roles)),
-            ('Channels', channels),
-            ('Default channel', default_channel)
-        ]
+        # Gather the valid and permanent invites if we have permission to do so
+        invite = None
+        if ctx.message.channel.permissions_for(ctx.message.server.me).manage_server:
+            # Get only permanent and valid invites
+            invites = await self.bot.invites_from(server)
+            main_invites = [i for i in invites if not i.revoked and i.max_age == 0]
+            if main_invites:
+                # Sort the invites by number of uses
+                main_invites.sort(key=lambda i: i.uses, reverse=True)
+                # Try to get an invite to the default channel
+                invite = discord.utils.get(main_invites, channel=server.default_channel)
+                if invite is None:
+                    # Try to get an invite created by the server owner
+                    invite = discord.utils.get(main_invites, inviter=server.owner)
+                    if invite is None:
+                        # Get the invite with the most uses
+                        invite = main_invites[0]
 
-        content = utils.indented_entry_to_str(entries)
-        await self.bot.say_block(content)
+        # Create and fill the embed
+        if invite is not None:
+            embed = discord.Embed(title='Server invite'.format(server.name), url=invite.url, colour=0x738bd7)
+        else:
+            embed = discord.Embed(colour=0x738bd7)
+        embed.set_author(name=server.name, url=server.icon_url, icon_url=server.icon_url)
+        embed.add_field(name='ID', value=server.id)
+        embed.add_field(name='Owner', value=str(server.owner))
+        embed.add_field(name='Region', value=server.region.value.title())
+        embed.add_field(name='Channels', value=channels)
+        embed.add_field(name='Default channel', value=default_channel)
+        embed.add_field(name='Members', value=members)
+        embed.add_field(name='Roles', value=', '.join(roles))
+        embed.set_footer(text='Created the ')
+        embed.timestamp = server.created_at
+
+        await self.bot.say(embed=embed)
 
     @info_group.command(name='user')
     async def info_user(self, member: discord.Member=None):
@@ -259,18 +285,15 @@ class Info:
         else:
             voice = 'Not connected.'
 
-        entries = [
-            ('Nickname', member.nick),
-            ('Username', member.name),
-            ('Tag', member.discriminator),
-            ('ID', member.id),
-            ('Created', member.created_at),
-            ('Joined', member.joined_at),
-            ('Roles', ', '.join(roles)),
-            ('Servers', '{} shared'.format(shared)),
-            ('Voice', voice),
-            ('Avatar', member.avatar_url)
-        ]
+        embed = discord.Embed(title=member.nick or member.name, url=member.avatar_url, colour=0x738bd7)
+        embed.set_author(name=str(member))
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name='ID', value=member.id)
+        embed.add_field(name='Servers', value='{} shared'.format(shared))
+        embed.add_field(name='Joined', value=member.joined_at)
+        embed.add_field(name='Roles', value=', '.join(roles))
+        embed.add_field(name='Voice', value=voice)
+        embed.set_footer(text='User created the ')
+        embed.timestamp = member.created_at
 
-        content = '{}'.format(utils.indented_entry_to_str(entries))
-        await self.bot.say_block(content)
+        await self.bot.say(embed=embed)
