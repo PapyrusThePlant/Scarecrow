@@ -26,7 +26,6 @@ class Bot(commands.Bot):
         self.app_info = None
         self.owner = None
         self.do_restart = False
-        self.do_shutdown = False
         self.start_time = time.time()
         self.conf = config.Config(conf_path, encoding='utf-8')
 
@@ -37,10 +36,8 @@ class Bot(commands.Bot):
             prefixes = commands.when_mentioned_or(*prefixes_cpy)
             del prefixes_cpy
 
-        super().__init__(description=self.conf.description,
-                         command_prefix=prefixes,
-                         help_attrs={'hidden': True})
-
+        # Init the framework and load extensions
+        super().__init__(description=self.conf.description, command_prefix=prefixes, help_attrs={'hidden': True})
         self.load_extensions(paths.COGS)
 
         # Accept restarts after everything has been initialised without issue
@@ -60,7 +57,12 @@ class Bot(commands.Bot):
                 try:
                     self.load_extension(extension)
                 except Exception as e:
-                    logging.warning('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+                    log.warning('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+
+    def unload_extensions(self):
+        # Unload every cog
+        for extension in self.extensions.copy().keys():
+            self.unload_extension(extension)
 
     async def on_command_error(self, exception, context):
         # Skip if a cog defines this event
@@ -102,39 +104,19 @@ class Bot(commands.Bot):
         # if message.content.startswith ... :3
         await self.process_commands(message)
 
-    def _clean_shutdown(self):
-        # Unload every cog
-        for extension in self.extensions.copy().keys():
-            self.unload_extension(extension)
-
+    def shutdown(self):
+        self.do_restart = False
         # Log out of Discord
         asyncio.ensure_future(self.logout())
 
-    def shutdown(self):
-        self.do_shutdown = True
-        self.do_restart = False
-        self._clean_shutdown()
-
-    def restart(self, mode):
-        self.do_shutdown = mode == 'deep'
+    def restart(self):
         self.do_restart = True
-        self._clean_shutdown()
+        # Log out of Discord
+        asyncio.ensure_future(self.logout())
 
     def run(self):
-        try:
-            self.loop.run_until_complete(self.start(self.conf.token))
-        except KeyboardInterrupt:
-            self._clean_shutdown()
-        finally:
-            # Cancel pending tasks
-            pending = asyncio.Task.all_tasks()
-            gathered = asyncio.gather(*pending)
-            try:
-                gathered.cancel()
-                self.loop.run_until_complete(gathered)
-                gathered.exception()
-            except:
-                pass
+        super().run(self.conf.token)
+        self.unload_extensions()
 
     def say_block(self, content):
         content = '```\n{}\n```'.format(content)

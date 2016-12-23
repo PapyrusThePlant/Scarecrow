@@ -57,20 +57,15 @@ class ChannelConfig(config.ConfigElement):
 
 
 class Twitter:
-    """Twitter commands and events."""
+    """Twitter commands and events.
+
+    Powered by tweepy (https://github.com/tweepy/tweepy)
+    """
     def __init__(self, bot):
         self.bot = bot
         self.conf = config.Config(paths.TWITTER_CONFIG, encoding='utf-8')
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
-
-    @staticmethod
-    def __about():
-        entries = [
-            ('Twitter library', 'tweepy (Python)'),
-            ('Get it on', 'https://github.com/tweepy/tweepy')
-        ]
-        return utils.indented_entry_to_str(entries)
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -111,7 +106,7 @@ class Twitter:
         if not discord_channel.permissions_for(member).embed_links:
             await self.bot.say(':warning: I need embed links permission in this channel to display tweets properly.')
 
-        await self.bot.say(':ok_hand:')
+        await self.bot.say('\N{OK HAND SIGN}')
 
     @twitter_group.command(name='search')
     async def twitter_search(self, query, limit=5):
@@ -199,13 +194,7 @@ class Twitter:
             del conf
         self.conf.save()
 
-        await self.bot.say(':ok_hand:')
-
-    @twitter_group.command(name='fetch')
-    @checks.is_owner()
-    async def twitter_fetch(self):
-        """Fetches the tweets that might have been missed during downtime or for other reasons."""
-        await self._fetch_missed_tweets()
+        await self.bot.say('\N{OK HAND SIGN}')
 
     async def _fetch_missed_tweets(self):
         missed = []

@@ -33,7 +33,8 @@ class Dev:
     async def cogs_group(self, ctx):
         """Cogs management commands.
 
-        If no subcommand is invoked, lists loaded cogs."""
+        If no subcommand is invoked, lists loaded cogs.
+        """
         if ctx.subcommand_passed is not None:
             return
 
@@ -57,7 +58,7 @@ class Dev:
     @checks.is_owner()
     async def cogs_load(self, *, name: str):
         """Loads a cog from name."""
-        module_path = 'cogs.{}'.format(name)
+        module_path = 'cogs.{}'.format(name.lower())
         if module_path in self.bot.extensions:
             await self.bot.say('{} already loaded.'.format(name))
         else:
@@ -66,7 +67,7 @@ class Dev:
             except ImportError:
                 await self.bot.say('Could not find module.')
             else:
-                await self.bot.say(':ok_hand:')
+                await self.bot.say('\N{OK HAND SIGN}:')
 
     @cogs_group.command(name='reload')
     @checks.is_owner()
@@ -80,7 +81,7 @@ class Dev:
         self.bot.unload_extension(module_path)
         self.bot.load_extension(module_path)
 
-        await self.bot.say(':ok_hand:')
+        await self.bot.say('\N{OK HAND SIGN}:')
 
     @cogs_group.command(name='unload')
     @checks.is_owner()
@@ -92,7 +93,7 @@ class Dev:
             return
 
         self.bot.unload_extension(module_path)
-        await self.bot.say(':ok_hand:')
+        await self.bot.say('\N{OK HAND SIGN}:')
 
     @commands.command(pass_context=True, hidden=True)
     @checks.is_owner()

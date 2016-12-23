@@ -50,17 +50,6 @@ class Info:
         # Create the string and return it
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
-    @commands.command()
-    async def avatar(self, member: discord.Member=None):
-        """Retreives a member's avatar link.
-
-        If no member is given, the bot's avatar link is given.
-        """
-        if member is None:
-            await self.bot.say(self.bot.user.avatar_url)
-        else:
-            await self.bot.say(member.avatar_url)
-
     @commands.command(aliases=['charinfos'])
     async def charinfo(self, *, data: str):
         """Shows information about one or several characters.
@@ -127,49 +116,32 @@ class Info:
             content = '\n'.join(entries)
             await self.bot.say(content)
 
-    @commands.group(name='info', aliases=['infos'], invoke_without_command=True)
-    async def info_group(self):
-        """Shows informations about the bot."""
+    @commands.group(name='info', aliases=['infos'], invoke_without_command=True, pass_context=True)
+    async def info_group(self, ctx):
+        """Shows information about the bot."""
         members_count = sum(len(server.members) for server in self.bot.servers)
         unique_members_count = len(set(self.bot.get_all_members()))
         members_str = '{} ({} unique)'.format(members_count, unique_members_count)
 
         embed = discord.Embed(title='Bot support server invite', url='https://discord.gg/ZWnENfx', colour=0x738bd7)
         embed.set_author(name=self.bot.owner.name, icon_url=self.bot.owner.avatar_url)
+        embed.add_field(name='Command prefixes', value=str(self.bot.command_prefix(self.bot, ctx.message))[1:-1])
         embed.add_field(name='Servers', value=str(len(self.bot.servers)))
         embed.add_field(name='Members', value=members_str)
-        embed.add_field(name='Invite', value=dutils.oauth_url(self.bot.app_info.id))
         embed.add_field(name='Memory', value=self._get_memory_str())
         embed.add_field(name='Uptime', value=self._get_uptime_str())
+        embed.add_field(name='Click this to invite me to your server :', value=dutils.oauth_url(self.bot.app_info.id), inline=False)
         embed.set_footer(text='Powered by discord.py', icon_url='http://i.imgur.com/5BFecvA.png')
 
         await self.bot.say(embed=embed)
 
-    @info_group.command(name='cog')
-    async def info_cog(self, cog_name):
-        """Shows information about a cog."""
-        if cog_name not in self.bot.cogs:
-            await self.bot.say('Cog not loaded.')
-            return
-
-        cog = self.bot.cogs[cog_name]
-        about = getattr(cog, '_{}__about'.format(cog_name), None)
-
-        # Try to retreive the cog's about page
-        if about and callable(about):
-            content = about()
-        else:
-            content = 'Cog {} does not have any about page.'.format(cog_name)
-
-        await self.bot.say_block(content)
-
     @info_group.command(name='channel', pass_context=True)
     async def info_channel(self, ctx, *, channel: discord.Channel=None):
-        """Shows informations about the channel."""
+        """Shows information about the channel."""
         if channel is None:
             channel = ctx.message.channel
 
-        embed = discord.Embed(description='<#{}>'.format(channel.id), colour=0x738bd7)
+        embed = discord.Embed(description=channel.mention, colour=0x738bd7)
         embed.add_field(name='ID', value=channel.id)
         embed.add_field(name='Server', value=channel.server.name)
         embed.add_field(name='Type', value=channel.type)
@@ -188,7 +160,7 @@ class Info:
 
     @info_group.command(name='server', no_pm=True, pass_context=True)
     async def info_server(self, ctx):
-        """Shows informations about the server."""
+        """Shows information about the server."""
         server = ctx.message.server
 
         # Order the roles and avoid mentions when listing them
@@ -209,7 +181,7 @@ class Info:
         default_channel = 'None'
         for channel in server.channels:
             if channel.is_default:
-                default_channel = channel.name
+                default_channel = channel
             perms = channel.permissions_for(default_member)
             if channel.type == discord.ChannelType.text:
                 text_channels += 1
@@ -259,18 +231,18 @@ class Info:
         embed.add_field(name='ID', value=server.id)
         embed.add_field(name='Owner', value=str(server.owner))
         embed.add_field(name='Region', value=server.region.value.title())
-        embed.add_field(name='Channels', value=channels)
-        embed.add_field(name='Default channel', value=default_channel)
         embed.add_field(name='Members', value=members)
+        embed.add_field(name='Channels', value=channels)
+        embed.add_field(name='Default channel', value=default_channel.mention)
         embed.add_field(name='Roles', value=', '.join(roles))
-        embed.set_footer(text='Created the ')
+        embed.set_footer(text='Server created the ')
         embed.timestamp = server.created_at
 
         await self.bot.say(embed=embed)
 
     @info_group.command(name='user')
     async def info_user(self, member: discord.Member=None):
-        """Shows informations about a user."""
+        """Shows information about a user."""
         if member is None:
             return
 

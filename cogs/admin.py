@@ -86,7 +86,7 @@ class Admin:
     @commands.command(pass_context=True)
     @checks.has_permissions(manage_server=True)
     async def ignore(self, ctx, *, target):
-        """Ignores either a channel, a user (server-wide), or a whole server.
+        """Ignores a channel, a user (server-wide), or a whole server.
 
         A server owner cannot be ignored on his own server.
         If the bot is invited to an ignored server, it will leave it.
@@ -109,12 +109,12 @@ class Admin:
         if isinstance(target, discord.Server):
             await self.bot.leave_server(target)
         else:
-            await self.bot.say(':ok_hand:')
+            await self.bot.say('\N{OK HAND SIGN}')
 
     @commands.command(pass_context=True)
     @checks.has_permissions(manage_server=True)
     async def unignore(self, ctx, *, target):
-        """Un-ignores either a channel, a user (server-wide), or a whole server."""
+        """Un-ignores a channel, a user (server-wide), or a whole server."""
         target, conf = self.resolve_target(ctx, target)
 
         # Only let the bot owner unignore a server owner
@@ -125,24 +125,40 @@ class Admin:
 
         conf.remove(target.id)
         self.ignored.save()
-        await self.bot.say(':ok_hand:')
+        await self.bot.say('\N{OK HAND SIGN}')
 
-    @commands.command(hidden=True)
+    @commands.command(hidden=True, pass_context=True)
     @checks.is_owner()
-    async def kill(self, who):
+    async def kill(self, ctx, who):
         if who == 'yourself':
             # Aww mean D:
             await self.bot.say('Committing sudoku...\nhttp://i.imgur.com/emefsOg.jpg')
+            self.bot.do_restart = False
             self.bot.shutdown()
+        else:
+            if not ctx.message.channel.permissions_for(ctx.message.server.me).kick_members:
+                return
+
+            try:
+                member = commands.MemberConverter(ctx, who).convert()
+            except commands.BadArgument:
+                await self.bot.say('Member not found.')
+            else:
+                if member.id == self.bot.owner.id:
+                    await self.bot.say('Cannot kill the bot owner.')
+                    return
+                elif member.id == ctx.message.server.owner.id:
+                    await self.bot.say('Cannot kill the server owner.')
+                    return
+
+                await self.bot.say('http://i.imgur.com/k3n09s9.png')
+                await self.bot.kick(member)
 
     @commands.command()
     @checks.is_owner()
-    async def restart(self, mode=None):
+    async def restart(self):
         """Restarts the bot."""
-        if mode is not None and mode != 'deep':
-            await self.bot.say("Unknown restart mode.")
-            return
-        self.bot.restart(mode)
+        self.bot.restart()
 
     @commands.command()
     @checks.is_owner()
@@ -157,9 +173,7 @@ class Admin:
         await self.bot.change_status(discord.Game(name=status))
 
     async def on_command(self, command, ctx):
-        name = command.name
-        self.commands_used[name] += 1
-
+        self.commands_used[command.name] += 1
         log.info('{0.server.name}:#{0.channel.name}:{0.author.name}:{0.author.id}:{0.content}'.format(ctx.message))
 
     async def on_server_join(self, server: discord.Server):
@@ -184,7 +198,7 @@ class Admin:
                                               "Though I do like cookies, which are not just biscuits.\n"
                                               "Just like scones. Not scone scones, but scones.\n"
                                               "Get it ?")
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
         await self.bot.edit_message(message, 'lol jk.')
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
         await self.bot.delete_message(message)
