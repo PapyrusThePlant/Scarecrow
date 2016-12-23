@@ -17,7 +17,6 @@ class BotConfig(config.ConfigElement):
     def __init__(self, token, description, **kwargs):
         self.description = description
         self.token = token
-        self.commands_prefixes = kwargs.pop('commands_prefixes', ['mention'])
 
 
 class Bot(commands.Bot):
@@ -29,15 +28,10 @@ class Bot(commands.Bot):
         self.start_time = time.time()
         self.conf = config.Config(conf_path, encoding='utf-8')
 
-        prefixes = self.conf.commands_prefixes
-        if 'mention' in prefixes:
-            prefixes_cpy = prefixes.copy()
-            prefixes_cpy.remove('mention')
-            prefixes = commands.when_mentioned_or(*prefixes_cpy)
-            del prefixes_cpy
-
         # Init the framework and load extensions
-        super().__init__(description=self.conf.description, command_prefix=prefixes, help_attrs={'hidden': True})
+        super().__init__(description=self.conf.description,
+                         command_prefix=commands.when_mentioned_or('€'),
+                         help_attrs={'hidden': True})
         self.load_extensions(paths.COGS)
 
         # Accept restarts after everything has been initialised without issue

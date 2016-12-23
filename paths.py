@@ -6,6 +6,7 @@ COGS = WORKDIR + '/cogs/'
 
 CONFIG = WORKDIR + '/conf/'
 IGNORED_CONFIG = CONFIG + 'ignored.json'
+PREFIXES_CONFIG = CONFIG + 'prefixes.json'
 SCARECROW_CONFIG = CONFIG + 'scarecrow.json'
 TWITTER_CONFIG = CONFIG + 'twitter.json'
 
