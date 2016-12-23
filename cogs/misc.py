@@ -53,13 +53,16 @@ class Misc:
     @commands.command(pass_context=True)
     async def nsfw(self, ctx):
         """Tries to add the NSFW role to a member."""
-        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_roles:
+        perms = ctx.message.channel.permissions_for(ctx.message.server.me)
+        if not perms.manage_roles:
             return
 
         role = discord.utils.get(ctx.message.server.roles, name='NSFW')
         if role is not None:
             await self.bot.add_roles(ctx.message.author, role)
-            await self.bot.delete_message(ctx.message)
+            await self.bot.say('Access granted. \N{OK HAND SIGN}', delete_after=3)
+            if perms.manage_messages:
+                await self.bot.delete_message(ctx.message)
 
     @commands.command()
     async def weebnames(self, wanted_gender=None):
