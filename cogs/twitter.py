@@ -85,18 +85,23 @@ class Twitter:
         """
         conf = dutils.get(self.conf.follows, screen_name=channel)
         discord_channel = ctx.message.channel
-        if conf is not None:
-            # Already following on twitter, check if the discord channel is new
-            if dutils.get(conf.discord_channels, id=discord_channel.id):
-                await self.bot.say('Already following ' + channel + ' on this channel.')
-                return
-        else:
-            # New twitter channel, register it
+        if conf is None:
             try:
-                conf = self.stream.follow(channel)
+                # New twitter channel, register it
+                user = self.api.get_user(channel)
+                conf = FollowConfig(user.id_str, channel)
+                self.conf.follows.append(conf)
+
+                # Restart the stream
+                await self.stream.start()
             except tweepy.error.TweepError as e:
-                await self.bot.say(e.args[0][0]['message'])  # Wtf Tweepy...
+                await self.bot.say(e)
+                self.conf.follows.remove(conf)
                 return
+        elif dutils.get(conf.discord_channels, id=discord_channel.id):
+            # Already following on twitter, check if the discord channel is new
+            await self.bot.say('Already following ' + channel + ' on this channel.')
+            return
 
         # Add new discord channel
         conf.discord_channels.append(ChannelConfig(discord_channel.id))
@@ -112,7 +117,8 @@ class Twitter:
     async def twitter_search(self, query, limit=5):
         """Searches for a twitter user.
 
-        To use a multi-word query, enclose it in quotes"""
+        To use a multi-word query, enclose it in quotes.
+        """
         results = self.api.search_users(query, limit)
         if not results:
             await self.bot.say('No result')
@@ -120,9 +126,7 @@ class Twitter:
 
         paginator = Paginator()
         fmt = '{0:{width}}: {1}\n'
-        # this is slower according to timeit: max_width = max(map(lambda u: len(u.screen_name), results))
         max_width = max([len(u.screen_name) for u in results])
-
         for user in results:
             paginator.add_line(fmt.format(user.screen_name, user.description.replace('\n', ''), width=max_width))
 
@@ -136,21 +140,17 @@ class Twitter:
         The scope can either be 'channel' 'server' or 'global'.
         If nothing is specified the default scope is 'server'.
         """
-        scopes = {
-            'channel',
-            'server',
-            'global'
-        }
+        # Verify the scope
+        scopes = ('channel', 'server', 'global')
         if scope not in scopes:
             await self.bot.say("Invalid scope '{}'. Value must picked from {}.".format(scope, str(scopes)))
             return
 
+        # Gather the twitter channels we're following and the number of tweet received in the given scope
         received_count = 0
-        follows = self.conf.follows
         following = []
-        for chan_conf in follows:
+        for chan_conf in self.conf.follows:
             discord_channels = set(c.id for c in chan_conf.discord_channels)
-
             if scope == 'global':
                 following.append(chan_conf.screen_name)
                 received_count += sum(c.received_count for c in chan_conf.discord_channels)
@@ -165,6 +165,7 @@ class Twitter:
         if not following:
             following.append('No one')
 
+        # Display the info
         embed = discord.Embed()
         embed.description = 'Online' if self.stream.running else 'Offline'
         embed.colour = (255 << 8) if self.stream.running else 255 << 16
@@ -178,7 +179,7 @@ class Twitter:
     async def twitter_unfollow(self, ctx, channel):
         """Unfollows a twitter channel.
 
-        The tweets from the given twitter channel will not b
+        The tweets from the given twitter channel will not be
         sent to the channel this command was used in anymore.
         """
         conf = dutils.get(self.conf.follows, screen_name=channel)
@@ -188,10 +189,19 @@ class Twitter:
             await self.bot.say('Not following ' + channel + ' on this channel.')
             return
 
+        # Remove the discord channel from the twitter channel conf
         conf.discord_channels.remove(discord_channel)
         if not conf.discord_channels:
-            self.stream.unfollow(channel)
+            # If there are no more discord channel to feed, unfollow the twitter channel
+            self.conf.follows.remove(conf)
             del conf
+
+            # Update the tweepy stream
+            if len(self.conf.follows) > 0:
+                await self.stream.start()
+            else:
+                self.stream.stop()
+
         self.conf.save()
 
         await self.bot.say('\N{OK HAND SIGN}')
@@ -199,28 +209,23 @@ class Twitter:
     async def _fetch_missed_tweets(self):
         missed = []
         for chan_conf in self.conf.follows:
-            missed += self.fetch_from_channel(chan_conf)
+            # TODO : Use 'since_id=chan_conf.latest_received', atm twitter answers that it's not a valid parameter...
+            latest_tweets = self.api.user_timeline(user_id=chan_conf.id, exclude_replies=True, include_rts=False)
+
+            # Gather the missed tweets
+            missed = []
+            for tweet in latest_tweets:
+                if tweet.id > chan_conf.latest_received:
+                    missed.append(tweet)
 
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
-            if self.stream.valid_to_dispatch(tweet):
+            if not self.stream.skip_tweet(tweet):
                 await self.tweepy_on_status(tweet)
 
     async def on_ready(self):
         # Check if we've missed any tweet
         asyncio.ensure_future(self._fetch_missed_tweets())
-
-    def fetch_from_channel(self, chan_conf):
-        # TODO : Use the 'since_id' parameter, atm twitter answers that it's not a valid parameter
-        latest_tweets = self.api.user_timeline(user_id=chan_conf.id, exclude_replies=True, include_rts=False)
-
-        # Gather the missed tweets
-        missed = []
-        for tweet in latest_tweets:
-            if tweet.id > chan_conf.latest_received:
-                missed.append(tweet)
-
-        return missed
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
@@ -364,34 +369,6 @@ class TweepyStream(tweepy.StreamListener):
         """Returns whether or not a twitter stream is running."""
         return self.sub_process and self.sub_process.is_alive()
 
-    def follow(self, name):
-        """Adds a twitter channel to the follow list.
-
-        If the channel name is incorrect the exception from the user lookup will be forwarded upward.
-        """
-        # Get the twitter id
-        user = self.api.get_user(name)
-        chan_conf = FollowConfig(user.id_str, name)
-        self.conf.follows.append(chan_conf)
-
-        # Update the stream filter
-        asyncio.ensure_future(self.start())
-
-        return chan_conf
-
-    def unfollow(self, name):
-        """Removes a twitter channel from the follow list and update the tweepy Stream."""
-        for chan_conf in self.conf.follows:
-            if chan_conf.screen_name == name:
-                self.conf.follows.remove(chan_conf)
-                break
-
-        # Update the tweepy stream
-        if len(self.conf.follows) > 0:
-            asyncio.ensure_future(self.start())
-        else:
-            self.stop()
-
     async def start(self):
         """Starts the tweepy Stream."""
         if not self.conf.follows:
@@ -479,8 +456,8 @@ class TweepyStream(tweepy.StreamListener):
                     # Process the data sent by the subprocess
                     self.on_data(data)
 
-    def valid_to_dispatch(self, status):
-        """Returns True if the given Twitter status is valid to be dispatched to handlers."""
+    def skip_tweet(self, status):
+        """Returns True if the given Twitter status is to be skipped."""
         log_status = 'author: {}, reply_to_status: {}, reply_to_user: {}, quoting: {}, retweet: {}, text: {}'
         log_status = log_status.format(status.author.screen_name,
                                        status.in_reply_to_status_id,
@@ -492,27 +469,27 @@ class TweepyStream(tweepy.StreamListener):
         # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
             log.debug('Ignoring tweet (reply): ' + log_status)
-            return False
+            return True
         # Ignore quotes
         elif status.is_quote_status:
             log.debug('Ignoring tweet (quote): ' + log_status)
-            return False
+            return True
         # Ignore retweets
         elif hasattr(status, 'retweeted_status'):
             log.debug('Ignoring tweet (retweet): ' + log_status)
-            return False
+            return True
         # Ignore tweets from authors we're not following (shouldn't happen)
         elif status.author.id_str not in self.get_follows():
             log.debug('Ignoring tweet (bad author): ' + log_status)
-            return False
+            return True
         else:
             log.debug('Dispatching tweet to handler: ' + log_status)
-            return True
+            return False
 
     def on_status(self, status):
         """Called when a new status arrives."""
         log.debug('Received status: ' + str(status._json))
 
-        if self.valid_to_dispatch(status):
+        if not self.skip_tweet(status):
             # Feed the handler with the tweet
             asyncio.ensure_future(self.handler.tweepy_on_status(status))
