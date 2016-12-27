@@ -1,12 +1,22 @@
 #!/bin/bash
 
+if [ ! -d './venv' ]
+then
+    echo Creating new virtual environment...
+    python 3.5 -m virtualenv venv
+fi
+
+# Activate the virtual environment
+source venv/bin/activate
+
 if [ "$1" == 'update' ]
 then
-    # TODO : Do not re-install the lib if no newer version is available
-    # TODO : venv
-    echo Updating requirements...
+    branch=$(git rev-parse 00abbrev-ref HEAD)
+    echo Pulling last version from ${branch}...
     git pull
-    python3 -m pip install --user -U git+https://github.com/PapyrusThePlant/discord.py
+
+    echo Updating requirements...
+    pip install -U -r requirements.txt
     exit 0
 fi
 
@@ -15,7 +25,7 @@ while true
 do
     # Execute the bot
     start_time=`date +%s`
-    python3 -B scarecrow.py $1
+    python3 -B scarecrow.py "$@"
     exit_code=$?
     end_time=`date +%s`
 
@@ -39,3 +49,6 @@ do
         sleep_time=$(($sleep_time > 22 ? 45 : $sleep_time * 2))
     fi
 done
+
+# Deactivate the virtual environment
+deactivate
