@@ -25,7 +25,7 @@ while true
 do
     # Execute the bot
     start_time=`date +%s`
-    python3 -B scarecrow.py "$@"
+    python3 -B run.py "$@"
     exit_code=$?
     end_time=`date +%s`
 

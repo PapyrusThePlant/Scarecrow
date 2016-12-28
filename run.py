@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # Setup the logging
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG if len(sys.argv) > 1 and sys.argv[1] == 'debug' else logging.INFO)
-    handler = logging.FileHandler(filename=paths.SCARECROW_LOG, encoding='utf-8', mode='w')
+    handler = logging.FileHandler(filename=paths.BOT_LOG, encoding='utf-8', mode='w')
     handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
     root_logger.addHandler(handler)
 

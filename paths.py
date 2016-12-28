@@ -5,9 +5,9 @@ WORKDIR = curdir
 COGS = WORKDIR + '/cogs/'
 
 CONFIG = WORKDIR + '/conf/'
+BOT_CONFIG = CONFIG + 'bot.json'
 IGNORED_CONFIG = CONFIG + 'ignored.json'
 PREFIXES_CONFIG = CONFIG + 'prefixes.json'
-SCARECROW_CONFIG = CONFIG + 'scarecrow.json'
 TWITTER_CONFIG = CONFIG + 'twitter.json'
 
 DATA = WORKDIR + '/data/'
@@ -16,5 +16,5 @@ WEEBNAMES = DATA + 'weeb_names.txt'
 OEMBED_PROVIDERS = DATA + 'oEmbed_providers.json'
 
 LOGS = WORKDIR + '/logs/'
-SCARECROW_LOG = LOGS + 'scarecrow.log'
+BOT_LOG = LOGS + 'bot.log'
 TWITTER_SUBPROCESS_LOG = LOGS + 'twitter-sub-process-{pid}.log'

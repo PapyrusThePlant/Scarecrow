@@ -20,8 +20,7 @@ class BotConfig(config.ConfigElement):
 
 
 class Bot(commands.Bot):
-    """Ooooooh ! Scary."""
-    def __init__(self, conf_path=paths.SCARECROW_CONFIG):
+    def __init__(self, conf_path=paths.BOT_CONFIG):
         self.app_info = None
         self.owner = None
         self.do_restart = False
