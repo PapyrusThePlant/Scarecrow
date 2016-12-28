@@ -75,6 +75,39 @@ class Twitter:
     async def twitter_group(self):
         pass
 
+    @twitter_group.command(name='fetch', pass_context=True)
+    @checks.has_permissions(manage_server=True)
+    async def twitter_fetch(self, ctx, channel, limit=3, delete_message=True):
+        """Retrieves the last tweets from a channel and displays them."""
+        if channel == 'all':
+            # Retrieve all the channels for the current feed
+            discord_channel = ctx.message.channel.id
+            channels = [c for c in self.conf.follows if discord_channel in c.discord_channels]
+
+            # Invoke this command
+            for channel in channels:
+                ctx.invoke(self.twitter_fetch, ctx, channel.screen_name, delete_message=False)
+
+        conf = dutils.get(self.conf.follows, screen_name=channel)
+        if conf is None or dutils.get(conf.discord_channels, id=ctx.message.channel.id) is None:
+            await self.bot.say('Not following ' + channel + ' on this channel.')
+            return
+
+        # TODO : Use 'since_id=chan_conf.latest_received', atm twitter answers that it's not a valid parameter...
+        latest_tweets = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
+
+        # Display tweets up to the given limit
+        for tweet in latest_tweets:
+            if limit == 0:
+                break
+            if not self.stream.skip_tweet(tweet):
+                await self.tweepy_on_status(tweet)
+                limit -= 1
+
+        # Clean the feed
+        if delete_message:
+            await self.bot.delete_message(ctx.message)
+
     @twitter_group.command(name='follow', pass_context=True)
     @checks.has_permissions(manage_server=True)
     async def twitter_follow(self, ctx, channel):
@@ -183,14 +216,14 @@ class Twitter:
         sent to the channel this command was used in anymore.
         """
         conf = dutils.get(self.conf.follows, screen_name=channel)
-        discord_channel = None if conf is None else dutils.get(conf.discord_channels, id=ctx.message.channel.id)
+        chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
-        if discord_channel is None:
+        if chan_conf is None:
             await self.bot.say('Not following ' + channel + ' on this channel.')
             return
 
         # Remove the discord channel from the twitter channel conf
-        conf.discord_channels.remove(discord_channel)
+        conf.discord_channels.remove(chan_conf)
         if not conf.discord_channels:
             # If there are no more discord channel to feed, unfollow the twitter channel
             self.conf.follows.remove(conf)
@@ -262,7 +295,7 @@ class Twitter:
             try:
                 data = await oembed.fetch_oembed_data(url)
             except Exception as e:
-                log.error('Failed to retrieve oembed data for url \'{}\' : {}'.format(url, e))
+                log.warning('Failed to retrieve oembed data for url \'{}\' : {}'.format(url, e))
             else:
                 if data['type'] == 'photo':
                     embed.set_image(url=data['url'])
