@@ -95,6 +95,7 @@ class Twitter:
 
         # TODO : Use 'since_id=chan_conf.latest_received', atm twitter answers that it's not a valid parameter...
         latest_tweets = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
+        latest_tweets.sort(key=lambda t: t.id)
 
         # Display tweets up to the given limit
         for tweet in latest_tweets:
@@ -310,10 +311,11 @@ class Twitter:
             log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
             await self.bot.send_message(self.bot.get_channel(channel.id), embed=embed)
 
-            # Increment the received tweets count and save the id of the last tweet received from this channel
-            channel.received_count += 1
-            chan_conf.latest_received = tweet.id
-            self.conf.save()
+            if tweet.id > chan_conf.latest_received:
+                # Change stats and latest id only when processing newer tweets
+                channel.received_count += 1
+                chan_conf.latest_received = tweet.id
+                self.conf.save()
 
 
 class TweepyAPI(tweepy.API):
