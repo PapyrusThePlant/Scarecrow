@@ -67,7 +67,7 @@ class Dev:
             except ImportError:
                 await self.bot.say('Could not find module.')
             else:
-                await self.bot.say('\N{OK HAND SIGN}:')
+                await self.bot.say('\N{OK HAND SIGN}')
 
     @cogs_group.command(name='reload')
     @checks.is_owner()
@@ -81,7 +81,7 @@ class Dev:
         self.bot.unload_extension(module_path)
         self.bot.load_extension(module_path)
 
-        await self.bot.say('\N{OK HAND SIGN}:')
+        await self.bot.say('\N{OK HAND SIGN}')
 
     @cogs_group.command(name='unload')
     @checks.is_owner()
@@ -93,7 +93,7 @@ class Dev:
             return
 
         self.bot.unload_extension(module_path)
-        await self.bot.say('\N{OK HAND SIGN}:')
+        await self.bot.say('\N{OK HAND SIGN}')
 
     @commands.command(pass_context=True, hidden=True)
     @checks.is_owner()

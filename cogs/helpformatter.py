@@ -6,6 +6,10 @@ def setup(bot):
     bot.formatter = HelpFormatter()
 
 
+def teardown(bot):
+    bot.formatter = formatter.HelpFormatter()
+
+
 class HelpFormatter(formatter.HelpFormatter):
     """Deviation from the default formatter to list subcommands with extra indentation and formatting."""
     def __init__(self, *args, **kwargs):
