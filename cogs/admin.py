@@ -178,27 +178,18 @@ class Admin:
 
     async def on_server_join(self, server: discord.Server):
         # Notify the owner that the bot has been invited somewhere
-        await self.bot.send_message(self.bot.owner, "Joined new server {0.name} ({0.id}).\n"
-                                                    "Owner is {1.name} ({1.id})".format(server, server.owner))
+        embed = discord.Embed(title='{0.name} ({0.id})'.format(server), colour=0x00ff00)
+        embed.set_author(name='{0.name} ({0.id})'.format(server.owner), icon_url=server.owner.avatar_url)
+        embed.set_thumbnail(url='http://i.imgur.com/jhCa6vd.png')
+        await self.bot.send_message(self.bot.owner, embed=embed)
 
         if server.id in self.ignored.servers:
-            # Hiiiik ! A bad server ! let's scare it and run away
-            await self.bot.send_message(server.default_channel, utils.random_line(paths.INSULTS))
+            await self.bot.send_message(self.bot.owner, "Ignored server, leaving.")
             await self.bot.leave_server(server)
 
-            # Reassure our owner
-            await self.bot.send_message(self.bot.owner, "Left that nasty server. Phew! That was close.")
-            return
-
-        # Say hi, people love it when you say hi
-        message = await self.bot.send_message(server.default_channel,
-                                              "Hi I am the bright bot that will enlighten your day !\n"
-                                              "Say whatever you want to get my attention, I might just ignore it.\n"
-                                              "I like biscuits, and I don't mean cookies.\n"
-                                              "Though I do like cookies, which are not just biscuits.\n"
-                                              "Just like scones. Not scone scones, but scones.\n"
-                                              "Get it ?")
-        await asyncio.sleep(1)
-        await self.bot.edit_message(message, 'lol jk.')
-        await asyncio.sleep(1)
-        await self.bot.delete_message(message)
+    async def on_server_remove(self, server: discord.Server):
+        # Notify the owner that the bot has been removed from somewhere
+        embed = discord.Embed(title='{0.name} ({0.id})'.format(server), colour=0xff0000)
+        embed.set_author(name='{0.name} ({0.id})'.format(server.owner), icon_url=server.owner.avatar_url)
+        embed.set_thumbnail(url='http://i.imgur.com/7fnH92U.png')
+        await self.bot.send_message(self.bot.owner, embed=embed)
