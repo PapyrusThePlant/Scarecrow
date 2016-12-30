@@ -3,7 +3,7 @@
 if [ ! -d './venv' ]
 then
     echo Creating new virtual environment...
-    python 3.5 -m virtualenv venv
+    python3.5 -m virtualenv venv
 fi
 
 # Activate the virtual environment
@@ -11,7 +11,7 @@ source venv/bin/activate
 
 if [ "$1" == 'update' ]
 then
-    branch=$(git rev-parse 00abbrev-ref HEAD)
+    branch=$(git rev-parse --abbrev-ref HEAD)
     echo Pulling last version from ${branch}...
     git pull
 

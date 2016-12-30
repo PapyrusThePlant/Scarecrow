@@ -17,6 +17,8 @@ class BotConfig(config.ConfigElement):
     def __init__(self, token, description, **kwargs):
         self.description = description
         self.token = token
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class Bot(commands.Bot):
