@@ -68,8 +68,8 @@ class Bot(commands.Bot):
         if hasattr(context.command, "on_error"):
             return
 
-        # Skip check failures
-        if isinstance(exception, commands.CheckFailure):
+        # Skip check failures and unknown commands
+        if isinstance(exception, (commands.CheckFailure, commands.CommandNotFound)):
             return
 
         content = 'Ignoring exception in command {}:\n' \
