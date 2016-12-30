@@ -1,3 +1,4 @@
+import aiohttp
 import asyncio
 import logging
 import multiprocessing
@@ -93,17 +94,15 @@ class Twitter:
             await self.bot.say('Not following ' + channel + ' on this channel.')
             return
 
-        # TODO : Use 'since_id=chan_conf.latest_received', atm twitter answers that it's not a valid parameter...
-        latest_tweets = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
-        latest_tweets.sort(key=lambda t: t.id)
+        # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
+        latests = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
+        valids = list(filter(lambda t: not self.stream.skip_tweet(t), latests))
+        valids.sort(key=lambda t: t.id)
+        valids = valids[-limit:]
 
-        # Display tweets up to the given limit
-        for tweet in latest_tweets:
-            if limit == 0:
-                break
-            if not self.stream.skip_tweet(tweet):
-                await self.tweepy_on_status(tweet)
-                limit -= 1
+        # Display the kept tweets
+        for tweet in valids:
+            await self.tweepy_on_status(tweet)
 
         # Clean the feed
         if delete_message:
