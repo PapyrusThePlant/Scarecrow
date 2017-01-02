@@ -1,9 +1,11 @@
-import discord
+import asyncio
 import inspect
 import io
+import os
 import traceback
 from contextlib import redirect_stdout
 
+import discord
 from discord.ext import commands
 
 from .util import checks, utils
@@ -209,3 +211,21 @@ class Dev:
                 pass
             except discord.HTTPException as e:
                 await self.bot.send_message(msg.channel, 'Unexpected error: `{}`'.format(e))
+
+    @commands.command()
+    @checks.is_owner()
+    async def update(self):
+        """Updates the bot."""
+        embed = discord.Embed(colour=0x738bd7, description='Updating bot...')
+        message = await self.bot.say(embed=embed)
+
+        process = await asyncio.create_subprocess_exec('git', 'pull', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await process.communicate()
+
+        if stdout:
+            embed.add_field(name='stdout', value="```\n {} \n```".format(stdout.decode()))
+        if stderr:
+            embed.add_field(name='stderr', value="```\n {} \n```".format(stderr.decode()))
+
+        if stdout or stderr:
+            await self.bot.edit_message(message, embed=embed)

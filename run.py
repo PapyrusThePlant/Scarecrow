@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import multiprocessing
 import sys
@@ -18,6 +19,16 @@ if __name__ == '__main__':
 
     log = logging.getLogger(__name__)
     log.info('Started with Python {0.major}.{0.minor}.{0.micro}'.format(sys.version_info))
+
+    # Try to use uvloop, and fallback to a ProactorEventLoop on windows to be able to use subprocesses
+    # See https://docs.python.org/3/library/asyncio-subprocess.html#windows-event-loop
+    try:
+        import uvloop
+    except ImportError:
+        if sys.platform == 'win32':
+            asyncio.set_event_loop(asyncio.ProactorEventLoop())
+    else:
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     # Create the bot
     log.info('Creating bot...')
