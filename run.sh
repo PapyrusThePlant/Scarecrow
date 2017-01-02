@@ -20,6 +20,7 @@ then
     exit 0
 fi
 
+rm logs/*
 sleep_time=1
 while true
 do
