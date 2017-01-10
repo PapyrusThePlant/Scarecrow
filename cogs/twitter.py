@@ -79,7 +79,7 @@ class Twitter:
     @twitter_group.command(name='fetch', pass_context=True)
     @checks.has_permissions(manage_server=True)
     async def twitter_fetch(self, ctx, channel, limit=3, delete_message=True):
-        """Retrieves the last tweets from a channel and displays them."""
+        """Retrieves the lastest tweets from a channel and displays them."""
         if channel == 'all':
             # Retrieve all the channels for the current feed
             discord_channel = ctx.message.channel.id

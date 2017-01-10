@@ -26,7 +26,6 @@ class Prefix:
         self.bot.command_prefix = self.get_prefixes
 
     def __unload(self):
-        log.info('Unloading cog.')
         self.bot.command_prefix = self.saved_prefixes
 
     def get_prefixes(self, bot, message):
