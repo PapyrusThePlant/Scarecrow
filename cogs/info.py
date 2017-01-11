@@ -122,9 +122,10 @@ class Info:
         members_count = sum(len(server.members) for server in self.bot.servers)
         unique_members_count = len(set(self.bot.get_all_members()))
         members_str = '{} ({} unique)'.format(members_count, unique_members_count)
+        owner = ctx.message.server.get_member(self.bot.owner.id)
 
         embed = discord.Embed(title='Bot support server invite', url='https://discord.gg/ZWnENfx', colour=0x738bd7)
-        embed.set_author(name=self.bot.owner.name, icon_url=self.bot.owner.avatar_url)
+        embed.set_author(name='{0.display_name} ({0})'.format(owner), icon_url=owner.avatar_url)
         embed.add_field(name='Command prefixes', value=str(self.bot.command_prefix(self.bot, ctx.message))[1:-1])
         embed.add_field(name='Servers', value=str(len(self.bot.servers)))
         embed.add_field(name='Members', value=members_str)
