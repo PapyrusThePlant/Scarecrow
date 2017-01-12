@@ -83,7 +83,7 @@ class Admin:
         server = utils.ServerConverter(ctx, target).convert()
         return server, self.ignored.servers
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, no_pm=True)
     @checks.has_permissions(manage_server=True)
     async def ignore(self, ctx, *, target):
         """Ignores a channel, a user (server-wide), or a whole server.
@@ -111,7 +111,7 @@ class Admin:
         else:
             await self.bot.say('\N{OK HAND SIGN}')
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, no_pm=True)
     @checks.has_permissions(manage_server=True)
     async def unignore(self, ctx, *, target):
         """Un-ignores a channel, a user (server-wide), or a whole server."""
@@ -127,30 +127,30 @@ class Admin:
         self.ignored.save()
         await self.bot.say('\N{OK HAND SIGN}')
 
-    @commands.command(hidden=True, pass_context=True)
+    @commands.command(hidden=True, pass_context=True, no_pm=True)
     @checks.is_owner()
-    async def kill(self, ctx, who):
+    async def kill(self, ctx, *, who):
         if who == 'yourself':
             # Aww mean D:
             await self.bot.say('Committing sudoku...\nhttp://i.imgur.com/emefsOg.jpg')
             self.bot.do_restart = False
             self.bot.shutdown()
+            return
+
+        if not ctx.message.channel.permissions_for(ctx.message.server.me).kick_members:
+            await self.bot.say('My power is not over 9000, sorry.')
+            return
+
+        try:
+            member = commands.MemberConverter(ctx, who).convert()
+        except commands.BadArgument:
+            await self.bot.say('Member not found.')
         else:
-            if not ctx.message.channel.permissions_for(ctx.message.server.me).kick_members:
-                return
-
-            try:
-                member = commands.MemberConverter(ctx, who).convert()
-            except commands.BadArgument:
-                await self.bot.say('Member not found.')
+            if member.id == self.bot.owner.id:
+                await self.bot.say('Cannot kill the bot owner.')
+            elif member.id == ctx.message.server.owner.id:
+                await self.bot.say('Cannot kill the server owner.')
             else:
-                if member.id == self.bot.owner.id:
-                    await self.bot.say('Cannot kill the bot owner.')
-                    return
-                elif member.id == ctx.message.server.owner.id:
-                    await self.bot.say('Cannot kill the server owner.')
-                    return
-
                 await self.bot.say('http://i.imgur.com/k3n09s9.png')
                 await self.bot.kick(member)
 

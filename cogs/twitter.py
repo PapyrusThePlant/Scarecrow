@@ -76,7 +76,7 @@ class Twitter:
     async def twitter_group(self):
         pass
 
-    @twitter_group.command(name='fetch', pass_context=True)
+    @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
     @checks.has_permissions(manage_server=True)
     async def twitter_fetch(self, ctx, channel, limit=3, delete_message=True):
         """Retrieves the lastest tweets from a channel and displays them."""
@@ -108,7 +108,7 @@ class Twitter:
         if delete_message:
             await self.bot.delete_message(ctx.message)
 
-    @twitter_group.command(name='follow', pass_context=True)
+    @twitter_group.command(name='follow', pass_context=True, no_pm=True)
     @checks.has_permissions(manage_server=True)
     async def twitter_follow(self, ctx, channel):
         """Follows a twitter channel.
@@ -166,7 +166,7 @@ class Twitter:
         for page in paginator.pages:
             await self.bot.say(page)
 
-    @twitter_group.command(name='status', pass_context=True)
+    @twitter_group.command(name='status', pass_context=True, no_pm=True)
     async def twitter_status(self, ctx, scope='server'):
         """Displays the status of the twitter stream.
 
@@ -207,7 +207,7 @@ class Twitter:
 
         await self.bot.say(embed=embed)
 
-    @twitter_group.command(name='unfollow', pass_context=True)
+    @twitter_group.command(name='unfollow', pass_context=True, no_pm=True)
     @checks.is_server_owner()
     async def twitter_unfollow(self, ctx, channel):
         """Unfollows a twitter channel.

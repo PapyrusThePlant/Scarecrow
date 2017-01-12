@@ -35,12 +35,12 @@ class Prefix:
             prefixes.append('{} '.format(message.server.me.mention))
         return prefixes
 
-    @commands.group(name='prefix')
+    @commands.group(name='prefix', no_pm=True)
     async def prefix_group(self):
         pass
 
     @checks.has_permissions(manage_server=True)
-    @prefix_group.command(name='add', pass_context=True)
+    @prefix_group.command(name='add', pass_context=True, no_pm=True)
     async def prefix_add(self, ctx, *, prefix):
         """Adds a command prefix specific to this server.
 
@@ -63,7 +63,7 @@ class Prefix:
         await self.bot.say('\N{OK HAND SIGN}')
 
     @checks.has_permissions(manage_server=True)
-    @prefix_group.command(name='remove', pass_context=True)
+    @prefix_group.command(name='remove', pass_context=True, no_pm=True)
     async def prefix_remove(self, ctx, *, prefix):
         """Removes a command prefix specific to this server."""
         sid = ctx.message.server.id

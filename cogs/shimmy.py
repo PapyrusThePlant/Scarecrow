@@ -45,7 +45,7 @@ class Shimmy:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, no_pm=True)
     @checks.in_server(SHIMMY_SERVER_ID)
     async def nsfw(self, ctx):
         """Tries to add the NSFW role to a member."""

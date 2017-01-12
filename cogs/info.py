@@ -136,7 +136,7 @@ class Info:
 
         await self.bot.say(embed=embed)
 
-    @info_group.command(name='channel', pass_context=True)
+    @info_group.command(name='channel', pass_context=True, no_pm=True)
     async def info_channel(self, ctx, *, channel: discord.Channel=None):
         """Shows information about the channel."""
         if channel is None:
@@ -159,7 +159,7 @@ class Info:
 
         await self.bot.say(embed=embed)
 
-    @info_group.command(name='server', no_pm=True, pass_context=True)
+    @info_group.command(name='server', pass_context=True, no_pm=True)
     async def info_server(self, ctx):
         """Shows information about the server."""
         server = ctx.message.server
@@ -241,8 +241,8 @@ class Info:
 
         await self.bot.say(embed=embed)
 
-    @info_group.command(name='user')
-    async def info_user(self, member: discord.Member=None):
+    @info_group.command(name='user', no_pm=True)
+    async def info_user(self, *, member: discord.Member=None):
         """Shows information about a user."""
         if member is None:
             return
