@@ -101,7 +101,8 @@ class Twitter:
 
             # Display the kept tweets
             for tweet in valids[-limit:]:
-                await self.tweepy_on_status(tweet)
+                embed = await self.prepare_tweet(tweet)
+                await self.bot.say(embed=embed)
 
         # Clean the feed
         if delete_message:
@@ -259,10 +260,8 @@ class Twitter:
         # Check if we've missed any tweet
         asyncio.ensure_future(self._fetch_missed_tweets())
 
-    async def tweepy_on_status(self, tweet):
-        """Called by the stream when a tweet is received."""
+    async def prepare_tweet(self, tweet):
         author = tweet.author
-        chan_conf = dutils.get(self.conf.follows, id=author.id_str)
         author_url = 'http://twitter.com/{}'.format(author.screen_name)
         tweet_url = '{}/status/{}'.format(author_url, tweet.id)
 
@@ -300,6 +299,11 @@ class Twitter:
                     embed.set_image(url=data['url'])
                 else:
                     embed.set_image(url=data.get('thumbnail_url', None) or data.get('url', None))
+
+    async def tweepy_on_status(self, tweet):
+        """Called by the stream when a tweet is received."""
+        chan_conf = dutils.get(self.conf.follows, id=tweet.author.id_str)
+        embed = await self.prepare_tweet(tweet)
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
