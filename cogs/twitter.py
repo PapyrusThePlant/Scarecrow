@@ -85,24 +85,23 @@ class Twitter:
             discord_channel = ctx.message.channel.id
             channels = [c for c in self.conf.follows if discord_channel in c.discord_channels]
 
-            # Invoke this command
+            # Invoke this command for every channel
             for channel in channels:
                 ctx.invoke(self.twitter_fetch, ctx, channel.screen_name, delete_message=False)
+        else:
+            conf = dutils.get(self.conf.follows, screen_name=channel)
+            if conf is None or dutils.get(conf.discord_channels, id=ctx.message.channel.id) is None:
+                await self.bot.say('Not following ' + channel + ' on this channel.')
+                return
 
-        conf = dutils.get(self.conf.follows, screen_name=channel)
-        if conf is None or dutils.get(conf.discord_channels, id=ctx.message.channel.id) is None:
-            await self.bot.say('Not following ' + channel + ' on this channel.')
-            return
+            # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
+            latests = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
+            valids = [t for t in latests if not self.stream.skip_tweet(t)]
+            valids.sort(key=lambda t: t.id)
 
-        # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
-        latests = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
-        valids = list(filter(lambda t: not self.stream.skip_tweet(t), latests))
-        valids.sort(key=lambda t: t.id)
-        valids = valids[-limit:]
-
-        # Display the kept tweets
-        for tweet in valids:
-            await self.tweepy_on_status(tweet)
+            # Display the kept tweets
+            for tweet in valids[-limit:]:
+                await self.tweepy_on_status(tweet)
 
         # Clean the feed
         if delete_message:
