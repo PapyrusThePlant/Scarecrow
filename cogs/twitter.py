@@ -326,14 +326,15 @@ class TweepyAPI(tweepy.API):
         log.info('Logged in Twitter as {username}'.format(username=self.verify_credentials().screen_name))
 
 
-class SubProcessStream:
+class SubProcessStream(multiprocessing.Process):
     """Aggregation of things to run a tweepy stream in a sub-process."""
-    def __init__(self, mp_queue, credentials, follows):
+    def __init__(self, mp_queue, credentials, follows, *args, **kwargs):
         self.mp_queue = mp_queue
         self.credentials = credentials
         self.follows = follows
+        super().__init__(*args, name='Tweepy Stream', target=self.run_tweepy, **kwargs)
 
-    def run(self):
+    def run_tweepy(self):
         """The entry point of the sub-process.
 
         The tweepy.API object isn't pickable so let's just re-create it in the sub-process.
@@ -408,24 +409,18 @@ class TweepyStream(tweepy.StreamListener):
         if not self.conf.follows:
             return
 
-        # TODO : Avoid being rate limited when restarting the stream with the same follow list.
-        # Starting the stream with the same follow list than the moment it was shut down gets us rate limited by the
-        # Twitter api, the subprocess exits with no error and the daemon cleans the stream up before exiting too
+        # Avoid being rate limited by twitter when restarting the stream with the same follow list.
+        if self.sub_process and not set(self.sub_process.follows) != set(self.get_follows()):
+            return
 
         # Kill the current subprocess before starting a new one
         self.stop()
-
-        # Wait for the cleanup in the polling daemon before creating a new subprocess
-        while self.sub_process:
-            await asyncio.sleep(1)
 
         # Create a new multi-processes queue, a new stream object and a new Process
         log.info('Creating new sub-process.')
         self.mp_queue = multiprocessing.Queue()
         self.mp_queue.cancel_join_thread()
-        stream = SubProcessStream(self.mp_queue, self.conf.credentials, self.get_follows())
-        self.sub_process = multiprocessing.Process(target=stream.run,
-                                                   name='Tweepy_Stream')
+        self.sub_process = SubProcessStream(self.mp_queue, self.conf.credentials, self.get_follows())
         log.info('Created new sub-process.')
 
         # Schedule the polling daemon (it will take care of starting the child process)
