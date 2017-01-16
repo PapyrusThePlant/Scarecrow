@@ -27,7 +27,7 @@ class HTTPError(Exception):
     def __init__(self, resp, message):
         self.response = resp
         if type(message) is dict:
-            self.resp_message = message.get('message', '')
+            self.resp_message = message.get('message', message.get('msg', ''))
             self.code = message.get('code', 0)
         else:
             self.resp_message = message
