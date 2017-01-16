@@ -23,6 +23,9 @@ class Misc:
         }
         self.google_session = aiohttp.ClientSession(headers=headers)
 
+    def __unload(self):
+        self.google_session.close()
+
     @commands.group(invoke_without_command=True)
     async def agarify(self, *, content):
         """Agarifies a string."""
