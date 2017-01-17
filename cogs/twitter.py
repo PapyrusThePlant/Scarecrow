@@ -90,8 +90,9 @@ class Twitter:
                 ctx.invoke(self.twitter_fetch, ctx, channel.screen_name, delete_message=False)
         else:
             conf = dutils.get(self.conf.follows, screen_name=channel)
-            if conf is None or dutils.get(conf.discord_channels, id=ctx.message.channel.id) is None:
-                await self.bot.say('Not following ' + channel + ' on this channel.')
+            servers_channels = set(c.id for c in ctx.message.server.channels)
+            if conf is None or not servers_channels.intersection(c.id for c in conf.discord_channels):
+                await self.bot.say('Not following ' + channel + ' on this server.')
                 return
 
             # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
@@ -262,8 +263,8 @@ class Twitter:
 
     async def prepare_tweet(self, tweet):
         author = tweet.author
-        author_url = 'http://twitter.com/{}'.format(author.screen_name)
-        tweet_url = '{}/status/{}'.format(author_url, tweet.id)
+        author_url = 'https://twitter.com/{}'.format(author.screen_name)
+        tweet_url = 'https://twitter.com/i/web/status/{}'.format(tweet.id)
 
         urls = tweet.entities.get('urls', [])
         media = tweet.entities.get('media', [])
@@ -273,8 +274,12 @@ class Twitter:
             tweet.text = tweet.text.replace(medium['url'], '')
 
         # Replace links in the tweet with the expanded url for lisibility
-        for url in urls:
-            tweet.text = tweet.text.replace(url['url'], url['expanded_url'])
+        for url in urls.copy():
+            if url['expanded_url'] == tweet_url:
+                tweet.text = tweet.text.replace(url['url'], '')
+                urls.remove(url)
+            else:
+                tweet.text = tweet.text.replace(url['url'], url['expanded_url'])
 
         # Build the embed
         embed = discord.Embed(colour=discord.Colour(int(author.profile_link_color, 16)),
@@ -299,6 +304,8 @@ class Twitter:
                     embed.set_image(url=data['url'])
                 else:
                     embed.set_image(url=data.get('thumbnail_url', None) or data.get('url', None))
+
+        return embed
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
