@@ -76,18 +76,31 @@ class Twitter:
     async def twitter_group(self):
         pass
 
+    def _get_latest_valids(self, channel_id, limit):
+        latests = self.api.user_timeline(user_id=channel_id, exclude_replies=True, include_rts=False)
+        valids = [t for t in latests if not self.stream.skip_tweet(t)]
+        valids.sort(key=lambda t: t.id)
+        return valids[-limit:]
+
     @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
     @checks.has_permissions(manage_server=True)
     async def twitter_fetch(self, ctx, channel, limit=3, delete_message=True):
         """Retrieves the lastest tweets from a channel and displays them."""
+        to_display = []
         if channel == 'all':
             # Retrieve all the channels for the current feed
-            discord_channel = ctx.message.channel.id
-            channels = [c for c in self.conf.follows if discord_channel in c.discord_channels]
+            servers_chans = set(c.id for c in ctx.message.server.channels)
+            confs = [conf for conf in self.conf.follows if servers_chans.intersection(c.id for c in conf.discord_channels)]
+            if not confs:
+                await self.bot.say('Not following any channel on this server.')
+                return
 
-            # Invoke this command for every channel
-            for channel in channels:
-                ctx.invoke(self.twitter_fetch, ctx, channel.screen_name, delete_message=False)
+            # Get the latests X tweets from every channel
+            for conf in confs:
+                to_display.extend(self._get_latest_valids(conf.id, limit))
+
+            # Order them again when all have been retrieved
+            to_display.sort(key=lambda t: t.id)
         else:
             conf = dutils.get(self.conf.follows, screen_name=channel)
             servers_channels = set(c.id for c in ctx.message.server.channels)
@@ -96,14 +109,12 @@ class Twitter:
                 return
 
             # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
-            latests = self.api.user_timeline(user_id=conf.id, exclude_replies=True, include_rts=False)
-            valids = [t for t in latests if not self.stream.skip_tweet(t)]
-            valids.sort(key=lambda t: t.id)
+            to_display = self._get_latest_valids(conf.id, limit)
 
-            # Display the kept tweets
-            for tweet in valids[-limit:]:
-                embed = await self.prepare_tweet(tweet)
-                await self.bot.say(embed=embed)
+        # Display the kept tweets
+        for tweet in to_display:
+            embed = await self.prepare_tweet(tweet)
+            await self.bot.say(embed=embed)
 
         # Clean the feed
         if delete_message:
