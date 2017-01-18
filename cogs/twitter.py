@@ -102,6 +102,7 @@ class Twitter:
             # Order them again when all have been retrieved
             to_display.sort(key=lambda t: t.id)
         else:
+            channel = channel.lower()
             conf = dutils.get(self.conf.follows, screen_name=channel)
             servers_channels = set(c.id for c in ctx.message.server.channels)
             if conf is None or not servers_channels.intersection(c.id for c in conf.discord_channels):
@@ -128,6 +129,7 @@ class Twitter:
         The tweets from the given twitter channel will be
         sent to the channel this command was used in.
         """
+        channel = channel.lower()
         conf = dutils.get(self.conf.follows, screen_name=channel)
         discord_channel = ctx.message.channel
         if conf is None:
@@ -227,6 +229,7 @@ class Twitter:
         The tweets from the given twitter channel will not be
         sent to the channel this command was used in anymore.
         """
+        channel = channel.lower()
         conf = dutils.get(self.conf.follows, screen_name=channel)
         chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
