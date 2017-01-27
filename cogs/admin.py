@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from collections import Counter
 
@@ -84,7 +83,7 @@ class Admin:
         return server, self.ignored.servers
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     async def ignore(self, ctx, *, target):
         """Ignores a channel, a user (server-wide), or a whole server.
 
@@ -112,7 +111,7 @@ class Admin:
             await self.bot.say('\N{OK HAND SIGN}')
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     async def unignore(self, ctx, *, target):
         """Un-ignores a channel, a user (server-wide), or a whole server."""
         target, conf = self.resolve_target(ctx, target)

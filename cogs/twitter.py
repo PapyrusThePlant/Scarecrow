@@ -12,7 +12,7 @@ import discord.utils as dutils
 from discord.ext.commands.formatter import Paginator
 
 import paths
-from .util import checks, config, oembed
+from .util import config, oembed
 
 log = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ class Twitter:
         return valids[-limit:]
 
     @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     async def twitter_fetch(self, ctx, channel, limit=3, delete_message=True):
         """Retrieves the lastest tweets from a channel and displays them."""
         to_display = []
@@ -129,7 +129,7 @@ class Twitter:
             await self.bot.delete_message(ctx.message)
 
     @twitter_group.command(name='follow', pass_context=True, no_pm=True)
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     async def twitter_follow(self, ctx, channel):
         """Follows a twitter channel.
 
@@ -228,7 +228,7 @@ class Twitter:
         await self.bot.say(embed=embed)
 
     @twitter_group.command(name='unfollow', pass_context=True, no_pm=True)
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     async def twitter_unfollow(self, ctx, channel):
         """Unfollows a twitter channel.
 

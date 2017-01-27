@@ -39,7 +39,7 @@ class Prefix:
     async def prefix_group(self):
         pass
 
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     @prefix_group.command(name='add', pass_context=True, no_pm=True)
     async def prefix_add(self, ctx, *, prefix):
         """Adds a command prefix specific to this server.
@@ -62,7 +62,7 @@ class Prefix:
         self.conf.save()
         await self.bot.say('\N{OK HAND SIGN}')
 
-    @checks.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_server=True)
     @prefix_group.command(name='remove', pass_context=True, no_pm=True)
     async def prefix_remove(self, ctx, *, prefix):
         """Removes a command prefix specific to this server."""
