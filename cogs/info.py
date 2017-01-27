@@ -68,7 +68,7 @@ class Info:
                 await self.bot.say('Invalid unicode escape sequence.')
                 return
             else:
-                data = ''.join([chr(cp) for cp in code_points])
+                data = ''.join(chr(cp) for cp in code_points)
         elif len(data) > 1:
             # Maybe we've been given the character's name ?
             try:
@@ -138,7 +138,10 @@ class Info:
 
     @info_group.command(name='channel', pass_context=True, no_pm=True)
     async def info_channel(self, ctx, *, channel: discord.Channel=None):
-        """Shows information about the channel."""
+        """Shows information about a channel.
+
+        The channel can either be the name or the ID of a text or voice channel.
+        If no channel is given, the text channel this command was used in is selected."""
         if channel is None:
             channel = ctx.message.channel
 
@@ -241,11 +244,15 @@ class Info:
 
         await self.bot.say(embed=embed)
 
-    @info_group.command(name='user', no_pm=True)
-    async def info_user(self, *, member: discord.Member=None):
-        """Shows information about a user."""
+    @info_group.command(name='user', pass_context=True, no_pm=True)
+    async def info_user(self, ctx, *, member: discord.Member=None):
+        """Shows information about a member.
+
+        The given member can either be found by ID, nickname or username.
+        If no member is given, your info will be displayed.
+        """
         if member is None:
-            return
+            member = ctx.message.author
 
         roles = [role.name.replace('@', '@\u200b') for role in member.roles]
         shared = sum(1 for m in self.bot.get_all_members() if m.id == member.id)

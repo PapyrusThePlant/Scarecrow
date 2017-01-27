@@ -33,10 +33,7 @@ class Dev:
 
     @commands.group(name='cogs', pass_context=True, invoke_without_command=True)
     async def cogs_group(self, ctx):
-        """Cogs management commands.
-
-        If no subcommand is invoked, lists loaded cogs.
-        """
+        """Lists currently loaded cogs."""
         if ctx.subcommand_passed is not None:
             return
 

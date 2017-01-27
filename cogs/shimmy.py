@@ -56,4 +56,9 @@ class Shimmy:
     @commands.command(aliases=['eight', '8'])
     @checks.in_server(SHIMMY_SERVER_ID)
     async def ball(self, *, question):
+        """Scarecrow's 8-Ball reaches into the future, to find the answers to your questions.
+
+        It knows what will be, and is willing to share this with you. Just send a question that can be answered by
+        "Yes" or "No", then let Scarecrow's 8-Ball show you the way !
+        """
         await self.bot.say(random.choice(eight_ball_responses))

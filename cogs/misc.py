@@ -282,6 +282,7 @@ class Misc:
 
     @commands.command(aliases=['g'])
     async def google(self, *, query):
+        """Search for something on google."""
         params = {
             'hl': 'en',
             'q': query,

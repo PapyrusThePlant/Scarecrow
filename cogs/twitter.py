@@ -93,8 +93,12 @@ class Twitter:
 
     @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
-    async def twitter_fetch(self, ctx, channel, limit=3, delete_message=True):
-        """Retrieves the lastest tweets from a channel and displays them."""
+    async def twitter_fetch(self, ctx, channel, limit=3):
+        """Retrieves the lastest tweets from a channel and displays them.
+
+        If a limit is given, at most that number of tweets will be displayed.
+        Defaults to 3.
+        """
         to_display = []
         if channel == 'all':
             # Retrieve all the channels for the current feed
@@ -123,10 +127,6 @@ class Twitter:
         for tweet in to_display:
             embed = await self.prepare_tweet(tweet)
             await self.bot.say(embed=embed)
-
-        # Clean the feed
-        if delete_message:
-            await self.bot.delete_message(ctx.message)
 
     @twitter_group.command(name='follow', pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
