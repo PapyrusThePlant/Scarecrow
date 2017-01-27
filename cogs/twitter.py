@@ -1,4 +1,3 @@
-import aiohttp
 import asyncio
 import logging
 import multiprocessing
@@ -13,7 +12,7 @@ import discord.utils as dutils
 from discord.ext.commands.formatter import Paginator
 
 import paths
-from .util import checks, config, oembed, utils
+from .util import checks, config, oembed
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +25,13 @@ def setup(bot):
         if entry.is_file() and 'twitter' in entry.name:
             os.remove(entry.path)
 
-    bot.add_cog(Twitter(bot))
+    cog = Twitter(bot)
+    bot.add_cog(cog)
+    asyncio.ensure_future(cog.stream.start())
+
+
+class TwitterError(commands.CommandError):
+    pass
 
 
 class TwitterConfig(config.ConfigElement):
@@ -72,6 +77,10 @@ class Twitter:
         log.info('Unloading cog.')
         self.stream.quit()
 
+    async def on_command_error(self, error, ctx):
+        if isinstance(error, TwitterError):
+            await ctx.bot.send_message(ctx.message.channel, error)
+
     @commands.group(name='twitter')
     async def twitter_group(self):
         pass
@@ -92,8 +101,7 @@ class Twitter:
             servers_chans = set(c.id for c in ctx.message.server.channels)
             confs = [conf for conf in self.conf.follows if servers_chans.intersection(c.id for c in conf.discord_channels)]
             if not confs:
-                await self.bot.say('Not following any channel on this server.')
-                return
+                raise TwitterError('Not following any channel on this server.')
 
             # Get the latests X tweets from every channel
             for conf in confs:
@@ -106,8 +114,7 @@ class Twitter:
             conf = dutils.get(self.conf.follows, screen_name=channel)
             servers_channels = set(c.id for c in ctx.message.server.channels)
             if conf is None or not servers_channels.intersection(c.id for c in conf.discord_channels):
-                await self.bot.say('Not following ' + channel + ' on this server.')
-                return
+                raise TwitterError('Not following {} on this server.'.format(channel))
 
             # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
             to_display = self._get_latest_valids(conf.id, limit)
@@ -129,9 +136,14 @@ class Twitter:
         The tweets from the given twitter channel will be
         sent to the channel this command was used in.
         """
+        discord_channel = ctx.message.channel
+
+        # Check for required permissions
+        if not discord_channel.permissions_for(discord_channel.server.me).embed_links:
+            raise TwitterError('\N{WARNING SIGN} The permission to embed links in this channel is required to display tweets properly \N{WARNING SIGN}')
+
         channel = channel.lower()
         conf = dutils.get(self.conf.follows, screen_name=channel)
-        discord_channel = ctx.message.channel
         if conf is None:
             try:
                 # New twitter channel, register it
@@ -142,22 +154,16 @@ class Twitter:
                 # Restart the stream
                 await self.stream.start()
             except tweepy.error.TweepError as e:
-                await self.bot.say(e)
                 self.conf.follows.remove(conf)
-                return
+                log.error(''.format(str(e)))
+                raise TwitterError('Unknown error, this has been logged.')
         elif dutils.get(conf.discord_channels, id=discord_channel.id):
             # Already following on twitter, check if the discord channel is new
-            await self.bot.say('Already following ' + channel + ' on this channel.')
-            return
+            raise TwitterError('Already following {} on this channel.'.format(channel))
 
         # Add new discord channel
         conf.discord_channels.append(ChannelConfig(discord_channel.id))
         self.conf.save()
-
-        member = discord_channel.server.me
-        if not discord_channel.permissions_for(member).embed_links:
-            await self.bot.say(':warning: I need embed links permission in this channel to display tweets properly.')
-
         await self.bot.say('\N{OK HAND SIGN}')
 
     @twitter_group.command(name='search')
@@ -187,27 +193,27 @@ class Twitter:
         The scope can either be 'channel' 'server' or 'global'.
         If nothing is specified the default scope is 'server'.
         """
-        # Verify the scope
-        scopes = ('channel', 'server', 'global')
-        if scope not in scopes:
-            await self.bot.say("Invalid scope '{}'. Value must picked from {}.".format(scope, str(scopes)))
-            return
+        # Define the channel checker and tweets counter according to the given scope
+        if scope == 'global':
+            predicate = lambda: True
+            counter = lambda: sum(c.received_count for c in chan_conf.discord_channels)
+        elif scope == 'server':
+            def predicate(): return discord_channels & set(c.id for c in ctx.message.server.channels)
+            def counter(): return sum(c.received_count for c in chan_conf.discord_channels if c.id in set(ch.id for ch in ctx.message.server.channels))
+        elif scope == 'channel':
+            def predicate(): return ctx.message.channel.id in discord_channels
+            def counter(): return sum(c.received_count for c in chan_conf.discord_channels if c.id == ctx.message.channel.id)
+        else:
+            raise TwitterError("Invalid scope '{}'. Value must picked from {}.".format(scope, "['channel', 'server', 'global']"))
 
-        # Gather the twitter channels we're following and the number of tweet received in the given scope
+        # Gather the twitter channels we're following and the number of tweet received
         received_count = 0
         following = []
         for chan_conf in self.conf.follows:
             discord_channels = set(c.id for c in chan_conf.discord_channels)
-            if scope == 'global':
+            if predicate():
                 following.append(chan_conf.screen_name)
-                received_count += sum(c.received_count for c in chan_conf.discord_channels)
-            elif scope == 'server' and discord_channels & set(c.id for c in ctx.message.server.channels):
-                following.append(chan_conf.screen_name)
-                server_channels = set(ch.id for ch in ctx.message.server.channels)
-                received_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in server_channels)
-            elif scope == 'channel' and ctx.message.channel.id in discord_channels:
-                following.append(chan_conf.screen_name)
-                received_count += sum(c.received_count for c in chan_conf.discord_channels if c.id == ctx.message.channel.id)
+                received_count += counter()
 
         if not following:
             following.append('No one')
@@ -222,7 +228,7 @@ class Twitter:
         await self.bot.say(embed=embed)
 
     @twitter_group.command(name='unfollow', pass_context=True, no_pm=True)
-    @checks.is_server_owner()
+    @checks.has_permissions(manage_server=True)
     async def twitter_unfollow(self, ctx, channel):
         """Unfollows a twitter channel.
 
@@ -234,8 +240,7 @@ class Twitter:
         chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
         if chan_conf is None:
-            await self.bot.say('Not following ' + channel + ' on this channel.')
-            return
+            raise TwitterError('Not following {} on this channel.'.format(channel))
 
         # Remove the discord channel from the twitter channel conf
         conf.discord_channels.remove(chan_conf)
@@ -330,12 +335,21 @@ class Twitter:
         await self.bot.wait_until_ready()
 
         for channel in chan_conf.discord_channels:
+            discord_channel = self.bot.get_channel(channel.id)
+
+            # Check for required permissions
+            perms = discord_channel.permissions_for(discord_channel.server.me)
+            if not perms.send_messages:
+                await self.bot.send_message(discord_channel.server.owner, '')
+            if not perms.embed_links:
+                raise TwitterError('\N{WARNING SIGN} Missed tweet from {} : Embed links permission missing.'.format(tweet.author.screen_name))
+
             # Send the embed to the appropriate channel
             log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
-            await self.bot.send_message(self.bot.get_channel(channel.id), embed=embed)
+            await self.bot.send_message(discord_channel, embed=embed)
 
+            # Update stats and latest id when processing newer tweets
             if tweet.id > chan_conf.latest_received:
-                # Change stats and latest id only when processing newer tweets
                 channel.received_count += 1
                 chan_conf.latest_received = tweet.id
                 self.conf.save()
@@ -420,8 +434,6 @@ class TweepyStream(tweepy.StreamListener):
         self.sub_process = None
         self.mp_queue = None
         self.daemon = None
-
-        asyncio.ensure_future(self.start())
 
     @property
     def running(self):

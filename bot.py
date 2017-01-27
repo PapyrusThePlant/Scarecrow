@@ -59,22 +59,22 @@ class Bot(commands.Bot):
         for extension in self.extensions.copy().keys():
             self.unload_extension(extension)
 
-    async def on_command_error(self, exception, context):
-        # Skip if a cog defines this event
-        if self.extra_events.get('on_command_error', None):
+    async def on_command_error(self, error, ctx):
+        # Skip check failures and unknown commands
+        if isinstance(error, (commands.CheckFailure, commands.CommandNotFound)):
+            return
+
+        # Skip if the command's cog defines this event
+        cog = ctx.command.instance
+        if cog is not None and hasattr(cog, 'on_command_error'):
             return
 
         # Skip if the command defines an error handler
-        if hasattr(context.command, "on_error"):
-            return
-
-        # Skip check failures and unknown commands
-        if isinstance(exception, (commands.CheckFailure, commands.CommandNotFound)):
+        if hasattr(ctx.command, "on_error"):
             return
 
         content = 'Ignoring exception in command {}:\n' \
-                  '{}'.format(context.command,
-                              ''.join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
+                  '{}'.format(ctx.command, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
         log.error(content)
 
     async def on_error(self, event_method, *args, **kwargs):
