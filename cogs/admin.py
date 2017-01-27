@@ -82,23 +82,48 @@ class Admin:
         server = utils.ServerConverter(ctx, target).convert()
         return server, self.ignored.servers
 
+    async def valid_ignore_target(self, ctx, target):
+        # Only let the bot owner unignore a server owner
+        if isinstance(target, discord.Member):
+            # Do not ignore the bot owner
+            if self.bot.owner.id == target.id:
+                await self.bot.say('Cannot ignore the bot owner.')
+                return False
+
+            # Only allow the bot owner to unignore the server owner
+            if target.id == ctx.message.server.owner.id and ctx.message.author.id != self.bot.owner.id:
+                await self.bot.say('Only the bot owner can unignore the owner of a server.')
+                return False
+        elif isinstance(target, discord.Server):
+            # Only allow the bot owner to ignore servers
+            if ctx.message.author.id != self.bot.owner.id:
+                await self.bot.say('Only the bot owner can ignore/unignore servers.')
+                return False
+        elif isinstance(target, discord.Channel):
+            # Do not ignore voice channels or channels from other servers
+            if target.type != discord.ChannelType.text:
+                await self.bot.say('Cannot ignore/unignore voice channels.')
+                return False
+
+        # Let's ignore this fucker
+        return True
+
     @commands.command(pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def ignore(self, ctx, *, target):
         """Ignores a channel, a user (server-wide), or a whole server.
 
-        A server owner cannot be ignored on his own server.
-        If the bot is invited to an ignored server, it will leave it.
+        The target can be a name, an ID, the keyword 'channel' or 'server'.
         """
+        if target == 'channel':
+            target = ctx.message.channel.id
+        elif target == 'server':
+            target = ctx.message.server.id
         target, conf = self.resolve_target(ctx, target)
 
-        if isinstance(target, discord.Member):
-            # Do not ignore the bot owner
-            if self.bot.owner.id == target.id:
-                await self.bot.say('Cannot ignore the bot owner.')
-            # Do not ignore the server owner if it's not the bot owner that issues the command
-            elif ctx.message.server.owner_id == target.id and ctx.message.author.id != self.bot.owner.id:
-                await self.bot.say('Cannot ignore the server owner.')
+        # Check if the target is valid to ignore
+        if not await self.valid_ignore_target(ctx, target):
+            return
 
         # Save the ignore
         conf.append(target.id)
@@ -116,15 +141,17 @@ class Admin:
         """Un-ignores a channel, a user (server-wide), or a whole server."""
         target, conf = self.resolve_target(ctx, target)
 
-        # Only let the bot owner unignore a server owner
-        if isinstance(target, discord.Member)\
-                and target.id == ctx.message.server.owner.id\
-                and ctx.message.author.id != self.bot.owner.id:
-            await self.bot.say('Only the bot owner can unignore the owner of a server.')
+        # Check if the target is valid to unignore
+        if not await self.valid_ignore_target(ctx, target):
+            return
 
-        conf.remove(target.id)
-        self.ignored.save()
-        await self.bot.say('\N{OK HAND SIGN}')
+        try:
+            conf.remove(target.id)
+        except ValueError:
+            await self.bot.say('Target not found.')
+        else:
+            self.ignored.save()
+            await self.bot.say('\N{OK HAND SIGN}')
 
     @commands.command(hidden=True, pass_context=True, no_pm=True)
     @checks.is_owner()
