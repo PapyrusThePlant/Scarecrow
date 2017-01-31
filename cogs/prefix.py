@@ -29,10 +29,13 @@ class Prefix:
         self.bot.command_prefix = self.saved_prefixes
 
     def get_prefixes(self, bot, message):
-        prefixes = self.conf.server_specific.get(message.server.id, []) + self.conf.global_
+        if message.server is not None:
+            prefixes = self.conf.server_specific.get(message.server.id, []) + self.conf.global_
+        else:
+            prefixes = self.conf.global_
+            
         if 'mention' in prefixes:
-            prefixes.remove('mention')
-            prefixes.append('{} '.format(message.server.me.mention))
+            prefixes[prefixes.index('mention')] = bot.user.mention
         return prefixes
 
     @commands.group(name='prefix', no_pm=True)

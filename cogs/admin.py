@@ -200,7 +200,11 @@ class Admin:
 
     async def on_command(self, command, ctx):
         self.commands_used[command.name] += 1
-        log.info('{0.server.name}:#{0.channel.name}:{0.author.name}:{0.author.id}:{0.content}'.format(ctx.message))
+        m = ctx.message
+        if m.server is not None:
+            log.info('{0.name}:{0.id}:{1.name}:{1.id}:{2.name}:{2.id}:{3}'.format(m.server, m.channel, m.author, m.content))
+        else:
+            log.info('DM:{0.name}:{0.id}:{1}'.format(m.author, m.content))
 
     async def on_server_join(self, server: discord.Server):
         # Notify the owner that the bot has been invited somewhere
