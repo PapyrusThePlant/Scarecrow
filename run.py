@@ -7,15 +7,43 @@ import paths
 from bot import Bot
 
 
+class StreamToLogger:
+    """Fake file-like stream object that redirects writes to a logger instance."""
+    def __init__(self, logger, log_level=logging.INFO):
+        self.logger = logger
+        self.log_level = log_level
+        self.buffer = []
+
+    def write(self, buf):
+        if buf[-1] == '\n':
+            self.buffer.append(buf.rstrip())
+            self.emit()
+        else:
+            self.buffer.append(buf)
+
+    def emit(self):
+        self.logger.log(self.log_level, ''.join(part for part in self.buffer))
+        self.buffer.clear()
+
+    def flush(self):
+        # Quality flush
+        pass
+
+
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
 
-    # Setup the logging
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG if len(sys.argv) > 1 and sys.argv[1] == 'debug' else logging.INFO)
-    handler = logging.FileHandler(filename=paths.BOT_LOG, encoding='utf-8')
-    handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
-    root_logger.addHandler(handler)
+    # Setup the root logger
+    logging.basicConfig(
+        level=logging.DEBUG if 'debug' in sys.argv else logging.INFO,
+        filename=paths.BOT_LOG,
+        format='{asctime}:{levelname}:{name}:{message}',
+        style='{'
+    )
+
+    # Redirect stdout and stderr to the log file
+    sys.stdout = StreamToLogger(logging.getLogger('STDOUT'), logging.INFO)
+    sys.stderr = StreamToLogger(logging.getLogger('STDERR'), logging.ERROR)
 
     log = logging.getLogger(__name__)
     log.info('Started with Python {0.major}.{0.minor}.{0.micro}'.format(sys.version_info))
@@ -43,10 +71,5 @@ if __name__ == '__main__':
     else:
         log.info('Exiting normally')
     finally:
-        # Close logging handlers
-        handlers = root_logger.handlers
-        for handler in handlers:
-            handler.close()
-            root_logger.removeHandler(handler)
-
+        logging.shutdown()
         exit(bot.do_restart)

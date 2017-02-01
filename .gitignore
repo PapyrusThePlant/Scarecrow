@@ -1,4 +1,10 @@
-.idea
-conf
-logs
-venv
+# Build files and folders
+*.pyc
+venv/
+
+# Development files and folders
+.idea/
+
+# Project files and folders
+conf/
+logs/

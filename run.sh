@@ -3,7 +3,7 @@
 if [ ! -d './venv' ]
 then
     echo Creating new virtual environment...
-    python3.5 -m virtualenv venv
+    python3 -m virtualenv venv
 fi
 
 # Activate the virtual environment
@@ -16,7 +16,7 @@ then
     git pull
 
     echo Updating requirements...
-    pip install -U -r requirements.txt
+    python3 -m pip install -U -r requirements.txt
     exit 0
 fi
 
@@ -26,7 +26,7 @@ while true
 do
     # Execute the bot
     start_time=`date +%s`
-    python3 -B run.py "$@"
+    python3 run.py "$@"
     exit_code=$?
     end_time=`date +%s`
 
