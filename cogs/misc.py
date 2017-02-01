@@ -190,7 +190,7 @@ class Misc:
         if quick_search is not None:
             # Try to match things specific to the timeline or release date card
             timeline = quick_search.find("./div/div[@class='mod']/div[@class='_l6j']")
-            release_body = quick_search.find(".//div[@class='kp-header']/div[@class='_axe _T9h']")
+            release_body = quick_search.find(".//div[@class='kp-header']/div[@class='_axe _T9h kp-rgc']")
 
             # Check the results
             if timeline is not None:
@@ -342,9 +342,12 @@ class Misc:
             url = search_results[0][1]
             description = search_results[0][2]
             additional_results = '\n'.join('<{}>'.format(r[1]) for r in search_results[1:top_n + 1])
+
+            # Text response
             response = '**{}**\n{}\n{}\n\n**Additional Results**\n{}'.format(title, url, description, additional_results)
             await self.bot.say(response)
 
+            # Embed response (not worth using when the searche return a link to a video)
             embed = discord.Embed(colour=0x738bd7, title=title, url=url, description=description)
             embed.add_field(name='Additional Results', value=additional_results, inline=False)
         else:
