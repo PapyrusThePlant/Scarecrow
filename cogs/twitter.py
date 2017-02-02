@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import logging
 import multiprocessing
 import os
@@ -86,7 +87,7 @@ class Twitter:
         pass
 
     def _get_latest_valids(self, channel_id, limit):
-        latests = self.api.user_timeline(user_id=channel_id, exclude_replies=True, include_rts=False)
+        latests = self.api.user_timeline(user_id=channel_id, exclude_replies=True, include_rts=True, count=200)
         valids = [t for t in latests if not self.stream.skip_tweet(t)]
         valids.sort(key=lambda t: t.id)
         return valids[-limit:]
@@ -262,14 +263,18 @@ class Twitter:
     async def _fetch_missed_tweets(self):
         missed = []
         for chan_conf in self.conf.follows:
-            # TODO : Use 'since_id=chan_conf.latest_received', atm twitter answers that it's not a valid parameter...
-            latest_tweets = self.api.user_timeline(user_id=chan_conf.id, exclude_replies=True, include_rts=False)
+            if chan_conf.latest_received > 0:
+                partial = functools.partial(self.api.user_timeline, user_id=chan_conf.id, exclude_replies=True,
+                                            include_rts=True, since_id=chan_conf.latest_received, count=200)
+            else:
+                partial = functools.partial(self.api.user_timeline, user_id=chan_conf.id, exclude_replies=True, count=200)
+
+            latest_tweets = await self.bot.loop.run_in_executor(None, partial)
 
             # Gather the missed tweets
             missed = []
             for tweet in latest_tweets:
-                if tweet.id > chan_conf.latest_received:
-                    missed.append(tweet)
+                missed.append(tweet)
 
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
