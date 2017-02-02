@@ -76,6 +76,7 @@ class Bot(commands.Bot):
         content = 'Ignoring exception in command {}:\n' \
                   '{}'.format(ctx.command, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
         log.error(content)
+        await self.send_message(ctx.message.channel, 'An unexpected error has occurred and has been logged.')
 
     async def on_error(self, event_method, *args, **kwargs):
         # Skip if a cog defines this event
