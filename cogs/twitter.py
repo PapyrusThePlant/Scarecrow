@@ -1,5 +1,6 @@
 import asyncio
 import functools
+import json
 import logging
 import multiprocessing
 import os
@@ -86,19 +87,12 @@ class Twitter:
     async def twitter_group(self):
         pass
 
-    def _get_latest_valids(self, channel_id, limit):
-        latests = self.api.user_timeline(user_id=channel_id, exclude_replies=True, include_rts=True, count=200)
-        valids = [t for t in latests if not self.stream.skip_tweet(t)]
-        valids.sort(key=lambda t: t.id)
-        return valids[-limit:]
-
     @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def twitter_fetch(self, ctx, channel, limit=3):
         """Retrieves the lastest tweets from a channel and displays them.
 
-        If a limit is given, at most that number of tweets will be displayed.
-        Defaults to 3.
+        If a limit is given, at most that number of tweets will be displayed. Defaults to 3.
         """
         to_display = []
         if channel == 'all':
@@ -110,7 +104,7 @@ class Twitter:
 
             # Get the latests X tweets from every channel
             for conf in confs:
-                to_display.extend(self._get_latest_valids(conf.id, limit))
+                to_display.extend(await self.get_latest_valids(conf.id, limit))
 
             # Order them again when all have been retrieved
             to_display.sort(key=lambda t: t.id)
@@ -122,11 +116,11 @@ class Twitter:
                 raise TwitterError('Not following {} on this server.'.format(channel))
 
             # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
-            to_display = self._get_latest_valids(conf.id, limit)
+            to_display = await self.get_latest_valids(conf.id, limit)
 
         # Display the kept tweets
         for tweet in to_display:
-            embed = await self.prepare_tweet(tweet)
+            embed = await self.prepare_embed(tweet)
             await self.bot.say(embed=embed)
 
     @twitter_group.command(name='follow', pass_context=True, no_pm=True)
@@ -260,38 +254,51 @@ class Twitter:
 
         await self.bot.say('\N{OK HAND SIGN}')
 
+    async def get_latest_valids(self, channel_id, limit=0, since_id=0):
+        if since_id == 0:
+            if limit == 0:
+                # Because we could potentielly end up fetching thousands of tweets here, let's force a limit
+                limit = 3
+            partial = functools.partial(self.api.user_timeline, user_id=channel_id, exclude_replies=True, include_rts=True)
+        else:
+            partial = functools.partial(self.api.user_timeline, user_id=channel_id, exclude_replies=True, include_rts=True, since_id=since_id)
+
+        latests = await self.bot.loop.run_in_executor(None, partial)
+        valids = [t for t in latests if not self.stream.skip_tweet(t)]
+        valids.sort(key=lambda t: t.id)
+        return valids[-limit:]
+
     async def _fetch_missed_tweets(self):
         missed = []
+        # Gather the missed tweets
         for chan_conf in self.conf.follows:
-            if chan_conf.latest_received > 0:
-                partial = functools.partial(self.api.user_timeline, user_id=chan_conf.id, exclude_replies=True,
-                                            include_rts=True, since_id=chan_conf.latest_received, count=200)
-            else:
-                partial = functools.partial(self.api.user_timeline, user_id=chan_conf.id, exclude_replies=True, count=200)
-
-            latest_tweets = await self.bot.loop.run_in_executor(None, partial)
-
-            # Gather the missed tweets
-            missed = []
-            for tweet in latest_tweets:
-                missed.append(tweet)
+            missed.extend(await self.get_latest_valids(chan_conf.id, since_id=chan_conf.latest_received))
 
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
-            if not self.stream.skip_tweet(tweet):
-                await self.tweepy_on_status(tweet)
+            await self.tweepy_on_status(tweet)
 
     async def on_ready(self):
         # Check if we've missed any tweet
-        asyncio.ensure_future(self._fetch_missed_tweets())
+        await self._fetch_missed_tweets()
 
-    async def prepare_tweet(self, tweet):
-        author = tweet.author
-        author_url = 'https://twitter.com/{}'.format(author.screen_name)
-        tweet_url = 'https://twitter.com/i/web/status/{}'.format(tweet.id)
+    def prepare_tweet(self, tweet):
+        if isinstance(tweet, dict):
+            tweet = tweepy.Status.parse(self.api, tweet)
 
+        tweet.tweet_web_url = 'https://twitter.com/i/web/status/{}'.format(tweet.id)
+        tweet.tweet_url = 'https://twitter.com/{}/status/{}'.format(tweet.author.screen_name, tweet.id)
         urls = tweet.entities.get('urls', [])
         media = tweet.entities.get('media', [])
+
+        if tweet.is_quote_status:
+            tweet.quoted_status = self.prepare_tweet(tweet.quoted_status)
+            sub_tweet = tweet.quoted_status
+        elif hasattr(tweet, 'retweeted_status'):
+            tweet.retweeted_status = self.prepare_tweet(tweet.retweeted_status)
+            sub_tweet = tweet.retweeted_status
+        else:
+            sub_tweet = None
 
         # Remove the links to the attached media
         for medium in media:
@@ -299,21 +306,46 @@ class Twitter:
 
         # Replace links in the tweet with the expanded url for lisibility
         for url in urls.copy():
-            if url['expanded_url'] == tweet_url:
+            if url['expanded_url'] == tweet.tweet_url \
+                    or url['expanded_url'] == tweet.tweet_web_url \
+                    or (sub_tweet is not None and url['expanded_url'] == sub_tweet.tweet_url)\
+                    or (sub_tweet is not None and url['expanded_url'] == sub_tweet.tweet_web_url):
                 tweet.text = tweet.text.replace(url['url'], '')
                 urls.remove(url)
             else:
                 tweet.text = tweet.text.replace(url['url'], url['expanded_url'])
 
+        tweet.text = tweet.text.strip()
+        return tweet
+
+    async def prepare_embed(self, tweet):
+        tweet = self.prepare_tweet(tweet)
+
+        author = tweet.author
+        author_url = 'https://twitter.com/{}'.format(author.screen_name)
+
         # Build the embed
         embed = discord.Embed(colour=discord.Colour(int(author.profile_link_color, 16)),
                               title=author.name,
-                              url=tweet_url,
-                              description=tweet.text,
+                              url=tweet.tweet_url,
                               timestamp=tweet.created_at)
         embed.set_author(name='@{}'.format(author.screen_name), icon_url=author.profile_image_url, url=author_url)
 
+        # Check for retweets and quotes to format the tweet
+        if tweet.is_quote_status:
+            sub_tweet = tweet.quoted_status
+            embed.description = tweet.text
+            embed.add_field(name='Retweet from @{} :'.format(sub_tweet.author.screen_name), value=sub_tweet.text)
+        elif hasattr(tweet, 'retweeted_status'):
+            sub_tweet = tweet.retweeted_status
+            embed.add_field(name='Retweet from @{} :'.format(sub_tweet.author.screen_name), value=sub_tweet.text)
+        else:
+            sub_tweet = tweet
+            embed.description = tweet.text
+
         # Parse the tweet's entities to extract media and include them as the embed's image
+        urls = sub_tweet.entities.get('urls', [])
+        media = sub_tweet.entities.get('media', [])
         if media:
             embed.set_image(url=media[0]['media_url_https'])
         elif urls:
@@ -334,7 +366,7 @@ class Twitter:
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
         chan_conf = dutils.get(self.conf.follows, id=tweet.author.id_str)
-        embed = await self.prepare_tweet(tweet)
+        embed = await self.prepare_embed(tweet)
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
@@ -539,14 +571,6 @@ class TweepyStream(tweepy.StreamListener):
         # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
             log.debug('Ignoring tweet (reply): ' + log_status)
-            return True
-        # Ignore quotes
-        elif status.is_quote_status:
-            log.debug('Ignoring tweet (quote): ' + log_status)
-            return True
-        # Ignore retweets
-        elif hasattr(status, 'retweeted_status'):
-            log.debug('Ignoring tweet (retweet): ' + log_status)
             return True
         # Ignore tweets from authors we're not following (shouldn't happen)
         elif status.author.id_str not in self.get_follows():
