@@ -199,7 +199,8 @@ class Admin:
         await self.bot.change_status(discord.Game(name=status))
 
     async def on_command(self, command, ctx):
-        self.commands_used[command.name] += 1
+        # Log the command usage
+        self.commands_used[command.qualified_name] += 1
         m = ctx.message
         if m.server is not None:
             log.info('{0.name}:{0.id}:{1.name}:{1.id}:{2.name}:{2.id}:{3}'.format(m.server, m.channel, m.author, m.content))
@@ -207,19 +208,11 @@ class Admin:
             log.info('DM:{0.name}:{0.id}:{1}'.format(m.author, m.content))
 
     async def on_server_join(self, server: discord.Server):
-        # Notify the owner that the bot has been invited somewhere
-        embed = discord.Embed(title='{0.name} ({0.id})'.format(server), colour=0x00ff00)
-        embed.set_author(name='{0.name} ({0.id})'.format(server.owner), icon_url=server.owner.avatar_url)
-        embed.set_thumbnail(url='http://i.imgur.com/jhCa6vd.png')
-        await self.bot.send_message(self.bot.owner, embed=embed)
-
+        # Log that the bot has been added somewhere
+        log.info('GUILD_JOIN:{0.name}:{0.id}:{1.name}:{1.id}:'.format(server, server.owner))
         if server.id in self.ignored.servers:
-            await self.bot.send_message(self.bot.owner, "Ignored server, leaving.")
-            await self.bot.leave_server(server)
+            log.info('IGNORED SERVER:{0.name}:{0.id}:'.format(server))
 
     async def on_server_remove(self, server: discord.Server):
-        # Notify the owner that the bot has been removed from somewhere
-        embed = discord.Embed(title='{0.name} ({0.id})'.format(server), colour=0xff0000)
-        embed.set_author(name='{0.name} ({0.id})'.format(server.owner), icon_url=server.owner.avatar_url)
-        embed.set_thumbnail(url='http://i.imgur.com/7fnH92U.png')
-        await self.bot.send_message(self.bot.owner, embed=embed)
+        # Log that the bot has been removed from somewhere
+        log.info('GUILD_REMOVE:{0.name}:{0.id}:{1.name}:{1.id}:'.format(server, server.owner))
