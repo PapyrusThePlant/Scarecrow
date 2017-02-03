@@ -35,7 +35,7 @@ class Prefix:
             prefixes = self.conf.global_
             
         if 'mention' in prefixes:
-            prefixes[prefixes.index('mention')] = bot.user.mention
+            prefixes[prefixes.index('mention')] = bot.user.mention + ' '
         return prefixes
 
     @commands.group(name='prefix', no_pm=True)
@@ -44,10 +44,13 @@ class Prefix:
 
     @commands.has_permissions(manage_server=True)
     @prefix_group.command(name='add', pass_context=True, no_pm=True)
-    async def prefix_add(self, ctx, *, prefix):
+    async def prefix_add(self, ctx, prefix):
         """Adds a command prefix specific to this server.
 
         Adding 'mention' will define the bot's mention as a prefix.
+        If you want a space after your prefix, enclose it in quotes.
+        e.g :   @Scarecrow prefix add "pls bot "
+                pls bot help
         """
         if prefix in self.get_prefixes(self.bot, ctx.message):
             await self.bot.say('This prefix is already in place on this server.')
@@ -67,7 +70,7 @@ class Prefix:
 
     @commands.has_permissions(manage_server=True)
     @prefix_group.command(name='remove', pass_context=True, no_pm=True)
-    async def prefix_remove(self, ctx, *, prefix):
+    async def prefix_remove(self, ctx, prefix):
         """Removes a command prefix specific to this server."""
         sid = ctx.message.server.id
         prefixes = self.conf.server_specific.get(sid, None)
