@@ -111,8 +111,10 @@ class Bot(commands.Bot):
         asyncio.ensure_future(self.logout())
 
     def run(self):
-        super().run(self.conf.token)
-        self.unload_extensions()
+        try:
+            super().run(self.conf.token)
+        finally:
+            self.unload_extensions()
 
     def say_block(self, content):
         content = '```\n{}\n```'.format(content)
