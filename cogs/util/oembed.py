@@ -21,14 +21,14 @@ class OembedException(Exception):
 
 class EndpointNotFound(OembedException):
     def __init__(self, url):
-        message = 'No endpoint has been found that matches the given url. ({})'.format(url)
-        super(EndpointNotFound, self).__init__(message)
+        message = 'No endpoint has been found that matches the url "{}"'.format(url)
+        super().__init__(message)
 
 
 class NoOembedData(OembedException):
     def __init__(self, url):
-        message = 'Failed to retreive oembed data for the given url. ({})'.format(url)
-        super(NoOembedData, self).__init__(message)
+        message = 'Failed to retreive oembed data for the url "{}"'.format(url)
+        super().__init__(message)
 
 
 def find_oembed_endpoint(url):
@@ -60,7 +60,10 @@ async def fetch_oembed_data(url):
             try:
                 data = await utils.fetch_page(endpoint_url, params={'url': url, 'format': 'json'})
             except:
-                data = await utils.fetch_page(endpoint_url, data={'url': url, 'format': 'json'})
+                try:
+                    data = await utils.fetch_page(endpoint_url, data={'url': url, 'format': 'json'})
+                except:
+                    data = None
             if isinstance(data, dict):
                 return data
 

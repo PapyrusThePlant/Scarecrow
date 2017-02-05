@@ -153,7 +153,6 @@ class Twitter:
                 log.error(''.format(str(e)))
                 raise TwitterError('Unknown error, this has been logged.')
         elif dutils.get(conf.discord_channels, id=discord_channel.id):
-            # Already following on twitter, check if the discord channel is new
             raise TwitterError('Already following {} on this channel.'.format(channel))
 
         # Add new discord channel
@@ -264,15 +263,18 @@ class Twitter:
             partial = functools.partial(self.api.user_timeline, user_id=channel_id, exclude_replies=True, include_rts=True, since_id=since_id)
 
         latests = await self.bot.loop.run_in_executor(None, partial)
-        valids = [t for t in latests if not self.stream.skip_tweet(t)]
+        valids = [t for t in latests if not self.skip_tweet(t)]
         valids.sort(key=lambda t: t.id)
         return valids[-limit:]
 
-    async def _fetch_missed_tweets(self):
+    async def fetch_missed_tweets(self):
         missed = []
         # Gather the missed tweets
         for chan_conf in self.conf.follows:
-            missed.extend(await self.get_latest_valids(chan_conf.id, since_id=chan_conf.latest_received))
+            latests = await self.get_latest_valids(chan_conf.id, since_id=chan_conf.latest_received)
+            if latests:
+                log.info('Found {} tweets to display for @{}'.format(len(latests), chan_conf.screen_name))
+            missed.extend(latests)
 
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
@@ -280,7 +282,7 @@ class Twitter:
 
     async def on_ready(self):
         # Check if we've missed any tweet
-        await self._fetch_missed_tweets()
+        await self.fetch_missed_tweets()
 
     def prepare_tweet(self, tweet):
         if isinstance(tweet, dict):
@@ -306,16 +308,24 @@ class Twitter:
 
         # Replace links in the tweet with the expanded url for lisibility
         for url in urls.copy():
-            if url['expanded_url'] == tweet.tweet_url \
+            if url['url'] is None or url['url'] == '' \
+                    or url['expanded_url'] is None or url['expanded_url'] == '':
+                # Because receiving something like this is possible:
+                # "urls": [ {
+                #     "indices": [ 141, 141 ],
+                #     "url": "",
+                #     "expanded_url": null
+                #   } ],
+                urls.remove(url)
+            elif url['expanded_url'] == tweet.tweet_url \
                     or url['expanded_url'] == tweet.tweet_web_url \
-                    or (sub_tweet is not None and url['expanded_url'] == sub_tweet.tweet_url)\
-                    or (sub_tweet is not None and url['expanded_url'] == sub_tweet.tweet_web_url):
-                tweet.text = tweet.text.replace(url['url'], '')
+                    or (sub_tweet is not None and (url['expanded_url'] == sub_tweet.tweet_url
+                                                   or url['expanded_url'] == sub_tweet.tweet_web_url)):
+                tweet.text = tweet.text.replace(url['url'], '').strip()
                 urls.remove(url)
             else:
-                tweet.text = tweet.text.replace(url['url'], url['expanded_url'])
+                tweet.text = tweet.text.replace(url['url'], url['expanded_url']).strip()
 
-        tweet.text = tweet.text.strip()
         return tweet
 
     async def prepare_embed(self, tweet):
@@ -354,7 +364,7 @@ class Twitter:
             try:
                 data = await oembed.fetch_oembed_data(url)
             except Exception as e:
-                log.warning('Failed to retrieve oembed data for url \'{}\' : {}'.format(url, e))
+                log.warning(str(e))
             else:
                 if data['type'] == 'photo':
                     embed.set_image(url=data['url'])
@@ -363,8 +373,33 @@ class Twitter:
 
         return embed
 
+    def skip_tweet(self, status):
+        """Returns True if the given Twitter status is to be skipped."""
+        log_status = 'author: {}, reply_to_status: {}, reply_to_user: {}, quoting: {}, retweet: {}, text: {}'
+        log_status = log_status.format(status.author.screen_name,
+                                       status.in_reply_to_status_id,
+                                       status.in_reply_to_user_id,
+                                       status.is_quote_status,
+                                       hasattr(status, 'retweeted_status'),
+                                       status.text)
+
+        # Ignore replies
+        if status.in_reply_to_status_id or status.in_reply_to_user_id:
+            log.debug('Ignoring tweet (reply): ' + log_status)
+            return True
+        # Ignore tweets from authors we're not following (shouldn't happen)
+        elif status.author.id_str not in self.stream.get_follows():
+            log.debug('Ignoring tweet (bad author): ' + log_status)
+            return True
+        else:
+            log.debug('Dispatching tweet to handler: ' + log_status)
+            return False
+
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
+        if self.skip_tweet(tweet):
+            return
+
         chan_conf = dutils.get(self.conf.follows, id=tweet.author.id_str)
         embed = await self.prepare_embed(tweet)
 
@@ -558,32 +593,9 @@ class TweepyStream(tweepy.StreamListener):
                     # Process the data sent by the subprocess
                     self.on_data(data)
 
-    def skip_tweet(self, status):
-        """Returns True if the given Twitter status is to be skipped."""
-        log_status = 'author: {}, reply_to_status: {}, reply_to_user: {}, quoting: {}, retweet: {}, text: {}'
-        log_status = log_status.format(status.author.screen_name,
-                                       status.in_reply_to_status_id,
-                                       status.in_reply_to_user_id,
-                                       status.is_quote_status,
-                                       hasattr(status, 'retweeted_status'),
-                                       status.text)
-
-        # Ignore replies
-        if status.in_reply_to_status_id or status.in_reply_to_user_id:
-            log.debug('Ignoring tweet (reply): ' + log_status)
-            return True
-        # Ignore tweets from authors we're not following (shouldn't happen)
-        elif status.author.id_str not in self.get_follows():
-            log.debug('Ignoring tweet (bad author): ' + log_status)
-            return True
-        else:
-            log.debug('Dispatching tweet to handler: ' + log_status)
-            return False
-
     def on_status(self, status):
         """Called when a new status arrives."""
         log.debug('Received status: ' + str(status._json))
 
-        if not self.skip_tweet(status):
-            # Feed the handler with the tweet
-            asyncio.ensure_future(self.handler.tweepy_on_status(status))
+        # Feed the handler with the tweet
+        asyncio.ensure_future(self.handler.tweepy_on_status(status))
