@@ -60,8 +60,8 @@ class Bot(commands.Bot):
             self.unload_extension(extension)
 
     async def on_command_error(self, error, ctx):
-        # Skip check failures and unknown commands
-        if isinstance(error, (commands.CheckFailure, commands.CommandNotFound)):
+        # Skip missing arguments, check failures and unknown commands
+        if isinstance(error, (commands.MissingRequiredArgument, commands.CheckFailure, commands.CommandNotFound)):
             return
 
         # Skip if the command's cog defines this event

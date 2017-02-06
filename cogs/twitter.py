@@ -1,6 +1,5 @@
 import asyncio
 import functools
-import json
 import logging
 import multiprocessing
 import os
@@ -130,6 +129,9 @@ class Twitter:
 
         The tweets from the given twitter channel will be
         sent to the channel this command was used in.
+
+        Following protected users is not supported by the Twitter API.
+        See https://dev.twitter.com/streaming/overview/request-parameters#follow
         """
         discord_channel = ctx.message.channel
 
@@ -141,14 +143,23 @@ class Twitter:
         conf = dutils.get(self.conf.follows, screen_name=channel)
         if conf is None:
             try:
-                # New twitter channel, register it
-                user = self.api.get_user(channel)
+                # New twitter channel, retrieve the user info
+                partial = functools.partial(self.api.get_user, screen_name=channel)
+                user = await self.bot.loop.run_in_executor(None, partial)
+
+                # The Twitter API does not support following protected users
+                # https://dev.twitter.com/streaming/overview/request-parameters#follow
+                if user.protected:
+                    await self.bot.say('This channel is protected and cannot be followed.')
+                    return
+
+                # Register the new channel
                 conf = FollowConfig(user.id_str, channel)
                 self.conf.follows.append(conf)
 
                 # Restart the stream
                 await self.stream.start()
-            except tweepy.error.TweepError as e:
+            except tweepy.TweepError as e:
                 self.conf.follows.remove(conf)
                 log.error(''.format(str(e)))
                 raise TwitterError('Unknown error, this has been logged.')
