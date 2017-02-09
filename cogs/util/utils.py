@@ -54,6 +54,8 @@ async def fetch_page(url, **kwargs):
     else:
         if resp.headers['content-type'] == 'application/json':
             data = await resp.json()
+        elif 'image/' in resp.headers['content-type']:
+            return resp.url
         else:
             data = await resp.text()
 

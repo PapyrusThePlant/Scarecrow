@@ -41,7 +41,8 @@ class Misc:
         """Meow !"""
         providers = [
             ('http://random.cat/meow', lambda d: d['file']),
-            ('http://edgecats.net/random', lambda d: d)
+            ('http://edgecats.net/random', lambda d: d),
+            ('http://thecatapi.com/api/images/get?format=src', lambda d: d)
         ]
         provider = random.choice(providers)
         url = provider[0]
