@@ -15,11 +15,14 @@ class StreamToLogger:
         self.buffer = []
 
     def write(self, buf):
-        if buf[-1] == '\n':
-            self.buffer.append(buf.rstrip())
-            self.emit()
-        else:
-            self.buffer.append(buf)
+        try:
+            if buf[-1] == '\n':
+                self.buffer.append(buf.rstrip())
+                self.emit()
+            else:
+                self.buffer.append(buf)
+        except IndexError: # When buf == ''
+            pass
 
     def emit(self):
         self.logger.log(self.log_level, ''.join(part for part in self.buffer))
@@ -34,6 +37,12 @@ if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
 
     # Setup the root logger
+    rlog = logging.getLogger()
+    rlog.setLevel(logging.DEBUG if 'debug' in sys.argv else logging.INFO)
+    handler = logging.FileHandler(paths.BOT_LOG, encoding='utf-8')
+    handler.setFormatter(logging.Formatter('{asctime}:{levelname}:{name}:{message}', style='{'))
+    rlog.addHandler(handler)
+
     logging.basicConfig(
         level=logging.DEBUG if 'debug' in sys.argv else logging.INFO,
         filename=paths.BOT_LOG,
