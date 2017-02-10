@@ -1,4 +1,5 @@
 import asyncio
+import concurrent.futures
 import functools
 import logging
 import multiprocessing
@@ -28,7 +29,7 @@ def setup(bot):
 
     cog = Twitter(bot)
     bot.add_cog(cog)
-    asyncio.ensure_future(cog.stream.start())
+    asyncio.ensure_future(cog.stream.start(), loop=bot.loop)
 
 
 class TwitterError(commands.CommandError):
@@ -87,35 +88,21 @@ class Twitter:
         pass
 
     @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
-    @commands.has_permissions(manage_server=True)
-    async def twitter_fetch(self, ctx, channel, limit=3):
-        """Retrieves the lastest tweets from a channel and displays them.
+    async def twitter_fetch(self, ctx, channel, limit: int=1):
+        """Retrieves the latest tweets from a channel and displays them.
 
-        If a limit is given, at most that number of tweets will be displayed. Defaults to 3.
+        If a limit is given, at most that number of tweets will be displayed. Defaults to 1.
         """
-        to_display = []
-        if channel == 'all':
-            # Retrieve all the channels for the current feed
-            servers_chans = set(c.id for c in ctx.message.server.channels)
-            confs = [conf for conf in self.conf.follows if servers_chans.intersection(c.id for c in conf.discord_channels)]
-            if not confs:
-                raise TwitterError('Not following any channel on this server.')
-
-            # Get the latests X tweets from every channel
-            for conf in confs:
-                to_display.extend(await self.get_latest_valids(conf.id, limit))
-
-            # Order them again when all have been retrieved
-            to_display.sort(key=lambda t: t.id)
-        else:
-            channel = channel.lower()
-            conf = dutils.get(self.conf.follows, screen_name=channel)
-            servers_channels = set(c.id for c in ctx.message.server.channels)
-            if conf is None or not servers_channels.intersection(c.id for c in conf.discord_channels):
-                raise TwitterError('Not following {} on this server.'.format(channel))
-
-            # Get the latest tweets from the user, filter the one we display and only keep the {limit} most recent ones
-            to_display = await self.get_latest_valids(conf.id, limit)
+        # Get the latest tweets from the user
+        try:
+            to_display = await self.get_latest_valid(screen_name=channel.lower(), limit=limit)
+        except tweepy.TweepError as e:
+            # The channel is probably protected
+            if e.reason == 'Not authorized.':
+                raise TwitterError('This channel is protected, its tweets cannot be fetched.')
+            else:
+                log.error(str(e))
+                raise TwitterError('Unknown error, this has been logged.')
 
         # Display the kept tweets
         for tweet in to_display:
@@ -150,8 +137,7 @@ class Twitter:
                 # The Twitter API does not support following protected users
                 # https://dev.twitter.com/streaming/overview/request-parameters#follow
                 if user.protected:
-                    await self.bot.say('This channel is protected and cannot be followed.')
-                    return
+                    raise TwitterError('This channel is protected and cannot be followed.')
 
                 # Register the new channel
                 conf = FollowConfig(user.id_str, channel)
@@ -161,7 +147,7 @@ class Twitter:
                 await self.stream.start()
             except tweepy.TweepError as e:
                 self.conf.follows.remove(conf)
-                log.error(''.format(str(e)))
+                log.error(str(e))
                 raise TwitterError('Unknown error, this has been logged.')
         elif dutils.get(conf.discord_channels, id=discord_channel.id):
             raise TwitterError('Already following {} on this channel.'.format(channel))
@@ -200,8 +186,8 @@ class Twitter:
         """
         # Define the channel checker and tweets counter according to the given scope
         if scope == 'global':
-            predicate = lambda: True
-            counter = lambda: sum(c.received_count for c in chan_conf.discord_channels)
+            def predicate(): return True
+            def counter(): return sum(c.received_count for c in chan_conf.discord_channels)
         elif scope == 'server':
             def predicate(): return discord_channels & set(c.id for c in ctx.message.server.channels)
             def counter(): return sum(c.received_count for c in chan_conf.discord_channels if c.id in set(ch.id for ch in ctx.message.server.channels))
@@ -264,28 +250,27 @@ class Twitter:
 
         await self.bot.say('\N{OK HAND SIGN}')
 
-    async def get_latest_valids(self, channel_id, limit=0, since_id=0):
+    async def get_latest_valid(self, channel_id=None, screen_name=None, limit=0, since_id=0):
         if since_id == 0:
-            if limit == 0:
-                # Because we could potentielly end up fetching thousands of tweets here, let's force a limit
-                limit = 3
-            partial = functools.partial(self.api.user_timeline, user_id=channel_id, exclude_replies=True, include_rts=True)
+            # Because we could potentially end up fetching thousands of tweets here, let's force a limit
+            limit = limit or 3
+            partial = functools.partial(self.api.user_timeline, user_id=channel_id, screen_name=screen_name, exclude_replies=True, include_rts=True)
         else:
-            partial = functools.partial(self.api.user_timeline, user_id=channel_id, exclude_replies=True, include_rts=True, since_id=since_id)
+            partial = functools.partial(self.api.user_timeline, user_id=channel_id, screen_name=screen_name, exclude_replies=True, include_rts=True, since_id=since_id)
 
-        latests = await self.bot.loop.run_in_executor(None, partial)
-        valids = [t for t in latests if not self.skip_tweet(t)]
-        valids.sort(key=lambda t: t.id)
-        return valids[-limit:]
+        latest = await self.bot.loop.run_in_executor(None, partial)
+        valid = [t for t in latest if not self.skip_tweet(t)]
+        valid.sort(key=lambda t: t.id)
+        return valid[-limit:]
 
     async def fetch_missed_tweets(self):
         missed = []
         # Gather the missed tweets
         for chan_conf in self.conf.follows:
-            latests = await self.get_latest_valids(chan_conf.id, since_id=chan_conf.latest_received)
-            if latests:
-                log.info('Found {} tweets to display for @{}'.format(len(latests), chan_conf.screen_name))
-            missed.extend(latests)
+            latest = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
+            if latest:
+                log.info('Found {} tweets to display for @{}'.format(len(latest), chan_conf.screen_name))
+            missed.extend(latest)
 
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
@@ -397,10 +382,6 @@ class Twitter:
         # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
             log.debug('Ignoring tweet (reply): ' + log_status)
-            return True
-        # Ignore tweets from authors we're not following (shouldn't happen)
-        elif status.author.id_str not in self.stream.get_follows():
-            log.debug('Ignoring tweet (bad author): ' + log_status)
             return True
         else:
             log.debug('Dispatching tweet to handler: ' + log_status)
