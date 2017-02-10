@@ -22,11 +22,9 @@ class Info:
         self.bot = bot
 
     def _get_memory_str(self):
-        process = psutil.Process()
-        mem_info = process.memory_info()
-
         # Expressed in bytes, turn to Mb and round to 2 decimals
-        return '{0:.2f} Mb'.format(mem_info.rss / 1048576)
+        mem_info = psutil.Process().memory_full_info()
+        return '{0:.2f} Mb'.format(mem_info.uss / 1048576)
 
     def _get_uptime_str(self):
         # Get the uptime
