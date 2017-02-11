@@ -1,9 +1,9 @@
 import asyncio
-import concurrent.futures
 import functools
 import logging
 import multiprocessing
 import os
+import time
 from queue import Empty as QueueEmpty
 
 import tweepy
@@ -40,6 +40,7 @@ class TwitterConfig(config.ConfigElement):
     def __init__(self, credentials, **kwargs):
         self.credentials = credentials
         self.follows = kwargs.pop('follows', [])
+        self.processed_tweets = kwargs.pop('processed_tweets', 0)
 
 
 class TwitterCredentials(config.ConfigElement):
@@ -178,43 +179,32 @@ class Twitter:
             await self.bot.say(page)
 
     @twitter_group.command(name='status', pass_context=True, no_pm=True)
-    async def twitter_status(self, ctx, scope='server'):
-        """Displays the status of the twitter stream.
+    async def twitter_status(self, ctx):
+        """Displays the status of the twitter stream."""
+        server_channels = set(c.id for c in ctx.message.server.channels)
 
-        The scope can either be 'channel' 'server' or 'global'.
-        If nothing is specified the default scope is 'server'.
-        """
-        # Define the channel checker and tweets counter according to the given scope
-        if scope == 'global':
-            def predicate(): return True
-            def counter(): return sum(c.received_count for c in chan_conf.discord_channels)
-        elif scope == 'server':
-            def predicate(): return discord_channels & set(c.id for c in ctx.message.server.channels)
-            def counter(): return sum(c.received_count for c in chan_conf.discord_channels if c.id in set(ch.id for ch in ctx.message.server.channels))
-        elif scope == 'channel':
-            def predicate(): return ctx.message.channel.id in discord_channels
-            def counter(): return sum(c.received_count for c in chan_conf.discord_channels if c.id == ctx.message.channel.id)
-        else:
-            raise TwitterError("Invalid scope '{}'. Value must picked from {}.".format(scope, "['channel', 'server', 'global']"))
-
-        # Gather the twitter channels we're following and the number of tweet received
-        received_count = 0
-        following = []
+        followed_count = 0
+        displayed_count = 0
         for chan_conf in self.conf.follows:
-            discord_channels = set(c.id for c in chan_conf.discord_channels)
-            if predicate():
-                following.append(chan_conf.screen_name)
-                received_count += counter()
+            # Check if this channel is displayed in the server
+            if set(c.id for c in chan_conf.discord_channels) & server_channels:
+                followed_count += 1
+                displayed_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in server_channels)
 
-        if not following:
-            following.append('No one')
+        # Calculate the average tweets processed per minute
+        minutes = (time.time() - self.bot.start_time) / 60
+        processed_average = self.conf.processed_tweets / minutes
+        processed_average = '< 1' if processed_average < 1 else round(processed_average)
+        tweets_processed = '{} (avg {} / min)'.format(self.conf.processed_tweets, processed_average)
 
         # Display the info
-        embed = discord.Embed()
-        embed.description = 'Online' if self.stream.running else 'Offline'
-        embed.colour = (255 << 8) if self.stream.running else 255 << 16
-        embed.add_field(name=str(scope).title() + ' follows', value=', '.join(following))
-        embed.add_field(name='Tweets received', value=received_count)
+        if self.stream.running:
+            embed = discord.Embed(title='Stream status', description='Online', colour=0x00ff00)
+        else:
+            embed = discord.Embed(title='Stream status', description='Offline', colour=0xff0000)
+        embed.add_field(name='Tweets processed', value=tweets_processed, inline=False)
+        embed.add_field(name='Channels followed', value=followed_count)
+        embed.add_field(name='Tweets displayed', value=displayed_count)
 
         await self.bot.say(embed=embed)
 
@@ -259,7 +249,7 @@ class Twitter:
             partial = functools.partial(self.api.user_timeline, user_id=channel_id, screen_name=screen_name, exclude_replies=True, include_rts=True, since_id=since_id)
 
         latest = await self.bot.loop.run_in_executor(None, partial)
-        valid = [t for t in latest if not self.skip_tweet(t)]
+        valid = [t for t in latest if not self.skip_tweet(t, from_stream=False)]
         valid.sort(key=lambda t: t.id)
         return valid[-limit:]
 
@@ -369,7 +359,7 @@ class Twitter:
 
         return embed
 
-    def skip_tweet(self, status):
+    def skip_tweet(self, status, from_stream=True):
         """Returns True if the given Twitter status is to be skipped."""
         log_status = 'author: {}, reply_to_status: {}, reply_to_user: {}, quoting: {}, retweet: {}, text: {}'
         log_status = log_status.format(status.author.screen_name,
@@ -383,12 +373,16 @@ class Twitter:
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
             log.debug('Ignoring tweet (reply): ' + log_status)
             return True
+        elif from_stream and status.author.id_str not in self.stream.get_follows():
+            log.debug('Ignoring tweet (bad author): ' + log_status)
+            return True
         else:
             log.debug('Dispatching tweet to handler: ' + log_status)
             return False
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
+        self.conf.processed_tweets += 1
         if self.skip_tweet(tweet):
             return
 
