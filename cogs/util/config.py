@@ -5,6 +5,7 @@ import json
 class Config:
     """The config object, created from a json file"""
     def __init__(self, file, **options):
+        super().__setattr__('_data', {})
         self.file = file
         self.encoding = options.pop('encoding', None)
         self.object_hook = options.pop('object_hook', _ConfigDecoder().decode)
@@ -14,7 +15,7 @@ class Config:
             with open(self.file, 'r', encoding=self.encoding) as fp:
                 self._data = json.load(fp, object_hook=self.object_hook)
         except FileNotFoundError:
-            self._data = {}
+            pass
 
     def save(self):
         """Saves the config on disk"""
@@ -27,17 +28,21 @@ class Config:
         return self._data.__contains__(*args, **kwargs)
 
     def __len__(self):
-        return self._data.__len__()
+        return len(self._data)
 
     def __getattr__(self, item, default=None):
         return getattr(self._data, item, default)
 
-    def set(self, key, val):
-        self._data[key] = val
+    def __setattr__(self, key, value):
+        if key in self._data:
+            setattr(self._data, key, value)
+        else:
+            super().__setattr__(key, value)
 
 
 class ConfigElement:
-    pass
+    def __iter__(self):
+        return iter(self.__dict__)
 
 
 class _ConfigEncoder(json.JSONEncoder):
