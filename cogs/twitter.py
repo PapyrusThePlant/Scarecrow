@@ -42,6 +42,25 @@ class TwitterConfig(config.ConfigElement):
         self.follows = kwargs.pop('follows', [])
         self.processed_tweets = kwargs.pop('processed_tweets', 0)
 
+    def remove_channels(self, *channels):
+        """Removes a set of discord channels from the"""
+        channels = set(c.id for c in channels)
+        conf_to_remove = set()
+
+        # Check every twitter channel
+        for chan_conf in self.follows:
+            # if the twitter channel is displayed in one of the given channels
+            if set(c.id for c in chan_conf.discord_channels) & channels:
+                dchans_to_remove = set(c for c in chan_conf.discord_channels if c.id in channels)
+                chan_conf.discord_channels = [c for c in chan_conf.discord_channels if c not in dchans_to_remove]
+
+                # If this channel is now displayed nowhere, mark it for suppression
+                if not chan_conf.discord_channels:
+                    conf_to_remove.add(chan_conf)
+
+        if conf_to_remove:
+            self.follows = [c for c in self.follows if c not in conf_to_remove]
+
 
 class TwitterCredentials(config.ConfigElement):
     def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret):
@@ -84,6 +103,21 @@ class Twitter:
         if isinstance(error, TwitterError):
             await ctx.bot.send_message(ctx.message.channel, error)
 
+    async def on_ready(self):
+        # Check if we've missed any tweet
+        await self.fetch_missed_tweets()
+
+    async def on_channel_delete(self, channel):
+        if channel.server is not None:
+            self.conf.remove_channels(channel)
+            self.conf.save()
+            await self.stream.start()
+
+    async def on_server_remove(self, server):
+        self.conf.remove_channels(*server.channels)
+        self.conf.save()
+        await self.stream.start()
+
     @commands.group(name='twitter')
     async def twitter_group(self):
         pass
@@ -125,25 +159,32 @@ class Twitter:
 
         # Check for required permissions
         if not discord_channel.permissions_for(discord_channel.server.me).embed_links:
-            raise TwitterError('\N{WARNING SIGN} The permission to embed links in this channel is required to display tweets properly \N{WARNING SIGN}')
+            raise TwitterError('\N{WARNING SIGN} The `Embed Links` permission in this channel is required to display tweets properly. \N{WARNING SIGN}')
 
         channel = channel.lower()
         conf = dutils.get(self.conf.follows, screen_name=channel)
         if conf is None:
+            # New twitter channel, retrieve the user info
+            partial = functools.partial(self.api.get_user, screen_name=channel)
             try:
-                # New twitter channel, retrieve the user info
-                partial = functools.partial(self.api.get_user, screen_name=channel)
                 user = await self.bot.loop.run_in_executor(None, partial)
+            except tweepy.TweepError as e:
+                if e.api_code == 50:
+                    raise TwitterError('User not found.')
+                else:
+                    log.error(str(e))
+                    raise TwitterError('Unknown error, this has been logged.')
 
-                # The Twitter API does not support following protected users
-                # https://dev.twitter.com/streaming/overview/request-parameters#follow
-                if user.protected:
-                    raise TwitterError('This channel is protected and cannot be followed.')
+            # The Twitter API does not support following protected users
+            # https://dev.twitter.com/streaming/overview/request-parameters#follow
+            if user.protected:
+                raise TwitterError('This channel is protected and cannot be followed.')
 
-                # Register the new channel
-                conf = FollowConfig(user.id_str, channel)
-                self.conf.follows.append(conf)
+            # Register the new channel
+            conf = FollowConfig(user.id_str, channel)
+            self.conf.follows.append(conf)
 
+            try:
                 # Restart the stream
                 await self.stream.start()
             except tweepy.TweepError as e:
@@ -265,10 +306,6 @@ class Twitter:
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
             await self.tweepy_on_status(tweet)
-
-    async def on_ready(self):
-        # Check if we've missed any tweet
-        await self.fetch_missed_tweets()
 
     def prepare_tweet(self, tweet):
         if isinstance(tweet, dict):
@@ -395,12 +432,17 @@ class Twitter:
         for channel in chan_conf.discord_channels:
             discord_channel = self.bot.get_channel(channel.id)
 
+            # Check if the channel still exists
+            if discord_channel is None:
+                log.error('Channel {} unavailable to display tweet {}.'.format(discord_channel.id, tweet.id_str))
+                continue
+
             # Check for required permissions
             perms = discord_channel.permissions_for(discord_channel.server.me)
-            if not perms.send_messages:
-                await self.bot.send_message(discord_channel.server.owner, '')
             if not perms.embed_links:
-                raise TwitterError('\N{WARNING SIGN} Missed tweet from {} : Embed links permission missing.'.format(tweet.author.screen_name))
+                content = '\N{WARNING SIGN} Missed tweet from {} : `Embed links` permission missing. \N{WARNING SIGN}'.format(tweet.author.screen_name)
+                await self.bot.send_message(discord_channel, content)
+                return
 
             # Send the embed to the appropriate channel
             log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
@@ -500,15 +542,16 @@ class TweepyStream(tweepy.StreamListener):
 
     async def start(self):
         """Starts the tweepy Stream."""
-        if not self.conf.follows:
-            return
-
         # Avoid being rate limited by twitter when restarting the stream with the same follow list.
         if self.sub_process and not set(self.sub_process.follows) != set(self.get_follows()):
             return
 
-        # Kill the current subprocess before starting a new one
+        # Kill the current stream before starting a new one
         self.stop()
+
+        # No need to start a stream if we're not following anyone
+        if not self.conf.follows:
+            return
 
         # Create a new multi-processes queue, a new stream object and a new Process
         log.info('Creating new sub-process.')
