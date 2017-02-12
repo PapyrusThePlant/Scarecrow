@@ -31,24 +31,28 @@ class Admin:
     def __check(self, ctx):
         """A global check used on every command."""
         author = ctx.message.author
-        if author == ctx.bot.owner or author == ctx.message.server.owner:
+        server = ctx.message.server
+        if author == ctx.bot.owner:
             return True
 
-        server = ctx.message.server
+        if server is not None:
+            # Check if we're ignoring the server
+            if server.id in self.ignored.servers:
+                return False
 
-        # Check if we're ignoring the server
-        if server.id in self.ignored.servers:
-            return False
+            # Server owners can't be ignored
+            if author == server.owner:
+                return True
 
-        # Check if the user is banned from using the bot
-        if author.id in self.ignored.users.get(server.id, {}):
-            return False
+            # Check if the user is banned from using the bot
+            if author.id in self.ignored.users.get(server.id, {}):
+                return False
 
-        # Check if the channel is banned, bypass this if the user has the administrator permission
-        channel = ctx.message.channel
-        perms = channel.permissions_for(author)
-        if not perms.administrator and channel.id in self.ignored.channels:
-            return False
+            # Check if the channel is banned, bypass this if the user has the manage server permission
+            channel = ctx.message.channel
+            perms = channel.permissions_for(author)
+            if not perms.manage_server and channel.id in self.ignored.channels:
+                return False
 
         return True
 
