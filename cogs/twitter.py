@@ -40,7 +40,6 @@ class TwitterConfig(config.ConfigElement):
     def __init__(self, credentials, **kwargs):
         self.credentials = credentials
         self.follows = kwargs.pop('follows', [])
-        self.processed_tweets = kwargs.pop('processed_tweets', 0)
 
     def remove_channels(self, *channels):
         """Removes a set of discord channels from the"""
@@ -94,6 +93,7 @@ class Twitter:
         self.conf = config.Config(paths.TWITTER_CONFIG, encoding='utf-8')
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
+        self.processed_tweets = 0
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -234,16 +234,16 @@ class Twitter:
 
         # Calculate the average tweets processed per minute
         minutes = (time.time() - self.bot.start_time) / 60
-        processed_average = self.conf.processed_tweets / minutes
+        processed_average = self.processed_tweets / minutes
         processed_average = '< 1' if processed_average < 1 else round(processed_average)
-        tweets_processed = '{} (avg {} / min)'.format(self.conf.processed_tweets, processed_average)
+        tweets_processed = '{} (avg {} / min)'.format(self.processed_tweets, processed_average)
 
         # Display the info
         if self.stream.running:
             embed = discord.Embed(title='Stream status', description='Online', colour=0x00ff00)
         else:
             embed = discord.Embed(title='Stream status', description='Offline', colour=0xff0000)
-        embed.add_field(name='Tweets processed', value=tweets_processed, inline=False)
+        embed.add_field(name='Tweets processed since startup', value=tweets_processed, inline=False)
         embed.add_field(name='Channels followed', value=followed_count)
         embed.add_field(name='Tweets displayed', value=displayed_count)
 
@@ -419,7 +419,7 @@ class Twitter:
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
-        self.conf.processed_tweets += 1
+        self.processed_tweets += 1
         if self.skip_tweet(tweet):
             return
 
