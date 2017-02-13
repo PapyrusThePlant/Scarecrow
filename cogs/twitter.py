@@ -134,10 +134,10 @@ class Twitter:
         except tweepy.TweepError as e:
             # The channel is probably protected
             if e.reason == 'Not authorized.':
-                raise TwitterError('This channel is protected, its tweets cannot be fetched.')
+                raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
             else:
                 log.error(str(e))
-                raise TwitterError('Unknown error, this has been logged.')
+                raise TwitterError('Unknown error, this has been logged.') from e
 
         # Display the kept tweets
         for tweet in to_display:
@@ -170,10 +170,10 @@ class Twitter:
                 user = await self.bot.loop.run_in_executor(None, partial)
             except tweepy.TweepError as e:
                 if e.api_code == 50:
-                    raise TwitterError('User not found.')
+                    raise TwitterError('User not found.') from e
                 else:
                     log.error(str(e))
-                    raise TwitterError('Unknown error, this has been logged.')
+                    raise TwitterError('Unknown error, this has been logged.') from e
 
             # The Twitter API does not support following protected users
             # https://dev.twitter.com/streaming/overview/request-parameters#follow
@@ -190,7 +190,7 @@ class Twitter:
             except tweepy.TweepError as e:
                 self.conf.follows.remove(conf)
                 log.error(str(e))
-                raise TwitterError('Unknown error, this has been logged.')
+                raise TwitterError('Unknown error, this has been logged.') from e
         elif dutils.get(conf.discord_channels, id=discord_channel.id):
             raise TwitterError('Already following {} on this channel.'.format(channel))
 

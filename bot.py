@@ -60,23 +60,13 @@ class Bot(commands.Bot):
             self.unload_extension(extension)
 
     async def on_command_error(self, error, ctx):
-        # Skip missing arguments, check failures and unknown commands
-        if isinstance(error, (commands.MissingRequiredArgument, commands.CheckFailure, commands.CommandNotFound)):
-            return
-
-        # Skip if the command's cog defines this event
-        cog = ctx.command.instance
-        if cog is not None and hasattr(cog, 'on_command_error'):
-            return
-
-        # Skip if the command defines an error handler
-        if hasattr(ctx.command, "on_error"):
-            return
-
-        content = 'Ignoring exception in command {}:\n' \
-                  '{}'.format(ctx.command, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
-        log.error(content)
-        await self.send_message(ctx.message.channel, 'An unexpected error has occurred and has been logged.')
+        if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand)):
+            await self.send_message(ctx.message.channel, str(error))
+        elif isinstance(error, commands.CommandInvokeError):
+            content = 'Ignoring exception in command {}:\n' \
+                      '{}'.format(ctx.command, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+            log.error(content)
+            await self.send_message(ctx.message.channel, 'An unexpected error has occurred and has been logged.')
 
     async def on_error(self, event_method, *args, **kwargs):
         # Skip if a cog defines this event
