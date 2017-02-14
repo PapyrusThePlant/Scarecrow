@@ -349,6 +349,10 @@ class Twitter:
             else:
                 tweet.text = tweet.text.replace(url['url'], url['expanded_url']).strip()
 
+        # Avoid retweets without text to cause the embed to be illegal
+        if not tweet.text:
+            tweet.text = '\N{ZERO WIDTH SPACE}'
+
         return tweet
 
     async def prepare_embed(self, tweet):
@@ -424,7 +428,13 @@ class Twitter:
             return
 
         chan_conf = dutils.get(self.conf.follows, id=tweet.author.id_str)
-        embed = await self.prepare_embed(tweet)
+        try:
+            embed = await self.prepare_embed(tweet)
+            content = None
+        except:
+            embed = None
+            content = 'Failed to prepare embed for ' + tweet.web_url # If the preparation failed before setting weet.web_url imma kms
+            log.error('Failed to prepare embed for ' + str(tweet._json))
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
@@ -440,13 +450,17 @@ class Twitter:
             # Check for required permissions
             perms = discord_channel.permissions_for(discord_channel.server.me)
             if not perms.embed_links:
-                content = '\N{WARNING SIGN} Missed tweet from {} : `Embed links` permission missing. \N{WARNING SIGN}'.format(tweet.author.screen_name)
-                await self.bot.send_message(discord_channel, content)
-                return
+                log.warning('Improper permissions in channel {} to display tweet {}.'.format(discord_channel.id, tweet.id_str))
+                try:
+                    warning = '\N{WARNING SIGN} Missed tweet from {} : `Embed links` permission missing. \N{WARNING SIGN}'.format(tweet.author.screen_name)
+                    await self.bot.send_message(discord_channel, warning)
+                except discord.DiscordException as e:
+                    log.error('Could not send warning to channel {}.\n{}'.format(discord_channel.id, e))
+                continue
 
             # Send the embed to the appropriate channel
             log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
-            await self.bot.send_message(discord_channel, embed=embed)
+            await self.bot.send_message(discord_channel, content=content, embed=embed)
 
             # Update stats and latest id when processing newer tweets
             if tweet.id > chan_conf.latest_received:
@@ -458,7 +472,7 @@ class Twitter:
 class TweepyAPI(tweepy.API):
     """Auto login tweepy api object."""
     def __init__(self, conf):
-        tweepy.API.__init__(self)
+        tweepy.API.__init__(self, wait_on_rate_limit=True)
         self.auth = tweepy.OAuthHandler(conf.consumer_key, conf.consumer_secret)
         self.auth.set_access_token(conf.access_token, conf.access_token_secret)
         log.info('Logged in Twitter as {username}'.format(username=self.verify_credentials().screen_name))
