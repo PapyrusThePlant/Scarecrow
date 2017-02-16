@@ -120,10 +120,8 @@ class Info:
         members_count = sum(len(server.members) for server in self.bot.servers)
         unique_members_count = len(set(self.bot.get_all_members()))
         members_str = '{} ({} unique)'.format(members_count, unique_members_count)
-        try:
-            owner = ctx.message.server.get_member(self.bot.owner.id)
-        except:
-            owner = self.bot.owner
+        owner = ctx.message.server.get_member(self.bot.owner.id)
+        owner = owner or self.bot.owner
 
         embed = discord.Embed(title='Bot support server invite', url='https://discord.gg/ZWnENfx', colour=0x738bd7)
         embed.set_author(name='{0.display_name} ({0})'.format(owner), icon_url=owner.avatar_url)
