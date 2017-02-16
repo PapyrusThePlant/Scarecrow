@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 import io
-import os
+import textwrap
 import traceback
 from contextlib import redirect_stdout
 
@@ -19,7 +19,9 @@ class Dev:
     """Dev tools and commands, mostly owner only."""
     def __init__(self, bot):
         self.bot = bot
-        self.repl_sessions = set()
+        self.debug_env = {}
+        self.cleanup_task = None
+        self.clear_debug_env()
 
     def _resolve_module_name(self, name):
         if name in self.bot.cogs:
@@ -94,120 +96,67 @@ class Dev:
         self.bot.unload_extension(module_path)
         await self.bot.say('\N{OK HAND SIGN}')
 
-    @commands.command(pass_context=True, hidden=True)
+    @commands.group(pass_context=True, invoke_without_command=True)
     @checks.is_owner()
     async def debug(self, ctx, *, code: str):
         """Yet another eval command."""
+        # Cleanup the code blocks
+        if code.startswith('```') and code.endswith('```'):
+            code = '\n'.join(code.splitlines()[1:-1])
         code = code.strip('` ')
 
-        env = {
-            'cog': self,
-            'bot': self.bot,
-            'ctx': ctx,
-            'message': ctx.message,
-            'channel': ctx.message.channel,
-            'server': ctx.message.server
-        }
-
-        env.update(globals())
+        # Wrap the code inside a coroutine to allow asyncronous keywords
+        code = 'async def painting_of_a_happy_little_tree(ctx):\n' + textwrap.indent(code, '    ')
+        stdout = io.StringIO()
 
         try:
-            result = eval(code, env)
-            if inspect.isawaitable(result):
-                result = await result
-        except Exception as e:
-            content = type(e).__name__ + ': ' + str(e)
+            # First exec to create the coroutine
+            exec(code, self.debug_env)
+            coro = self.debug_env.pop('painting_of_a_happy_little_tree')(ctx)
+        except SyntaxError as e:
+            content = '{0.text}{1:>{0.offset}}\n{2}: {0.msg}'.format(e, '^', type(e).__name__)
         else:
-            content = result
-
-        await self.bot.say_block(content)
-
-    @commands.command(pass_context=True, hidden=True)
-    @checks.is_owner()
-    async def repl(self, ctx):
-        """Yet another Read-Eval-Print-Loop."""
-        msg = ctx.message
-
-        variables = {
-            'ctx': ctx,
-            'bot': self.bot,
-            'message': msg,
-            'server': msg.server,
-            'channel': msg.channel,
-            'author': msg.author,
-            'last': None,
-        }
-
-        if msg.channel.id in self.repl_sessions:
-            await self.bot.say('Already running a REPL session in this channel. Exit it with `quit`.')
-            return
-
-        self.repl_sessions.add(msg.channel.id)
-        await self.bot.say('Enter code to execute or evaluate. `exit()` or `quit` to exit.')
-        while True:
-            response = await self.bot.wait_for_message(author=msg.author, channel=msg.channel,
-                                                       check=lambda m: m.content.startswith('`'))
-
-            content = response.content
-            if content.startswith('```') and content.endswith('```'):
-                cleaned = '\n'.join(content.split('\n')[1:-1])
-            else:
-                cleaned = content.strip('` \n')
-
-            if cleaned in ('quit', 'exit', 'exit()'):
-                await self.bot.say('Exiting.')
-                self.repl_sessions.remove(msg.channel.id)
-                return
-
-            executor = exec
-            if cleaned.count('\n') == 0:
-                # single statement, potentially 'eval'
-                try:
-                    code = compile(cleaned, '<repl session>', 'eval')
-                except SyntaxError:
-                    pass
-                else:
-                    executor = eval
-
-            if executor is exec:
-                try:
-                    code = compile(cleaned, '<repl session>', 'exec')
-                except SyntaxError as e:
-                    error = '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
-                    await self.bot.say(error)
-                    continue
-
-            variables['message'] = response
-
-            fmt = None
-            stdout = io.StringIO()
-
+            # Save a reference to the coro's frame before executing it
+            coro_frame = coro.cr_frame
             try:
                 with redirect_stdout(stdout):
-                    result = executor(code, variables)
-                    if inspect.isawaitable(result):
-                        result = await result
-            except Exception as e:
-                value = stdout.getvalue()
-                fmt = '```py\n{}{}\n```'.format(value, traceback.format_exc())
+                    result = await coro
+            except:
+                content = '{}{}'.format(stdout.getvalue(), traceback.format_exc())
             else:
-                value = stdout.getvalue()
+                # Execution succeeded, save the return value and build the output content
+                self.debug_env['_last'] = result
+                content = stdout.getvalue()
                 if result is not None:
-                    fmt = '```py\n{}{}\n```'.format(value, result)
-                    variables['last'] = result
-                elif value:
-                    fmt = '```py\n{}\n```'.format(value)
+                    content += str(result)
 
-            try:
-                if fmt is not None:
-                    if len(fmt) > 2000:
-                        await self.bot.send_message(msg.channel, 'Content too big to be printed.')
-                    else:
-                        await self.bot.send_message(msg.channel, fmt)
-            except discord.Forbidden:
-                pass
-            except discord.HTTPException as e:
-                await self.bot.send_message(msg.channel, 'Unexpected error: `{}`'.format(e))
+                # Re-schedule the cleanup
+                if self.cleanup_task:
+                    self.cleanup_task.cancel()
+                self.cleanup_task = ctx.bot.loop.call_later(180, self.clear_debug_env)
+            finally:
+                # Update the execution environment with the coroutine's locals
+                self.debug_env.update(coro_frame.f_locals)
+                del coro_frame
+
+        # Send the feedback
+        if content:
+            await self.bot.say_block(content)
+        else:
+            await self.bot.add_reaction(ctx.message, '\N{WHITE HEAVY CHECK MARK}')
+
+    def clear_debug_env(self):
+        if self.cleanup_task:
+            self.cleanup_task.cancel()
+            self.cleanup_task = None
+        self.debug_env.clear()
+        self.debug_env.update(globals())
+
+    @debug.command()
+    @checks.is_owner()
+    async def clear(self):
+        """Clears the execution environment."""
+        self.clear_debug_env()
 
     @commands.command()
     @checks.is_owner()
