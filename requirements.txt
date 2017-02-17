@@ -1,4 +1,4 @@
-git+https://github.com/PapyrusThePlant/discord.py.git@master#egg=discord.py
+git+https://github.com/PapyrusThePlant/discord.py.git@async#egg=discord.py
 lxml
 psutil
 tweepy
