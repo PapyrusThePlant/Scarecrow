@@ -102,7 +102,12 @@ class Twitter:
 
     async def on_command_error(self, error, ctx):
         if isinstance(error, TwitterError):
-            await ctx.bot.send_message(ctx.message.channel, error)
+            try:
+                await ctx.bot.send_message(ctx.message.channel, error)
+            except discord.Forbidden:
+                warning = 'Missing the `Send Messages` permission to send the following error to {}: {}'.format(ctx.message.channel.mention, error)
+                log.warning(warning)
+                await ctx.bot.send_message(ctx.message.author, warning)
 
     async def on_ready(self):
         # Check if we've missed any tweet
