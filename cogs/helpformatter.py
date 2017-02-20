@@ -1,4 +1,4 @@
-import discord.ext.commands.formatter as formatter
+import discord.ext.commands as commands
 from discord.ext.commands.core import GroupMixin
 
 
@@ -7,10 +7,10 @@ def setup(bot):
 
 
 def teardown(bot):
-    bot.formatter = formatter.HelpFormatter()
+    bot.formatter = commands.HelpFormatter()
 
 
-class HelpFormatter(formatter.HelpFormatter):
+class HelpFormatter(commands.HelpFormatter):
     """Deviation from the default formatter to list subcommands with extra indentation and formatting."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,10 +44,11 @@ class HelpFormatter(formatter.HelpFormatter):
 
     def _get_max_width(self, command, depth=1):
         """Tricks and ponies to get the appropriate max_width."""
-        if not isinstance(command, GroupMixin):
-            return len(command.name) + depth * len(self.base_indent)
-
-        return max([self._get_max_width(c, depth + 1) for c in command.commands.values()])
+        command_length = len(command.name) + depth * len(self.base_indent)
+        if isinstance(command, GroupMixin):
+            return max([self._get_max_width(c, depth + 1) for c in command.commands.values()] + [command_length])
+        else:
+            return command_length
 
     @property
     def max_name_size(self):
@@ -56,7 +57,7 @@ class HelpFormatter(formatter.HelpFormatter):
         try:
             command = self.command if not self.is_cog() else self.context.bot
             if command.commands:
-                return max(map(lambda c: self._get_max_width(c) if self.show_hidden or not c.hidden else 0, command.commands.values()))
+                return max([self._get_max_width(c) if self.show_hidden or not c.hidden else 0 for c in command.commands.values()])
             return 0
         except AttributeError:
             return len(self.command.name)
