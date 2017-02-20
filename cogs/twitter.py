@@ -3,6 +3,7 @@ import functools
 import logging
 import multiprocessing
 import os
+import textwrap
 import time
 from queue import Empty as QueueEmpty
 
@@ -205,19 +206,14 @@ class Twitter:
 
         To use a multi-word query, enclose it in quotes.
         """
-        results = self.api.search_users(query, limit)
+        results = await self.bot.loop.run_in_executor(None, self.api.search_users, query, limit)
         if not results:
-            await self.bot.say('No result')
-            return
+            raise TwitterError('No result')
 
-        paginator = Paginator()
-        fmt = '{0:{width}}: {1}\n'
-        max_width = max([len(u.screen_name) for u in results])
+        embed = discord.Embed(colour=0x738bd7)
         for user in results:
-            paginator.add_line(fmt.format(user.screen_name, user.description.replace('\n', ''), width=max_width))
-
-        for page in paginator.pages:
-            await self.bot.say(page)
+            embed.add_field(name=user.screen_name, value=textwrap.shorten(user.description, 1024), inline=False)
+        await self.bot.say(embed=embed)
 
     @twitter_group.command(name='status', pass_context=True, no_pm=True)
     async def twitter_status(self, ctx):
