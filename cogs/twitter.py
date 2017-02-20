@@ -136,6 +136,8 @@ class Twitter:
             # The channel is probably protected
             if e.reason == 'Not authorized.':
                 raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
+            if e.api_code == 34:
+                raise TwitterError('User "{}" not found.'.format(channel)) from e
             else:
                 log.error(str(e))
                 raise TwitterError('Unknown error, this has been logged.') from e
@@ -162,16 +164,16 @@ class Twitter:
         if not discord_channel.permissions_for(discord_channel.server.me).embed_links:
             raise TwitterError('\N{WARNING SIGN} The `Embed Links` permission in this channel is required to display tweets properly. \N{WARNING SIGN}')
 
-        channel = channel.lower()
-        conf = dutils.get(self.conf.follows, screen_name=channel)
+        lower_channel = channel.lower()
+        conf = dutils.get(self.conf.follows, screen_name=lower_channel)
         if conf is None:
             # New twitter channel, retrieve the user info
-            partial = functools.partial(self.api.get_user, screen_name=channel)
+            partial = functools.partial(self.api.get_user, screen_name=lower_channel)
             try:
                 user = await self.bot.loop.run_in_executor(None, partial)
             except tweepy.TweepError as e:
                 if e.api_code == 50:
-                    raise TwitterError('User not found.') from e
+                    raise TwitterError('User "{}" not found.'.format(channel)) from e
                 else:
                     log.error(str(e))
                     raise TwitterError('Unknown error, this has been logged.') from e
@@ -206,9 +208,13 @@ class Twitter:
 
         To use a multi-word query, enclose it in quotes.
         """
-        results = await self.bot.loop.run_in_executor(None, self.api.search_users, query, limit)
+        try:
+            results = await self.bot.loop.run_in_executor(None, self.api.search_users, query, limit)
+        except tweepy.TweepError as e:
+            log.error(str(e))
+            raise TwitterError('Unknown error, this has been logged.') from e
         if not results:
-            raise TwitterError('No result')
+            raise TwitterError('No result.')
 
         embed = discord.Embed(colour=0x738bd7)
         for user in results:
