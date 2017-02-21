@@ -1,12 +1,11 @@
 import random
 
-import discord
+import discord.utils as dutils
 import discord.ext.commands as commands
 
-from .util import checks
 
-SHIMMY_SERVER_ID = '140880261360517120'
-NSFW_ROLE_ID = '261189004681019392'
+SHIMMY_GUILD_ID = 140880261360517120
+NSFW_ROLE_ID = 261189004681019392
 
 
 eight_ball_responses = [
@@ -21,7 +20,7 @@ eight_ball_responses = [
     "Outlook good",
     "Yes",
     "Signs point to yes",
-    # Non cmmmittal
+    # Non committal
     "Reply hazy try again",
     "Ask again later",
     "Better not tell you now",
@@ -37,28 +36,31 @@ eight_ball_responses = [
 
 
 def setup(bot):
-    bot.add_cog(Shimmy(bot))
+    bot.add_cog(Shimmy())
 
 
 class Shimmy:
-    """Commands exclusive to Shimmy's discord server."""
-    def __init__(self, bot):
-        self.bot = bot
+    """Exclusivities to Shimmy's discord server."""
+    def __init__(self):
+        self.nsfw_role = None
 
-    @commands.command(pass_context=True, no_pm=True)
-    @checks.in_server(SHIMMY_SERVER_ID)
+    def __local_check(self, ctx):
+        return ctx.guild.id == SHIMMY_GUILD_ID
+
+    @commands.command(no_pm=True)
     async def nsfw(self, ctx):
         """Tries to add the NSFW role to a member."""
-        await self.bot.add_roles(ctx.message.author, discord.Object(id=NSFW_ROLE_ID))
-        await self.bot.say('\N{WHITE HEAVY CHECK MARK} Access granted.', delete_after=3)
-        await self.bot.delete_message(ctx.message)
+        if self.nsfw_role is None:
+            self.nsfw_role = dutils.get(ctx.guild.roles, id=NSFW_ROLE_ID)
 
-    @commands.command(aliases=['eight', '8'])
-    @checks.in_server(SHIMMY_SERVER_ID)
-    async def ball(self, *, question):
+        await ctx.author.add_roles(self.nsfw_role)
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @commands.command(no_pm=True)
+    async def ball(self, ctx, *, question):
         """Scarecrow's 8-Ball reaches into the future, to find the answers to your questions.
 
         It knows what will be, and is willing to share this with you. Just send a question that can be answered by
         "Yes" or "No", then let Scarecrow's 8-Ball show you the way !
         """
-        await self.bot.say(random.choice(eight_ball_responses))
+        await ctx.send(random.choice(eight_ball_responses))

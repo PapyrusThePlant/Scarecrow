@@ -4,21 +4,54 @@ This gather stuff that for the most part should be written elsewhere but is not 
 import aiohttp
 import asyncio
 import random
+import re
 
-import discord.utils as dutils
-from discord.ext.commands import BadArgument, Converter
+import discord
+import discord.ext.commands as commands
 
 
-class ServerConverter(Converter):
+class GuildChannelConverter(commands.Converter):
+    def __init__(self):
+        self._id_regex = re.compile(r'([0-9]{15,21})$')
+
+    def _get_id_match(self):
+        return self._id_regex.match(self.argument)
+
     def convert(self):
-        bot = self.ctx.bot
+        match = self._get_id_match()
 
-        result = dutils.get(bot.servers, name=self.argument)
-        if result is None:
-            result = bot.get_server(self.argument)
+        if match is None:
+            # not a mention
+            result = discord.utils.get(self.ctx.bot.get_all_channels(), name=self.argument)
+        else:
+            guild_id = int(match.group(1))
+            result = self.ctx.bot.get_channel(guild_id)
 
-        if result is None:
-            raise BadArgument('Member "{}" not found'.format(self.argument))
+        if not isinstance(result, (discord.TextChannel, discord.VoiceChannel)):
+            raise commands.BadArgument('Guild "{}" not found.'.format(self.argument))
+
+        return result
+
+
+class GuildConverter(commands.Converter):
+    def __init__(self):
+        self._id_regex = re.compile(r'([0-9]{15,21})$')
+
+    def _get_id_match(self):
+        return self._id_regex.match(self.argument)
+
+    def convert(self):
+        match = self._get_id_match()
+
+        if match is None:
+            # not a mention
+            result = discord.utils.get(self.ctx.bot.guilds, name=self.argument)
+        else:
+            guild_id = int(match.group(1))
+            result = self.ctx.bot.get_guild(guild_id)
+
+        if not isinstance(result, discord.Guild):
+            raise commands.BadArgument('Guild "{}" not found.'.format(self.argument))
 
         return result
 
@@ -26,8 +59,8 @@ class ServerConverter(Converter):
 class HTTPError(Exception):
     def __init__(self, resp, message):
         self.response = resp
-        if type(message) is dict:
-            self.resp_message = message.get('message', message.get('msg', ''))
+        if isinstance(message, dict):
+            self.resp_msg = message.get('message', message.get('msg', ''))
             self.code = message.get('code', 0)
         else:
             self.resp_message = message
@@ -36,7 +69,13 @@ class HTTPError(Exception):
         if len(self.resp_message):
             fmt += ': {1}'
 
-        super().__init__(fmt.format(self.response, self.resp_message))
+        super().__init__(fmt.format(self.response, self.resp_msg))
+
+
+def dict_keys_to_int(d):
+    """#HowToBeLazy"""
+    return {int(k): v for k, v in d.items()}
+
 
 async def fetch_page(url, **kwargs):
     """Fetches a web page and return its text or json content."""
@@ -68,6 +107,11 @@ async def fetch_page(url, **kwargs):
             _session.close()
 
     return data
+
+
+def format_block(content, language=''):
+    """Formats text into a code block."""
+    return '```{}\n{}\n```'.format(language, content)
 
 
 def indented_entry_to_str(entries, indent=0, sep=' '):

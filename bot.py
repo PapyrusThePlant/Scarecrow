@@ -62,20 +62,20 @@ class Bot(commands.Bot):
 
     async def on_command_error(self, error, ctx):
         if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand)):
-            await self.send_message(ctx.message.channel, str(error))
+            await ctx.send(str(error))
         elif isinstance(error, commands.CommandInvokeError):
-            content = 'Ignoring exception in command {}:\n' \
-                      '{}'.format(ctx.command, ''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+            tb = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+            content = 'Ignoring exception in command {} : {}'.format(ctx.command, tb)
             log.error(content)
-            await self.send_message(ctx.message.channel, 'An unexpected error has occurred and has been logged.')
+            await ctx.send('An unexpected error has occurred and has been logged.')
 
     async def on_error(self, event_method, *args, **kwargs):
         # Skip if a cog defines this event
         if self.extra_events.get('on_error', None):
             return
 
-        content = 'Ignoring exception in {}:\n' \
-                  '{}'.format(event_method, ''.join(traceback.format_exc()))
+        tb = ''.join(traceback.format_exc())
+        content = 'Ignoring exception in {} : {}'.format(event_method, tb)
         log.error(content)
 
     async def on_ready(self):
@@ -94,19 +94,15 @@ class Bot(commands.Bot):
     def shutdown(self):
         self.do_restart = False
         # Log out of Discord
-        asyncio.ensure_future(self.logout())
+        asyncio.ensure_future(self.logout(), loop=self.loop)
 
     def restart(self):
         self.do_restart = True
         # Log out of Discord
-        asyncio.ensure_future(self.logout())
+        asyncio.ensure_future(self.logout(), loop=self.loop)
 
     def run(self):
         try:
-            super().run(self.conf.token)
+            super().run(self.conf.token, reconnect=True)
         finally:
             self.unload_extensions()
-
-    def say_block(self, content):
-        content = '```\n{}\n```'.format(content)
-        return self.say(content)

@@ -17,20 +17,23 @@ class PublicStats:
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=bot.loop)
-        self.server_count = 0
+        self.guild_count = 0
+
+    def __unload(self):
+        self.session.close()
 
     async def on_ready(self):
         await self.send_stats()
 
-    async def on_server_join(self, server):
+    async def on_guild_join(self, guild):
         await self.send_stats()
 
-    async def on_server_remove(self, server):
+    async def on_guild_remove(self, guild):
         await self.send_stats()
 
     async def send_stats(self):
-        server_count = len(self.bot.servers)
-        if self.server_count == server_count:
+        guild_count = len(self.bot.guilds)
+        if self.guild_count == guild_count:
             return
 
         # Post to DiscordBots
@@ -40,11 +43,11 @@ class PublicStats:
             'content-type': 'application/json'
         }
         data = {
-            'server_count': server_count
+            'server_count': guild_count
         }
         async with self.session.post(url=url, headers=headers, data=json.dumps(data)) as resp:
             if resp.status != 200:
                 log.warning(utils.HTTPError(resp, 'Error while posting stats to DBots'))
 
         # Save the new server count after the post succeeded
-        self.server_count = server_count
+        self.guild_count = guild_count

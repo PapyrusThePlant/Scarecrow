@@ -8,7 +8,7 @@ from contextlib import redirect_stdout
 import discord
 from discord.ext import commands
 
-from .util import checks, utils
+from .util import utils
 
 
 def setup(bot):
@@ -16,14 +16,18 @@ def setup(bot):
 
 
 class Dev:
-    """Dev tools and commands, mostly owner only."""
+    """Nope, not for you."""
     def __init__(self, bot):
         self.bot = bot
         self.debug_env = {}
         self.cleanup_task = None
         self.clear_debug_env()
 
-    def _resolve_module_name(self, name):
+    def __local_check(self, ctx):
+        # Owner commands only
+        return ctx.author.id == ctx.bot.owner.id
+
+    def resolve_module_name(self, name):
         if name in self.bot.cogs:
             return self.bot.cogs[name].__module__
         elif name in self.bot.extensions:
@@ -33,7 +37,7 @@ class Dev:
         else:
             return None
 
-    @commands.group(name='cogs', pass_context=True, invoke_without_command=True)
+    @commands.group(name='cogs', invoke_without_command=True)
     async def cogs_group(self, ctx):
         """Lists currently loaded cogs."""
         if ctx.subcommand_passed is not None:
@@ -41,8 +45,8 @@ class Dev:
 
         entries = []
 
-        for name in self.bot.cogs:
-            cog = self.bot.cogs[name]
+        for name in ctx.bot.cogs:
+            cog = ctx.bot.cogs[name]
 
             # Get the first line of the doc
             help_doc = inspect.getdoc(cog)
@@ -53,51 +57,45 @@ class Dev:
             entries.append((name, help_doc))
 
         content = utils.indented_entry_to_str(entries)
-        await self.bot.say_block(content)
+        await ctx.send(utils.format_block(content))
 
     @cogs_group.command(name='load')
-    @checks.is_owner()
-    async def cogs_load(self, *, name: str):
+    async def cogs_load(self, ctx, *, name: str):
         """Loads a cog from name."""
         module_path = 'cogs.{}'.format(name.lower())
-        if module_path in self.bot.extensions:
-            await self.bot.say('{} already loaded.'.format(name))
-        else:
-            try:
-                self.bot.load_extension(module_path)
-            except ImportError:
-                await self.bot.say('Could not find module.')
-            else:
-                await self.bot.say('\N{OK HAND SIGN}')
+        if module_path in ctx.bot.extensions:
+            raise commands.BadArgument('"{}" already loaded.'.format(name))
+
+        try:
+            ctx.bot.load_extension(module_path)
+        except ImportError as e:
+            raise commands.BadArgument('Could not find module "{}".'.format(name)) from e
+
+        await ctx.send('\N{OK HAND SIGN}')
 
     @cogs_group.command(name='reload')
-    @checks.is_owner()
-    async def cogs_reload(self, name: str):
+    async def cogs_reload(self, ctx, name: str):
         """Reloads a cog."""
-        module_path = self._resolve_module_name(name)
+        module_path = self.resolve_module_name(name)
         if module_path is None:
-            await self.bot.say('{} not loaded.'.format(name))
-            return
+            raise commands.BadArgument('"{}" not loaded.'.format(name))
 
-        self.bot.unload_extension(module_path)
-        self.bot.load_extension(module_path)
+        ctx.bot.unload_extension(module_path)
+        ctx.bot.load_extension(module_path)
 
-        await self.bot.say('\N{OK HAND SIGN}')
+        await ctx.send('\N{OK HAND SIGN}')
 
     @cogs_group.command(name='unload')
-    @checks.is_owner()
-    async def cogs_unload(self, *, name: str):
+    async def cogs_unload(self, ctx, *, name: str):
         """Unloads a cog."""
-        module_path = self._resolve_module_name(name)
+        module_path = self.resolve_module_name(name)
         if module_path is None:
-            await self.bot.say('{} not loaded.'.format(name))
-            return
+            raise commands.BadArgument('"{}" not loaded.'.format(name))
 
-        self.bot.unload_extension(module_path)
-        await self.bot.say('\N{OK HAND SIGN}')
+        ctx.bot.unload_extension(module_path)
+        await ctx.send('\N{OK HAND SIGN}')
 
-    @commands.group(pass_context=True, invoke_without_command=True)
-    @checks.is_owner()
+    @commands.group(invoke_without_command=True)
     async def debug(self, ctx, *, code: str):
         """Yet another eval command."""
         # Cleanup the code blocks
@@ -141,9 +139,9 @@ class Dev:
 
         # Send the feedback
         if content:
-            await self.bot.say_block(content)
+            await ctx.send(utils.format_block(content, language='py'))
         else:
-            await self.bot.add_reaction(ctx.message, '\N{WHITE HEAVY CHECK MARK}')
+            await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     def clear_debug_env(self):
         if self.cleanup_task:
@@ -153,25 +151,23 @@ class Dev:
         self.debug_env.update(globals())
 
     @debug.command()
-    @checks.is_owner()
     async def clear(self):
         """Clears the execution environment."""
         self.clear_debug_env()
 
     @commands.command()
-    @checks.is_owner()
-    async def update(self):
+    async def update(self, ctx):
         """Updates the bot."""
         embed = discord.Embed(colour=0x738bd7, description='Updating bot...')
-        message = await self.bot.say(embed=embed)
+        message = await ctx.send(embed=embed)
 
         process = await asyncio.create_subprocess_exec('git', 'pull', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await process.communicate()
 
-        if stdout:
-            embed.add_field(name='stdout', value="```\n {} \n```".format(stdout.decode()))
         if stderr:
-            embed.add_field(name='stderr', value="```\n {} \n```".format(stderr.decode()))
+            embed.add_field(name='stderr', value=utils.format_block(stderr.decode()))
+        if stdout:
+            embed.add_field(name='stdout', value=utils.format_block(stdout.decode()))
 
         if stdout or stderr:
-            await self.bot.edit_message(message, embed=embed)
+            await message.edit(embed=embed)

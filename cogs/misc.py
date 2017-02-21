@@ -11,13 +11,12 @@ from .util import agarify, utils
 
 
 def setup(bot):
-    bot.add_cog(Misc(bot))
+    bot.add_cog(Misc())
 
 
 class Misc:
-    """Miscellaneous commands."""
-    def __init__(self, bot):
-        self.bot = bot
+    """No comment."""
+    def __init__(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
         }
@@ -27,26 +26,24 @@ class Misc:
         self.google_session.close()
 
     @commands.group(invoke_without_command=True)
-    async def agarify(self, *, content):
+    async def agarify(self, ctx, *, content):
         """Agarifies a string."""
-        await self.bot.say(agarify.agarify(content))
+        await ctx.send(agarify.agarify(content))
 
     @agarify.command()
-    async def user(self, *, user: discord.Member=None):
+    async def user(self, ctx, *, user: discord.Member):
         """Agarifies a user's name."""
-        await self.bot.say(agarify.agarify(user.display_name, True))
+        await ctx.send(agarify.agarify(user.display_name, True))
 
     @commands.command(aliases=['meow'])
-    async def cat(self):
+    async def cat(self, ctx):
         """Meow !"""
         providers = [
             ('http://random.cat/meow', lambda d: d['file']),
             ('http://edgecats.net/random', lambda d: d),
             ('http://thecatapi.com/api/images/get?format=src', lambda d: d)
         ]
-        provider = random.choice(providers)
-        url = provider[0]
-        loader = provider[1]
+        url, loader = random.choice(providers)
 
         data = await utils.fetch_page(url, timeout=5)
         if data is None:
@@ -54,7 +51,7 @@ class Misc:
         else:
             content = loader(data)
 
-        await self.bot.say(content)
+        await ctx.send(content)
 
     def parse_google_card(self, node):
         if node is None:
@@ -282,7 +279,7 @@ class Misc:
         return None
 
     @commands.command(aliases=['g'])
-    async def google(self, *, query):
+    async def google(self, ctx, *, query):
         """Search for something on google."""
         params = {
             'hl': 'en',
@@ -291,7 +288,7 @@ class Misc:
         }
         async with self.google_session.get('https://www.google.com/search', params=params) as resp:
             if resp.status != 200:
-                await self.bot.say(utils.HTTPError(resp, 'Error while querying google.'))
+                await ctx.send(utils.HTTPError(resp, 'Error while querying google.'))
                 return
             data = await resp.text()
 
@@ -335,37 +332,34 @@ class Misc:
         if not embed:
             # No card found
             if top_n == 0:
-                await self.bot.say('No result found.')
-                return
+                raise commands.BadArgument('No result found.')
 
             # Build the response from the search results
-            title = search_results[0][0]
-            url = search_results[0][1]
-            description = search_results[0][2]
-            additional_results = '\n'.join('<{}>'.format(r[1]) for r in search_results[1:top_n + 1])
+            title, url, description = search_results[0]
+            additional_results = '\n'.join('<{}>'.format(r[1]) for r in search_results[1:min(top_n + 1, len(search_results))])
 
             # Text response
             response = '**{}**\n{}\n{}\n\n**Additional Results**\n{}'.format(title, url, description, additional_results)
-            await self.bot.say(response)
+            await ctx.send(response)
 
-            # Embed response (not worth using when the searche return a link to a video)
-            embed = discord.Embed(colour=0x738bd7, title=title, url=url, description=description)
-            embed.add_field(name='Additional Results', value=additional_results, inline=False)
+            # Embed response (not worth using when the search return a link to a video)
+            # embed = discord.Embed(colour=0x738bd7, title=title, url=url, description=description)
+            # embed.add_field(name='Additional Results', value=additional_results, inline=False)
         else:
             # Add the search results to the embed with the card info
             if top_n > 0:
                 additional_results = '\n'.join(r[1] for r in search_results[:top_n])
                 embed.add_field(name='Additional Results', value=additional_results, inline=False)
             # Display the result
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
     @commands.command()
-    async def insult(self):
+    async def insult(self, ctx):
         """Poke the bear."""
-        await self.bot.say(utils.random_line(paths.INSULTS))
+        await ctx.send(utils.random_line(paths.INSULTS))
 
     @commands.command()
-    async def weebnames(self, wanted_gender=None):
+    async def weebnames(self,ctx, wanted_gender=None):
         """Looking for a name for your new waifu?
 
         A prefered gender can be specified between f(emale), m(ale), x(mixed).
@@ -380,4 +374,4 @@ class Misc:
 
             content += '[{}] {} {}\n'.format(gender, name, '({})'.format(remark) if remark else '')
 
-        await self.bot.say_block(content)
+        await ctx.send(utils.format_block(content))

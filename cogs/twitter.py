@@ -1,5 +1,6 @@
 import asyncio
 import functools
+import json
 import logging
 import multiprocessing
 import os
@@ -11,13 +12,12 @@ import tweepy
 
 import discord
 import discord.ext.commands as commands
-import discord.utils as dutils
-from discord.ext.commands.formatter import Paginator
 
 import paths
 from .util import config, oembed
 
 log = logging.getLogger(__name__)
+log.level = logging.DEBUG
 
 
 def setup(bot):
@@ -87,7 +87,7 @@ class ChannelConfig(config.ConfigElement):
 
 
 class Twitter:
-    """Twitter related commands.
+    """Follow Twitter accounts and stream their tweets in Discord.
 
     Powered by tweepy (https://github.com/tweepy/tweepy)
     """
@@ -102,35 +102,36 @@ class Twitter:
         log.info('Unloading cog.')
         self.stream.quit()
 
-    async def on_command_error(self, error, ctx):
+    async def __error(self, error, ctx):
+        """Local command error handler."""
         if isinstance(error, TwitterError):
             try:
-                await ctx.bot.send_message(ctx.message.channel, error)
+                await ctx.send(error)
             except discord.Forbidden:
                 warning = 'Missing the `Send Messages` permission to send the following error to {}: {}'.format(ctx.message.channel.mention, error)
                 log.warning(warning)
-                await ctx.bot.send_message(ctx.message.author, warning)
+                await ctx.author.send(warning)
 
     async def on_ready(self):
         # Check if we've missed any tweet
         await self.fetch_missed_tweets()
 
     async def on_channel_delete(self, channel):
-        if channel.server is not None:
+        if channel.guild is not None:
             self.conf.remove_channels(channel)
             self.conf.save()
             await self.stream.start()
 
-    async def on_server_remove(self, server):
-        self.conf.remove_channels(*server.channels)
+    async def on_guild_remove(self, guild):
+        self.conf.remove_channels(*guild.channels)
         self.conf.save()
         await self.stream.start()
 
     @commands.group(name='twitter')
-    async def twitter_group(self):
+    async def twitter_group(self, ctx):
         pass
 
-    @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
+    @twitter_group.command(name='fetch', no_pm=True)
     async def twitter_fetch(self, ctx, handle, limit: int=1):
         """Retrieves the latest tweets from a channel and displays them.
 
@@ -156,10 +157,10 @@ class Twitter:
         # Display the kept tweets
         for tweet in to_display:
             embed = await self.prepare_embed(tweet)
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
-    @twitter_group.command(name='follow', pass_context=True, no_pm=True)
-    @commands.has_permissions(manage_server=True)
+    @twitter_group.command(name='follow', no_pm=True)
+    @commands.has_permissions(manage_guild=True)
     async def twitter_follow(self, ctx, handle):
         """Follows a Twitter channel.
 
@@ -172,19 +173,17 @@ class Twitter:
         Following protected users is not supported by the Twitter API.
         See https://dev.twitter.com/streaming/overview/request-parameters#follow
         """
-        discord_channel = ctx.message.channel
-
         # Check for required permissions
-        if not discord_channel.permissions_for(discord_channel.server.me).embed_links:
-            raise TwitterError('\N{WARNING SIGN} The `Embed Links` permission in this channel is required to display tweets properly. \N{WARNING SIGN}')
+        if not ctx.channel.permissions_for(ctx.guild.me).embed_links:
+            raise TwitterError('The `Embed Links` permission in this channel is required to display tweets properly.')
 
         sane_handle = handle.lower().lstrip('@')
-        conf = dutils.get(self.conf.follows, screen_name=sane_handle)
+        conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
         if conf is None:
             # New Twitter channel, retrieve the user info
             partial = functools.partial(self.api.get_user, screen_name=sane_handle)
             try:
-                user = await self.bot.loop.run_in_executor(None, partial)
+                user = await ctx.bot.loop.run_in_executor(None, partial)
             except tweepy.TweepError as e:
                 if e.api_code == 50:
                     raise TwitterError('User "{}" not found.'.format(handle)) from e
@@ -208,22 +207,22 @@ class Twitter:
                 self.conf.follows.remove(conf)
                 log.error(str(e))
                 raise TwitterError('Unknown error, this has been logged.') from e
-        elif dutils.get(conf.discord_channels, id=discord_channel.id):
-            raise TwitterError('Already following {} on this channel.'.format(handle))
+        elif discord.utils.get(conf.discord_channels, id=ctx.channel.id):
+            raise TwitterError('Already following "{}" on this channel.'.format(handle))
 
-        # Add new Discord channel
-        conf.discord_channels.append(ChannelConfig(discord_channel.id))
+        # Add new discord channel
+        conf.discord_channels.append(ChannelConfig(ctx.channel.id))
         self.conf.save()
-        await self.bot.say('\N{OK HAND SIGN}')
+        await ctx.send('\N{OK HAND SIGN}')
 
     @twitter_group.command(name='search')
-    async def twitter_search(self, query, limit=5):
+    async def twitter_search(self, ctx, query, limit=5):
         """Searches for a Twitter user.
 
         To use a multi-word query, enclose it in quotes.
         """
         try:
-            results = await self.bot.loop.run_in_executor(None, self.api.search_users, query, limit)
+            results = await ctx.bot.loop.run_in_executor(None, self.api.search_users, query, limit)
         except tweepy.TweepError as e:
             log.error(str(e))
             raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
@@ -235,23 +234,23 @@ class Twitter:
             name = '{} - @{}'.format(user.name, user.screen_name)
             description = textwrap.shorten(user.description, 1024) if user.description else 'No description.'
             embed.add_field(name=name, value=description, inline=False)
-        await self.bot.say(embed=embed)
+        await ctx.send(embed=embed)
 
-    @twitter_group.command(name='status', pass_context=True, no_pm=True)
+    @twitter_group.command(name='status', no_pm=True)
     async def twitter_status(self, ctx):
         """Displays the status of the Twitter stream."""
-        server_channels = set(c.id for c in ctx.message.server.channels)
+        guild_channels = set(c.id for c in ctx.guild.channels)
 
         followed_count = 0
         displayed_count = 0
         for chan_conf in self.conf.follows:
-            # Check if this channel is displayed in the server
-            if set(c.id for c in chan_conf.discord_channels) & server_channels:
+            # Check if this channel is displayed in the guild
+            if set(c.id for c in chan_conf.discord_channels) & guild_channels:
                 followed_count += 1
-                displayed_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in server_channels)
+                displayed_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in guild_channels)
 
         # Calculate the average tweets processed per minute
-        minutes = (time.time() - self.bot.start_time) / 60
+        minutes = (time.time() - ctx.bot.start_time) / 60
         processed_average = self.processed_tweets / minutes
         processed_average = '< 1' if processed_average < 1 else round(processed_average)
         tweets_processed = '{} (avg {} / min)'.format(self.processed_tweets, processed_average)
@@ -265,10 +264,10 @@ class Twitter:
         embed.add_field(name='Channels followed', value=followed_count)
         embed.add_field(name='Tweets displayed', value=displayed_count)
 
-        await self.bot.say(embed=embed)
+        await ctx.send(embed=embed)
 
-    @twitter_group.command(name='unfollow', pass_context=True, no_pm=True)
-    @commands.has_permissions(manage_server=True)
+    @twitter_group.command(name='unfollow', no_pm=True)
+    @commands.has_permissions(manage_guild=True)
     async def twitter_unfollow(self, ctx, handle):
         """Unfollows a Twitter channel.
 
@@ -279,8 +278,8 @@ class Twitter:
         handle, it will avoid unwanted mentions in Discord.
         """
         sane_handle = handle.lower().lstrip('@')
-        conf = dutils.get(self.conf.follows, screen_name=sane_handle)
-        chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
+        conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
+        chan_conf = discord.utils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
         if chan_conf is None:
             raise TwitterError('Not following {} on this channel.'.format(handle))
@@ -300,7 +299,7 @@ class Twitter:
 
         self.conf.save()
 
-        await self.bot.say('\N{OK HAND SIGN}')
+        await ctx.send('\N{OK HAND SIGN}')
 
     async def get_latest_valid(self, channel_id=None, screen_name=None, limit=0, since_id=0):
         if since_id == 0:
@@ -411,8 +410,10 @@ class Twitter:
             url = urls[0]['expanded_url']
             try:
                 data = await oembed.fetch_oembed_data(url)
-            except Exception as e:
+            except oembed.OembedException as e:
                 log.warning(str(e))
+            except Exception as e:
+                log.warning('Error while fetching oEmbed data for {} : {}'.format(url, e))
             else:
                 if data['type'] == 'photo':
                     embed.set_image(url=data['url'])
@@ -423,23 +424,13 @@ class Twitter:
 
     def skip_tweet(self, status, from_stream=True):
         """Returns True if the given Twitter status is to be skipped."""
-        log_status = 'author: {}, reply_to_status: {}, reply_to_user: {}, quoting: {}, retweet: {}, text: {}'
-        log_status = log_status.format(status.author.screen_name,
-                                       status.in_reply_to_status_id,
-                                       status.in_reply_to_user_id,
-                                       status.is_quote_status,
-                                       hasattr(status, 'retweeted_status'),
-                                       status.text)
-
-        # Ignore replies
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
-            log.debug('Ignoring tweet (reply): ' + log_status)
+            # Ignore replies
             return True
         elif from_stream and status.author.id_str not in self.stream.get_follows():
-            log.debug('Ignoring tweet (bad author): ' + log_status)
+            # The stream includes replies to tweets from channels we're following, ignore them
             return True
         else:
-            log.debug('Dispatching tweet to handler: ' + log_status)
             return False
 
     async def tweepy_on_status(self, tweet):
@@ -448,14 +439,17 @@ class Twitter:
         if self.skip_tweet(tweet):
             return
 
-        chan_conf = dutils.get(self.conf.follows, id=tweet.author.id_str)
+        tweet_str = json.dumps(tweet._json, separators=(',', ':'), ensure_ascii=True)
+        log.debug('Received tweet: ' + tweet_str)
+
+        chan_conf = discord.utils.get(self.conf.follows, id=tweet.author.id_str)
         try:
             embed = await self.prepare_embed(tweet)
             content = None
-        except:
+        except Exception as e:
             embed = None
-            content = 'Failed to prepare embed for ' + tweet.tweet_web_url # If the preparation failed before setting tweet.tweet_web_url imma kms
-            log.error('Failed to prepare embed for ' + str(tweet._json))
+            content = 'Failed to prepare embed for ' + tweet.tweet_web_url
+            log.error('Failed to prepare embed {} : {} '.format(e, tweet_str))
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
@@ -465,24 +459,30 @@ class Twitter:
 
             # Check if the channel still exists
             if discord_channel is None:
-                log.error('Channel {} unavailable to display tweet {}.'.format(discord_channel.id, tweet.id_str))
+                log.error('Channel {} unavailable to display {}.'.format(channel.id, tweet.tweet_url))
                 continue
 
             # Check for required permissions
-            perms = discord_channel.permissions_for(discord_channel.server.me)
+            perms = discord_channel.permissions_for(discord_channel.guild.me)
             if not perms.embed_links:
-                log.warning('Improper permissions in channel {} to display tweet {}.'.format(discord_channel.id, tweet.id_str))
+                warning = '`Embed links` permission missing to display {}.'.format(tweet.tweet_url)
+                log.warning(warning)
+
                 try:
-                    warning = '\N{WARNING SIGN} Missed tweet from {} : `Embed links` permission missing. \N{WARNING SIGN}'.format(tweet.author.screen_name)
-                    await self.bot.send_message(discord_channel, warning)
+                    await discord_channel.send(warning)
                 except discord.DiscordException as e:
-                    log.error('Could not send warning to channel {}.\n{}'.format(discord_channel.id, e))
+                    log.error('Could not send warning to channel {} : {}'.format(discord_channel.id, e))
+
                 continue
 
-            # Send the embed to the appropriate channel
-            log.debug('Scheduling Discord message on channel ({}) : {}'.format(channel.id, tweet.text))
-            await self.bot.send_message(discord_channel, content=content, embed=embed)
+            try:
+                # Send the message to the appropriate channel
+                await discord_channel.send(content=content, embed=embed)
+            except Exception as e:
+                log.error('Failed to send message on channel {} : Error : {} : Content : {} : Embed : {}'.format(channel.id, e, content, embed.to_dict() if embed else 'None'))
+                continue
 
+            log.debug('Successfully sent message on channel {} : Content {} : Embed {}'.format(channel.id, content, embed.to_dict() if embed else 'None'))
             # Update stats and latest id when processing newer tweets
             if tweet.id > chan_conf.latest_received:
                 channel.received_count += 1
@@ -528,7 +528,7 @@ class SubProcessStream(multiprocessing.Process):
         self.mp_queue.cancel_join_thread()
 
         # Create the tweepy stream
-        log.info('Creating and starting tweepy stream.')
+        log.info('Creating tweepy stream.')
         api = TweepyAPI(self.credentials)  # Re-creation, much efficient, wow
         listener = SubProcessStream.TweepyListener(self.mp_queue, api)
         stream = tweepy.Stream(api.auth, listener)
@@ -542,7 +542,7 @@ class SubProcessStream(multiprocessing.Process):
             except Exception as e:
                 log.exception('Recovering from exception : {}'.format(e))
             else:
-                log.info('Exiting sub-process.')
+                log.info('Exiting normally.')
                 return
 
     class TweepyListener(tweepy.StreamListener):
@@ -589,11 +589,10 @@ class TweepyStream(tweepy.StreamListener):
             return
 
         # Create a new multi-processes queue, a new stream object and a new Process
-        log.info('Creating new sub-process.')
+        log.info('Creating sub-process.')
         self.mp_queue = multiprocessing.Queue()
         self.mp_queue.cancel_join_thread()
         self.sub_process = SubProcessStream(self.mp_queue, self.conf.credentials, self.get_follows())
-        log.info('Created new sub-process.')
 
         # Schedule the polling daemon (it will take care of starting the child process)
         self.daemon = asyncio.ensure_future(self._run())
@@ -601,15 +600,10 @@ class TweepyStream(tweepy.StreamListener):
     def stop(self):
         """Stops the tweepy Stream."""
         if self.running:
-            log.info('Stopping sub process (pid {}).'.format(self.sub_process.pid))
+            log.info('Stopping stream/daemon and cleaning up {}.'.format(self.sub_process.pid))
             self.sub_process.terminate()
             self.sub_process.join()
-            log.info('Stopped sub process (pid {}).'.format(self.sub_process.pid))
             self.daemon.cancel()
-            log.info('Cancelled polling daemon for sub process {}.'.format(self.sub_process.pid))
-
-            # Cleanup the stream
-            log.info('Cleaning sub-process (pid {}).'.format(self.sub_process.pid))
             self.mp_queue.close()
             self.mp_queue = None
             self.sub_process = None
@@ -627,13 +621,12 @@ class TweepyStream(tweepy.StreamListener):
     async def _run(self):
         """Polling daemon that checks the multi-processes queue for data and dispatches it to `on_data`."""
         self.sub_process.start()
-        log.info('Started sub process (pid {}).'.format(self.sub_process.pid))
+        log.info('Started daemon for {}.'.format(self.sub_process.pid))
 
         # Wait until the process is actually started to not consider it dead when it's not even born yet
         while not self.sub_process.is_alive():
             try:
-                # Wtb milliseconds async sleep omg
-                await asyncio.wait_for(asyncio.sleep(1), 0.1)
+                await asyncio.sleep(0.1)
             except asyncio.TimeoutError:
                 pass
 
@@ -643,7 +636,7 @@ class TweepyStream(tweepy.StreamListener):
                 data = self.mp_queue.get(False)  # Do not block
             except QueueEmpty:
                 if not self.sub_process.is_alive():
-                    log.warning('Sub process (pid {}) appears dead.'.format(self.sub_process.pid))
+                    log.warning('{} appears dead.'.format(self.sub_process.pid))
                     asyncio.ensure_future(self.stop())
 
                 # Arbitrary sleep time after an unsuccessful poll
@@ -659,7 +652,5 @@ class TweepyStream(tweepy.StreamListener):
 
     def on_status(self, status):
         """Called when a new status arrives."""
-        log.debug('Received status: ' + str(status._json))
-
         # Feed the handler with the tweet
         asyncio.ensure_future(self.handler.tweepy_on_status(status))
