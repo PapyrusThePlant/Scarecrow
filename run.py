@@ -35,20 +35,14 @@ class StreamToLogger:
 
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
+    debug_instance = 'debug' in sys.argv
 
     # Setup the root logger
     rlog = logging.getLogger()
-    rlog.setLevel(logging.DEBUG if 'debug' in sys.argv else logging.INFO)
+    rlog.setLevel(logging.DEBUG if debug_instance else logging.INFO)
     handler = logging.FileHandler(paths.BOT_LOG, encoding='utf-8')
     handler.setFormatter(logging.Formatter('{asctime}:{levelname}:{name}:{message}', style='{'))
     rlog.addHandler(handler)
-
-    logging.basicConfig(
-        level=logging.DEBUG if 'debug' in sys.argv else logging.INFO,
-        filename=paths.BOT_LOG,
-        format='{asctime}:{levelname}:{name}:{message}',
-        style='{'
-    )
 
     # Redirect stdout and stderr to the log file
     sys.stdout = StreamToLogger(logging.getLogger('STDOUT'), logging.INFO)
@@ -69,7 +63,7 @@ if __name__ == '__main__':
 
     # Create the bot
     log.info('Creating bot...')
-    bot = Bot()
+    bot = Bot(debug_instance=debug_instance)
 
     # Start it
     try:

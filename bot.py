@@ -22,12 +22,13 @@ class BotConfig(config.ConfigElement):
 
 
 class Bot(commands.Bot):
-    def __init__(self, conf_path=paths.BOT_CONFIG):
+    def __init__(self, conf_path=paths.BOT_CONFIG, debug_instance=False):
         self.app_info = None
         self.owner = None
         self.do_restart = False
         self.start_time = time.time()
         self.conf = config.Config(conf_path, encoding='utf-8')
+        self.debug_instance = debug_instance
 
         # Init the framework and load extensions
         super().__init__(description=self.conf.description,
