@@ -232,7 +232,9 @@ class Twitter:
 
         embed = discord.Embed(colour=0x738bd7)
         for user in results:
-            embed.add_field(name=user.screen_name, value=textwrap.shorten(user.description, 1024), inline=False)
+            name = '{} - @{}'.format(user.name, user.screen_name)
+            description = textwrap.shorten(user.description, 1024) if user.description else 'No description.'
+            embed.add_field(name=name, value=description, inline=False)
         await self.bot.say(embed=embed)
 
     @twitter_group.command(name='status', pass_context=True, no_pm=True)
