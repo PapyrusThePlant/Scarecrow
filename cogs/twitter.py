@@ -328,7 +328,7 @@ class Twitter:
         for tweet in missed:
             await self.tweepy_on_status(tweet)
 
-    def prepare_tweet(self, tweet):
+    def prepare_tweet(self, tweet, nested=False):
         if isinstance(tweet, dict):
             tweet = tweepy.Status.parse(self.api, tweet)
 
@@ -337,11 +337,11 @@ class Twitter:
         urls = tweet.entities.get('urls', [])
         media = tweet.entities.get('media', [])
 
-        if tweet.is_quote_status:
-            tweet.quoted_status = self.prepare_tweet(tweet.quoted_status)
+        if not nested and tweet.is_quote_status:
+            tweet.quoted_status = self.prepare_tweet(tweet.quoted_status, nested=True)
             sub_tweet = tweet.quoted_status
-        elif hasattr(tweet, 'retweeted_status'):
-            tweet.retweeted_status = self.prepare_tweet(tweet.retweeted_status)
+        elif not nested and hasattr(tweet, 'retweeted_status'):
+            tweet.retweeted_status = self.prepare_tweet(tweet.retweeted_status, nested=True)
             sub_tweet = tweet.retweeted_status
         else:
             sub_tweet = None
@@ -454,7 +454,7 @@ class Twitter:
             content = None
         except:
             embed = None
-            content = 'Failed to prepare embed for ' + tweet.web_url # If the preparation failed before setting weet.web_url imma kms
+            content = 'Failed to prepare embed for ' + tweet.tweet_web_url # If the preparation failed before setting tweet.tweet_web_url imma kms
             log.error('Failed to prepare embed for ' + str(tweet._json))
 
         # Make sure we're ready to send messages
