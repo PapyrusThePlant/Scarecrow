@@ -19,6 +19,7 @@ class PrefixesConfig(config.ConfigElement):
 
 
 class Prefix:
+    """Server specific management commands."""
     def __init__(self, bot):
         self.bot = bot
         self.conf = config.Config(paths.PREFIXES_CONFIG, encoding='utf-8')

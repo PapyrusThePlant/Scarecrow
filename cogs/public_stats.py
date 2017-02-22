@@ -13,6 +13,7 @@ def setup(bot):
 
 
 class PublicStats:
+    """Automated stats collection and publication."""
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=bot.loop)

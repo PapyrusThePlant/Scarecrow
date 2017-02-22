@@ -43,18 +43,20 @@ class TwitterConfig(config.ConfigElement):
         self.follows = kwargs.pop('follows', [])
 
     def remove_channels(self, *channels):
-        """Removes a set of discord channels from the"""
+        """Unregister the given channels from every FollowConfig, and
+        removes any FollowConfig that end up without any channel.
+        """
         channels = set(c.id for c in channels)
         conf_to_remove = set()
 
-        # Check every twitter channel
+        # Check every FollowConfig
         for chan_conf in self.follows:
-            # if the twitter channel is displayed in one of the given channels
             if set(c.id for c in chan_conf.discord_channels) & channels:
+                # Remove the given channels from this FollowConfig
                 dchans_to_remove = set(c for c in chan_conf.discord_channels if c.id in channels)
                 chan_conf.discord_channels = [c for c in chan_conf.discord_channels if c not in dchans_to_remove]
 
-                # If this channel is now displayed nowhere, mark it for suppression
+                # If this FollowConfig ended up with 0 channel, save it to remove it later
                 if not chan_conf.discord_channels:
                     conf_to_remove.add(chan_conf)
 
@@ -85,7 +87,7 @@ class ChannelConfig(config.ConfigElement):
 
 
 class Twitter:
-    """Twitter commands and events.
+    """Twitter related commands.
 
     Powered by tweepy (https://github.com/tweepy/tweepy)
     """
@@ -129,27 +131,27 @@ class Twitter:
         pass
 
     @twitter_group.command(name='fetch', pass_context=True, no_pm=True)
-    async def twitter_fetch(self, ctx, channel, limit: int=1):
+    async def twitter_fetch(self, ctx, handle, limit: int=1):
         """Retrieves the latest tweets from a channel and displays them.
 
-        You do not need to include the @ before the twitter channel,
-        it will avoid unwanted mentions in Discord.
+        You do not need to include the '@' before the Twitter channel's
+         handle, it will avoid unwanted mentions in Discord.
 
         If a limit is given, at most that number of tweets will be displayed. Defaults to 1.
         """
-        sane_channel = channel.lower().lstrip('@')
+        sane_handle = handle.lower().lstrip('@')
         # Get the latest tweets from the user
         try:
-            to_display = await self.get_latest_valid(screen_name=sane_channel, limit=limit)
+            to_display = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
         except tweepy.TweepError as e:
             # The channel is probably protected
             if e.reason == 'Not authorized.':
                 raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
             if e.api_code == 34:
-                raise TwitterError('User "{}" not found.'.format(channel)) from e
+                raise TwitterError('User "{}" not found.'.format(handle)) from e
             else:
                 log.error(str(e))
-                raise TwitterError('Unknown error, this has been logged.') from e
+                raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
 
         # Display the kept tweets
         for tweet in to_display:
@@ -158,14 +160,14 @@ class Twitter:
 
     @twitter_group.command(name='follow', pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
-    async def twitter_follow(self, ctx, channel):
-        """Follows a twitter channel.
+    async def twitter_follow(self, ctx, handle):
+        """Follows a Twitter channel.
 
-        The tweets from the given twitter channel will be
+        The tweets from the given Twitter channel will be
         sent to the channel this command was used in.
 
-        You do not need to include the @ before the twitter channel,
-        it will avoid unwanted mentions in Discord.
+        You do not need to include the '@' before the Twitter channel's
+        handle, it will avoid unwanted mentions in Discord.
 
         Following protected users is not supported by the Twitter API.
         See https://dev.twitter.com/streaming/overview/request-parameters#follow
@@ -176,16 +178,16 @@ class Twitter:
         if not discord_channel.permissions_for(discord_channel.server.me).embed_links:
             raise TwitterError('\N{WARNING SIGN} The `Embed Links` permission in this channel is required to display tweets properly. \N{WARNING SIGN}')
 
-        sane_channel = channel.lower().lstrip('@')
-        conf = dutils.get(self.conf.follows, screen_name=sane_channel)
+        sane_handle = handle.lower().lstrip('@')
+        conf = dutils.get(self.conf.follows, screen_name=sane_handle)
         if conf is None:
-            # New twitter channel, retrieve the user info
-            partial = functools.partial(self.api.get_user, screen_name=sane_channel)
+            # New Twitter channel, retrieve the user info
+            partial = functools.partial(self.api.get_user, screen_name=sane_handle)
             try:
                 user = await self.bot.loop.run_in_executor(None, partial)
             except tweepy.TweepError as e:
                 if e.api_code == 50:
-                    raise TwitterError('User "{}" not found.'.format(channel)) from e
+                    raise TwitterError('User "{}" not found.'.format(handle)) from e
                 else:
                     log.error(str(e))
                     raise TwitterError('Unknown error, this has been logged.') from e
@@ -196,7 +198,7 @@ class Twitter:
                 raise TwitterError('This channel is protected and cannot be followed.')
 
             # Register the new channel
-            conf = FollowConfig(user.id_str, channel)
+            conf = FollowConfig(user.id_str, user.screen_name)
             self.conf.follows.append(conf)
 
             try:
@@ -207,16 +209,16 @@ class Twitter:
                 log.error(str(e))
                 raise TwitterError('Unknown error, this has been logged.') from e
         elif dutils.get(conf.discord_channels, id=discord_channel.id):
-            raise TwitterError('Already following {} on this channel.'.format(channel))
+            raise TwitterError('Already following {} on this channel.'.format(handle))
 
-        # Add new discord channel
+        # Add new Discord channel
         conf.discord_channels.append(ChannelConfig(discord_channel.id))
         self.conf.save()
         await self.bot.say('\N{OK HAND SIGN}')
 
     @twitter_group.command(name='search')
     async def twitter_search(self, query, limit=5):
-        """Searches for a twitter user.
+        """Searches for a Twitter user.
 
         To use a multi-word query, enclose it in quotes.
         """
@@ -224,7 +226,7 @@ class Twitter:
             results = await self.bot.loop.run_in_executor(None, self.api.search_users, query, limit)
         except tweepy.TweepError as e:
             log.error(str(e))
-            raise TwitterError('Unknown error, this has been logged.') from e
+            raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
         if not results:
             raise TwitterError('No result.')
 
@@ -235,7 +237,7 @@ class Twitter:
 
     @twitter_group.command(name='status', pass_context=True, no_pm=True)
     async def twitter_status(self, ctx):
-        """Displays the status of the twitter stream."""
+        """Displays the status of the Twitter stream."""
         server_channels = set(c.id for c in ctx.message.server.channels)
 
         followed_count = 0
@@ -265,26 +267,26 @@ class Twitter:
 
     @twitter_group.command(name='unfollow', pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
-    async def twitter_unfollow(self, ctx, channel):
-        """Unfollows a twitter channel.
+    async def twitter_unfollow(self, ctx, handle):
+        """Unfollows a Twitter channel.
 
-        The tweets from the given twitter channel will not be
+        The tweets from the given Twitter channel will not be
         sent to the channel this command was used in anymore.
 
-        You do not need to include the @ before the twitter channel,
-        it will avoid unwanted mentions in Discord.
+        You do not need to include the '@' before the Twitter channel's
+        handle, it will avoid unwanted mentions in Discord.
         """
-        sane_channel = channel.lower().lstrip('@')
-        conf = dutils.get(self.conf.follows, screen_name=sane_channel)
+        sane_handle = handle.lower().lstrip('@')
+        conf = dutils.get(self.conf.follows, screen_name=sane_handle)
         chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
         if chan_conf is None:
-            raise TwitterError('Not following {} on this channel.'.format(channel))
+            raise TwitterError('Not following {} on this channel.'.format(handle))
 
-        # Remove the discord channel from the twitter channel conf
+        # Remove the Discord channel from the Twitter channel conf
         conf.discord_channels.remove(chan_conf)
         if not conf.discord_channels:
-            # If there are no more discord channel to feed, unfollow the twitter channel
+            # If there are no more Discord channel to feed, unfollow the Twitter channel
             self.conf.follows.remove(conf)
             del conf
 
@@ -476,7 +478,7 @@ class Twitter:
                 continue
 
             # Send the embed to the appropriate channel
-            log.debug('Scheduling discord message on channel ({}) : {}'.format(channel.id, tweet.text))
+            log.debug('Scheduling Discord message on channel ({}) : {}'.format(channel.id, tweet.text))
             await self.bot.send_message(discord_channel, content=content, embed=embed)
 
             # Update stats and latest id when processing newer tweets
@@ -568,12 +570,12 @@ class TweepyStream(tweepy.StreamListener):
 
     @property
     def running(self):
-        """Returns whether or not a twitter stream is running."""
+        """Returns whether or not a Twitter stream is running."""
         return self.sub_process and self.sub_process.is_alive()
 
     async def start(self):
         """Starts the tweepy Stream."""
-        # Avoid being rate limited by twitter when restarting the stream with the same follow list.
+        # Avoid being rate limited by Twitter when restarting the stream with the same follow list.
         if self.sub_process and not set(self.sub_process.follows) != set(self.get_follows()):
             return
 
@@ -617,7 +619,7 @@ class TweepyStream(tweepy.StreamListener):
         self.handler = None
 
     def get_follows(self):
-        """Returns a list containing the twitter ID of the channels we're following."""
+        """Returns a list containing the Twitter ID of the channels we're following."""
         return [c.id for c in self.conf.follows]
 
     async def _run(self):
