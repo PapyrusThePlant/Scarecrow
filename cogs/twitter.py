@@ -132,11 +132,15 @@ class Twitter:
     async def twitter_fetch(self, ctx, channel, limit: int=1):
         """Retrieves the latest tweets from a channel and displays them.
 
+        You do not need to include the @ before the twitter channel,
+        it will avoid unwanted mentions in Discord.
+
         If a limit is given, at most that number of tweets will be displayed. Defaults to 1.
         """
+        sane_channel = channel.lower().lstrip('@')
         # Get the latest tweets from the user
         try:
-            to_display = await self.get_latest_valid(screen_name=channel.lower(), limit=limit)
+            to_display = await self.get_latest_valid(screen_name=sane_channel, limit=limit)
         except tweepy.TweepError as e:
             # The channel is probably protected
             if e.reason == 'Not authorized.':
@@ -160,6 +164,9 @@ class Twitter:
         The tweets from the given twitter channel will be
         sent to the channel this command was used in.
 
+        You do not need to include the @ before the twitter channel,
+        it will avoid unwanted mentions in Discord.
+
         Following protected users is not supported by the Twitter API.
         See https://dev.twitter.com/streaming/overview/request-parameters#follow
         """
@@ -169,11 +176,11 @@ class Twitter:
         if not discord_channel.permissions_for(discord_channel.server.me).embed_links:
             raise TwitterError('\N{WARNING SIGN} The `Embed Links` permission in this channel is required to display tweets properly. \N{WARNING SIGN}')
 
-        lower_channel = channel.lower()
-        conf = dutils.get(self.conf.follows, screen_name=lower_channel)
+        sane_channel = channel.lower().lstrip('@')
+        conf = dutils.get(self.conf.follows, screen_name=sane_channel)
         if conf is None:
             # New twitter channel, retrieve the user info
-            partial = functools.partial(self.api.get_user, screen_name=lower_channel)
+            partial = functools.partial(self.api.get_user, screen_name=sane_channel)
             try:
                 user = await self.bot.loop.run_in_executor(None, partial)
             except tweepy.TweepError as e:
@@ -263,9 +270,12 @@ class Twitter:
 
         The tweets from the given twitter channel will not be
         sent to the channel this command was used in anymore.
+
+        You do not need to include the @ before the twitter channel,
+        it will avoid unwanted mentions in Discord.
         """
-        channel = channel.lower()
-        conf = dutils.get(self.conf.follows, screen_name=channel)
+        sane_channel = channel.lower().lstrip('@')
+        conf = dutils.get(self.conf.follows, screen_name=sane_channel)
         chan_conf = dutils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
         if chan_conf is None:
