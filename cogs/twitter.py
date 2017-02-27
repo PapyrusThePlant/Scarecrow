@@ -419,11 +419,18 @@ class Twitter:
             except Exception as e:
                 log.warning('Error while fetching oEmbed data for {} : {}'.format(url, e))
             else:
-                if data['type'] == 'photo':
-                    embed.set_image(url=data['url'])
-                else:
-                    embed.set_image(url=data.get('thumbnail_url', None) or data.get('url', None))
+                # Some providers return their errors in the resp content with a 200
+                if 'type' not in data:
+                    return embed
 
+                if data['type'] == 'photo':
+                    image_url = data['url']
+                else:
+                    image_url = data.get('thumbnail_url', data.get('url', url))
+
+                # Sometimes we get an empty image_url
+                if image_url:
+                    embed.set_image(url=image_url)
         return embed
 
     def skip_tweet(self, status, from_stream=True):
