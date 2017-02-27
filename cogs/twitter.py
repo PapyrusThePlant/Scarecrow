@@ -1,6 +1,7 @@
 import asyncio
 import functools
 import json
+import html
 import logging
 import multiprocessing
 import os
@@ -368,6 +369,9 @@ class Twitter:
                 urls.remove(url)
             else:
                 tweet.text = tweet.text.replace(url['url'], url['expanded_url']).strip()
+
+        # Decode html entities
+        tweet.text = html.unescape(tweet.text).strip()
 
         # Avoid retweets without text to cause the embed to be illegal
         if not tweet.text:
