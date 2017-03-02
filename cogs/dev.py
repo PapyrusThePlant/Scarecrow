@@ -19,9 +19,6 @@ class Dev:
     """Nope, not for you."""
     def __init__(self, bot):
         self.bot = bot
-        self.debug_env = {}
-        self.cleanup_task = None
-        self.clear_debug_env()
 
     def __local_check(self, ctx):
         # Owner commands only
@@ -106,16 +103,15 @@ class Dev:
         # Wrap the code inside a coroutine to allow asyncronous keywords
         code = 'async def painting_of_a_happy_little_tree(ctx):\n' + textwrap.indent(code, '    ')
         stdout = io.StringIO()
+        env = dict(globals())
 
         try:
             # First exec to create the coroutine
-            exec(code, self.debug_env)
-            coro = self.debug_env.pop('painting_of_a_happy_little_tree')(ctx)
+            exec(code, env)
+            coro = env.pop('painting_of_a_happy_little_tree')(ctx)
         except SyntaxError as e:
             content = '{0.text}{1:>{0.offset}}\n{2}: {0.msg}'.format(e, '^', type(e).__name__)
         else:
-            # Save a reference to the coro's frame before executing it
-            coro_frame = coro.cr_frame
             try:
                 with redirect_stdout(stdout):
                     result = await coro
@@ -123,37 +119,15 @@ class Dev:
                 content = '{}{}'.format(stdout.getvalue(), traceback.format_exc())
             else:
                 # Execution succeeded, save the return value and build the output content
-                self.debug_env['_last'] = result
                 content = stdout.getvalue()
                 if result is not None:
                     content += str(result)
-
-                # Re-schedule the cleanup
-                if self.cleanup_task:
-                    self.cleanup_task.cancel()
-                self.cleanup_task = ctx.bot.loop.call_later(180, self.clear_debug_env)
-            finally:
-                # Update the execution environment with the coroutine's locals
-                self.debug_env.update(coro_frame.f_locals)
-                del coro_frame
 
         # Send the feedback
         if content:
             await ctx.send(utils.format_block(content, language='py'))
         else:
             await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
-
-    def clear_debug_env(self):
-        if self.cleanup_task:
-            self.cleanup_task.cancel()
-            self.cleanup_task = None
-        self.debug_env.clear()
-        self.debug_env.update(globals())
-
-    @debug.command()
-    async def clear(self):
-        """Clears the execution environment."""
-        self.clear_debug_env()
 
     @commands.command()
     async def update(self, ctx):
