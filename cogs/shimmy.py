@@ -1,6 +1,6 @@
 import random
 
-import discord.utils as dutils
+import discord
 import discord.ext.commands as commands
 
 
@@ -45,16 +45,26 @@ class Shimmy:
         self.nsfw_role = None
 
     def __local_check(self, ctx):
-        return ctx.guild.id == SHIMMY_GUILD_ID
+        return ctx.guild is not None and ctx.guild.id == SHIMMY_GUILD_ID
 
     @commands.command(no_pm=True)
     async def nsfw(self, ctx):
         """Tries to add the NSFW role to a member."""
         if self.nsfw_role is None:
-            self.nsfw_role = dutils.get(ctx.guild.roles, id=NSFW_ROLE_ID)
+            self.nsfw_role = discord.utils.get(ctx.guild.roles, id=NSFW_ROLE_ID)
 
         await ctx.author.add_roles(self.nsfw_role)
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @commands.command(no_pm=True)
+    @commands.has_permissions(manage_server=True)
+    async def stream(self, ctx):
+        shimmy = ctx.guild.get_member(140526957686161408)
+        embed = discord.Embed(title='Click here to join the fun !', url='https://twitch.tv/shimmyx')
+        embed.set_author(name=shimmy.display_name, icon_url=shimmy.avatar_url)
+        embed.description = "Guess who's streaming? It's ~~slothsenpai~~ shimmysenpai ! Kyaa\~\~"
+
+        await ctx.send(content='@here', embed=embed)
 
     @commands.command(no_pm=True)
     async def ball(self, ctx, *, question):
