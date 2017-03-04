@@ -34,11 +34,15 @@ class Prefix:
             prefixes = self.conf.guild_specific.get(message.guild.id, []) + self.conf.global_
         else:
             prefixes = self.conf.global_
-            
+
         if 'mention' in prefixes:
             prefixes[prefixes.index('mention')] = bot.user.mention + ' '
 
         return prefixes
+
+    async def on_guild_remove(self, guild):
+        if guild.id in self.conf.guild_specific:
+            del self.conf.guild_specific[guild.id]
 
     @commands.group(name='prefix', no_pm=True)
     async def prefix_group(self):
