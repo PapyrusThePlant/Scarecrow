@@ -57,14 +57,15 @@ class Shimmy:
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @commands.command(no_pm=True)
-    @commands.has_permissions(manage_server=True)
-    async def stream(self, ctx):
+    @commands.has_permissions(manage_guild=True)
+    async def stream(self, ctx, *, description=None):
         shimmy = ctx.guild.get_member(140526957686161408)
         embed = discord.Embed(title='Click here to join the fun !', url='https://twitch.tv/shimmyx')
         embed.set_author(name=shimmy.display_name, icon_url=shimmy.avatar_url)
-        embed.description = "Guess who's streaming? It's ~~slothsenpai~~ shimmysenpai ! Kyaa\~\~"
+        embed.description = description or "Guess who's streaming? It's ~~slothsenpai~~ shimmysenpai ! Kyaa\~\~"
 
         await ctx.send(content='@here', embed=embed)
+        await ctx.message.delete()
 
     @commands.command(no_pm=True)
     async def ball(self, ctx, *, question):
