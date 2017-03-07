@@ -1,12 +1,15 @@
 import asyncio
+import gc
 import inspect
 import io
 import textwrap
 import traceback
 from contextlib import redirect_stdout
+from collections import Counter
 
 import discord
 from discord.ext import commands
+import psutil
 
 from .util import utils
 
@@ -128,6 +131,21 @@ class Dev:
             await ctx.send(utils.format_block(content, language='py'))
         else:
             await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @commands.command()
+    async def memory(self, ctx, n=10):
+        """Memory info."""
+        members = 0
+        uniques = set()
+        for member in ctx.bot.get_all_members():
+            members += 1
+            uniques.add(member.id)
+        memory = '{0:.2f} Mb'.format(psutil.Process().memory_full_info().uss / 1048576)
+        objects = Counter(type(o).__name__ for o in gc.get_objects())
+        objects_str = utils.format_block(objects.most_common(n), language='py')
+
+        fmt = 'Guilds: {}\nMembers: {} ({} uniques)\nMemory: {}\nObjects: {}'
+        await ctx.send(fmt.format(len(ctx.bot.guilds), members, len(uniques), memory, objects_str))
 
     @commands.command()
     async def update(self, ctx):
