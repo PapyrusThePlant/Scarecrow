@@ -338,7 +338,11 @@ class Twitter:
         media = tweet.entities.get('media', [])
 
         if not nested and tweet.is_quote_status:
-            tweet.quoted_status = self.prepare_tweet(tweet.quoted_status, nested=True)
+            if not hasattr(tweet, 'quoted_status'):
+                # Original tweet is unavailable
+                tweet.quoted_status = None
+            else:
+                tweet.quoted_status = self.prepare_tweet(tweet.quoted_status, nested=True)
             sub_tweet = tweet.quoted_status
         elif not nested and hasattr(tweet, 'retweeted_status'):
             tweet.retweeted_status = self.prepare_tweet(tweet.retweeted_status, nested=True)
@@ -396,7 +400,12 @@ class Twitter:
         if tweet.is_quote_status:
             sub_tweet = tweet.quoted_status
             embed.description = tweet.text
-            embed.add_field(name='Retweet from @{} :'.format(sub_tweet.author.screen_name), value=sub_tweet.text)
+            if not sub_tweet:
+                # Original tweet is unavailable
+                embed.add_field(name='Retweet unavailable', value='The retweeted status is unavailable.')
+                sub_tweet = tweet
+            else:
+                embed.add_field(name='Retweet from @{} :'.format(sub_tweet.author.screen_name), value=sub_tweet.text)
         elif hasattr(tweet, 'retweeted_status'):
             sub_tweet = tweet.retweeted_status
             embed.add_field(name='Retweet from @{} :'.format(sub_tweet.author.screen_name), value=sub_tweet.text)
