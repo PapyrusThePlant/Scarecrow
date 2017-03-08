@@ -98,6 +98,7 @@ class Twitter:
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
         self.processed_tweets = 0
+        self.latest_received = 0
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -197,8 +198,12 @@ class Twitter:
             if user.protected:
                 raise TwitterError('This channel is protected and cannot be followed.')
 
+            if self.latest_received == 0:
+                partial = functools.partial(self.api.user_timeline, user_id=user.id, count=1)
+                latest = await ctx.bot.loop.run_in_executor(None, partial)
+                self.latest_received = latest[0].id
             # Register the new channel
-            conf = FollowConfig(user.id_str, user.screen_name)
+            conf = FollowConfig(user.id_str, user.screen_name, latest_received=self.latest_received)
             self.conf.follows.append(conf)
 
             try:
@@ -456,6 +461,9 @@ class Twitter:
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
         self.processed_tweets += 1
+        if tweet.id > self.latest_received:
+            self.latest_received = tweet.id
+        
         if self.skip_tweet(tweet):
             return
 
