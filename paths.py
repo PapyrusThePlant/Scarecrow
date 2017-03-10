@@ -8,6 +8,7 @@ CONFIG = WORKDIR + '/conf/'
 BOT_CONFIG = CONFIG + 'bot.json'
 IGNORED_CONFIG = CONFIG + 'ignored.json'
 PREFIXES_CONFIG = CONFIG + 'prefixes.json'
+TWITCH_CONFIG = CONFIG + 'twitch.json'
 TWITTER_CONFIG = CONFIG + 'twitter.json'
 
 DATA = WORKDIR + '/data/'
