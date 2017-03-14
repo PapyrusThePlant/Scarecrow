@@ -18,7 +18,6 @@ import paths
 from .util import config, oembed
 
 log = logging.getLogger(__name__)
-log.level = logging.DEBUG
 
 
 def setup(bot):
