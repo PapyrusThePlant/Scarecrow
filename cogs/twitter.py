@@ -182,7 +182,7 @@ class Twitter:
         sane_handle = handle.lower().lstrip('@')
         conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
         if conf is None:
-            # New Twitter channel, retrieve the user info
+            # Retrieve the user info in case his screen name changed
             partial = functools.partial(self.api.get_user, screen_name=sane_handle)
             try:
                 user = await ctx.bot.loop.run_in_executor(None, partial)
@@ -192,7 +192,14 @@ class Twitter:
                 else:
                     log.error(str(e))
                     raise TwitterError('Unknown error, this has been logged.') from e
+            conf = discord.utils.get(self.conf.follows, id=user.id_str)
 
+            # Update the saved screen name if it changed
+            if conf is not None:
+                conf.screen_name = user.screen_name.lower()
+                self.conf.save()
+
+        if conf is None:
             # The Twitter API does not support following protected users
             # https://dev.twitter.com/streaming/overview/request-parameters#follow
             if user.protected:
@@ -203,7 +210,7 @@ class Twitter:
                 latest = await ctx.bot.loop.run_in_executor(None, partial)
                 self.latest_received = latest[0].id
             # Register the new channel
-            conf = FollowConfig(user.id_str, user.screen_name, latest_received=self.latest_received)
+            conf = FollowConfig(user.id_str, sane_handle, latest_received=self.latest_received)
             self.conf.follows.append(conf)
 
             try:
@@ -213,7 +220,8 @@ class Twitter:
                 self.conf.follows.remove(conf)
                 log.error(str(e))
                 raise TwitterError('Unknown error, this has been logged.') from e
-        elif discord.utils.get(conf.discord_channels, id=ctx.channel.id):
+
+        if discord.utils.get(conf.discord_channels, id=ctx.channel.id):
             raise TwitterError('Already following "{}" on this channel.'.format(handle))
 
         # Add new discord channel
@@ -285,6 +293,24 @@ class Twitter:
         """
         sane_handle = handle.lower().lstrip('@')
         conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
+        if conf is None:
+            # Retrieve the user info in case his screen name changed
+            partial = functools.partial(self.api.get_user, screen_name=sane_handle)
+            try:
+                user = await ctx.bot.loop.run_in_executor(None, partial)
+            except tweepy.TweepError as e:
+                if e.api_code == 50:
+                    raise TwitterError('User "{}" not found.'.format(handle)) from e
+                else:
+                    log.error(str(e))
+                    raise TwitterError('Unknown error, this has been logged.') from e
+            conf = discord.utils.get(self.conf.follows, id=user.id_str)
+
+            # Update the saved screen name if it changed
+            if conf is not None:
+                conf.screen_name = user.screen_name.lower()
+                self.conf.save()
+
         chan_conf = discord.utils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
 
         if chan_conf is None:
@@ -463,7 +489,7 @@ class Twitter:
         self.processed_tweets += 1
         if tweet.id > self.latest_received:
             self.latest_received = tweet.id
-        
+
         if self.skip_tweet(tweet):
             return
 
@@ -471,6 +497,12 @@ class Twitter:
         log.debug('Received tweet: ' + tweet_str)
 
         chan_conf = discord.utils.get(self.conf.follows, id=tweet.author.id_str)
+
+        # Update the saved screen name if it changed
+        if chan_conf.screen_name != tweet.author.screen_name:
+            chan_conf.screen_name = tweet.author.screen_name.lower()
+            self.conf.save()
+
         try:
             embed = await self.prepare_embed(tweet)
             content = None
