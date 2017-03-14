@@ -63,10 +63,10 @@ class HTTPError(Exception):
             self.resp_msg = message.get('message', message.get('msg', ''))
             self.code = message.get('code', 0)
         else:
-            self.resp_message = message
+            self.resp_msg = message
 
         fmt = '{0.reason} (status code: {0.status})'
-        if len(self.resp_message):
+        if len(self.resp_msg):
             fmt += ': {1}'
 
         super().__init__(fmt.format(self.response, self.resp_msg))
