@@ -154,7 +154,7 @@ class Info:
 
         if isinstance(channel, discord.VoiceChannel):
             embed.add_field(name='Bitrate', value=str(channel.bitrate))
-            embed.add_field(name='Members', value=str(len(channel.voice_members)))
+            embed.add_field(name='Members', value=str(len(channel.members)))
             embed.add_field(name='User limit', value=str(channel.user_limit) if channel.user_limit > 0 else 'None')
         elif isinstance(channel, discord.TextChannel):
             embed.add_field(name='Default channel', value='Yes' if channel.is_default else 'No')
@@ -249,7 +249,7 @@ class Info:
 
         if member.voice:
             vc = member.voice.channel
-            other_people = len(vc.voice_members) - 1
+            other_people = len(vc.members) - 1
             voice_fmt = '{} with {} others' if other_people else '{} by themselves'
             voice = voice_fmt.format(vc.name, other_people)
         else:
