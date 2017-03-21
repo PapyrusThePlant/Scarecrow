@@ -91,9 +91,10 @@ async def fetch_page(url, **kwargs):
     except asyncio.TimeoutError:
         data = None
     else:
-        if resp.headers['content-type'] == 'application/json':
+        content_type = [ct.strip() for ct in resp.headers['content-type'].split(';')]
+        if 'application/json' in content_type:
             data = await resp.json()
-        elif 'image/' in resp.headers['content-type']:
+        elif 'image/' in content_type:
             return resp.url
         else:
             data = await resp.text()
