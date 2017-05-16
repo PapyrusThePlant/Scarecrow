@@ -103,7 +103,7 @@ class Twitter:
         log.info('Unloading cog.')
         self.stream.quit()
 
-    async def __error(self, error, ctx):
+    async def __error(self, ctx, error):
         """Local command error handler."""
         if isinstance(error, TwitterError):
             try:

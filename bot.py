@@ -60,7 +60,7 @@ class Bot(commands.Bot):
         for extension in self.extensions.copy().keys():
             self.unload_extension(extension)
 
-    async def on_command_error(self, error, ctx):
+    async def on_command_error(self, ctx, error):
         if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand)):
             await ctx.send(str(error))
         elif isinstance(error, commands.CommandInvokeError):
@@ -103,6 +103,6 @@ class Bot(commands.Bot):
 
     def run(self):
         try:
-            super().run(self.conf.token, reconnect=True)
+            super().run(self.conf.token)
         finally:
             self.unload_extensions()

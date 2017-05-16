@@ -44,7 +44,7 @@ class TwitchConfig(config.ConfigElement):
 
 
 class Twitch:
-    "Follow Twitch channel and display alerts in Discord when one goes live."
+    """Follow Twitch channel and display alerts in Discord when one goes live."""
     def __init__(self, bot):
         self.bot = bot
         self.conf = config.Config(paths.TWITCH_CONFIG, encoding='utf-8')
@@ -85,7 +85,12 @@ class Twitch:
             channels = list(self.conf.follows.keys())
             for i in range(0, len(channels), 100):
                 chunk = channels[i:i + 100]
-                streams_chunk = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel':', '.join(chunk), 'limit': 100})
+                try:
+                    streams_chunk = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel':', '.join(chunk), 'limit': 100})
+                except utils.HTTPError as e:
+                    log.info('Ignoring HTTP error when fetching chunk #{} : {}'.format(i / 100 + 1, e))
+                    continue
+
                 for stream in streams_chunk['streams']:
                     if stream['channel']['_id'] not in self.live_cache:
                         try:

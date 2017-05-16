@@ -38,15 +38,14 @@ class HelpFormatter(commands.HelpFormatter):
             self._paginator.add_line(shortened)
 
             if isinstance(command, GroupMixin):
-                subcommands = [(n, c) for n, c in command.commands.items()]
                 indent = indent.replace('\u251c\u2500', '\u2502 ').replace('\u2514\u2500', '  ')  # wew wth
-                self._add_subcommands_to_page(max_width, subcommands, indent)
+                self._add_subcommands_to_page(max_width, command.all_commands.items(), indent)
 
     def _get_max_width(self, command, depth=1):
         """Tricks and ponies to get the appropriate max_width."""
         command_length = len(command.name) + depth * len(self.base_indent)
         if isinstance(command, GroupMixin):
-            return max([self._get_max_width(c, depth + 1) for c in command.commands.values()] + [command_length])
+            return max([self._get_max_width(c, depth + 1) for c in command.commands] + [command_length])
         else:
             return command_length
 
@@ -57,7 +56,7 @@ class HelpFormatter(commands.HelpFormatter):
         try:
             command = self.command if not self.is_cog() else self.context.bot
             if command.commands:
-                return max([self._get_max_width(c) if self.show_hidden or not c.hidden else 0 for c in command.commands.values()])
+                return max([self._get_max_width(c) if self.show_hidden or not c.hidden else 0 for c in command.commands])
             return 0
         except AttributeError:
             return len(self.command.name)
