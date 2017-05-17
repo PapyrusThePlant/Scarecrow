@@ -38,7 +38,7 @@ class TwitchConfig(config.ConfigElement):
             if not destinations:
                 conf_to_remove.add(channel_id)
 
-        # Cleanpu the followed channels
+        # Cleanup the followed channels
         if conf_to_remove:
             self.follows = {k: v for k, v in self.follows.items() if k not in conf_to_remove}
 
@@ -73,53 +73,75 @@ class Twitch:
         # Live cache initialisation
         channels = ','.join(self.conf.follows.keys())
         if channels:
-            streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel':channels})
-            self.live_cache = {s['channel']['_id']: s for s in streams['streams']}
+            try:
+                streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': channels})
+            except utils.HTTPError as e:
+                # Re-schedule the daemon on error
+                self.daemon = self.bot.loop.create_task(self._daemon())
+                return
+            else:
+                self.live_cache = {str(s['channel']['_id']): s for s in streams['streams']}
 
         # ERMAHGERD ! MAH FRAVRIT LERP !
         while True:
-            # Poll every minute
-            await asyncio.sleep(60)
+            try:
+                await self.poll_streams()
+            except Exception as e:
+                log.info('Polling error, retrying in 10 seconds: {}'.format(e))
+                await asyncio.sleep(10)
+            else:
+                await asyncio.sleep(60)
 
-            # Get the streams statuses in chunks of 100
-            channels = list(self.conf.follows.keys())
-            for i in range(0, len(channels), 100):
-                chunk = channels[i:i + 100]
+    async def poll_streams(self):
+        live_cache = {}
+
+        # Get the streams statuses in chunks of 100
+        channels = list(self.conf.follows.keys())
+        for i in range(0, len(channels), 100):
+            chunk = channels[i:i + 100]
+            try:
+                streams_chunk = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': ', '.join(chunk), 'limit': 100})
+            except utils.HTTPError as e:
+                raise Exception('HTTP error when fetching streams chunk #{}, trying again in 10 seconds...'.format(i / 100 + 1)) from e
+
+            # Extract the newly live streams
+            for stream in streams_chunk['streams']:
+                stream_id = str(stream['channel']['_id'])
+                live_cache[stream_id] = stream
+
+        # Send notifications for the streams that went live after we successfully retrieved all the chunks
+        for stream_id in live_cache:
+            if stream_id not in self.live_cache:
                 try:
-                    streams_chunk = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel':', '.join(chunk), 'limit': 100})
-                except utils.HTTPError as e:
-                    log.info('Ignoring HTTP error when fetching chunk #{} : {}'.format(i / 100 + 1, e))
-                    continue
+                    await self.notify(live_cache[stream_id])
+                except Exception as e:
+                    log.error('Notification error: {}'.format(e))
 
-                for stream in streams_chunk['streams']:
-                    if stream['channel']['_id'] not in self.live_cache:
-                        try:
-                            await self.notify(stream)
-                        except Exception as e:
-                            log.error('Notification error: {}'.format(e))
-                        self.live_cache[stream['channel']['_id']] = stream
+        # Update the live cache
+        del self.live_cache
+        self.live_cache = live_cache
 
     async def notify(self, stream):
         user_id = str(stream['channel']['_id'])
 
         # Build the embed
-        embed = discord.Embed(title=stream['channel']['status'], url=stream['channel']['url'], colour=0x738bd7)
+        embed = discord.Embed(title='Click here to join the fun !', url=stream['channel']['url'], colour=0x738bd7)
         embed.set_author(name=stream['channel']['display_name'])
         embed.set_thumbnail(url=stream['channel']['logo'])
         embed.set_image(url=stream['preview']['large'])
         embed.add_field(name='Playing', value=stream['game'])
-        embed.add_field(name='Delay', value='{} seconds.'.format(stream['delay']))
+        embed.add_field(name=stream['channel']['status'], value='\N{ZERO WIDTH SPACE}', inline=False)
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
 
-        # Send the notification to every interesed channel
+        # Send the notification to every interested channel
         for channel_id in self.conf.follows[user_id]:
             destination = self.bot.get_channel(channel_id)
             await destination.send(embed=embed)
 
     async def get_user(self, channel):
-        data = await utils.fetch_page('https://api.twitch.tv/kraken/users', session=self.session, params={'login':channel})
+        data = await utils.fetch_page('https://api.twitch.tv/kraken/users', session=self.session, params={'login': channel})
         if data['_total'] == 0:
             raise commands.BadArgument('Channel not found.')
         elif data['_total'] > 1:
@@ -152,7 +174,7 @@ class Twitch:
         self.conf.save()
 
         # Update the live streams cache if the stream is live
-        streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel':user_id})
+        streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': user_id})
         if streams['_total'] == 1 and user_id not in self.live_cache:
             self.live_cache[user_id] = streams['streams'][0]
 
@@ -179,7 +201,7 @@ class Twitch:
 
         # Cleanup the live streams cache
         try:
-            self.live_cache[user_id]
+            del self.live_cache[user_id]
         except KeyError:
             pass
 

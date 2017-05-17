@@ -214,7 +214,7 @@ class Twitter:
 
             try:
                 # Restart the stream
-                await self.stream.start()
+                self.stream.start()
             except tweepy.TweepError as e:
                 self.conf.follows.remove(conf)
                 log.error(str(e))
@@ -324,7 +324,7 @@ class Twitter:
 
             # Update the tweepy stream
             if len(self.conf.follows) > 0:
-                await self.stream.start()
+                self.stream.start()
             else:
                 self.stream.stop()
 
@@ -634,7 +634,7 @@ class TweepyStream(tweepy.StreamListener):
         """Returns whether or not a Twitter stream is running."""
         return self.sub_process and self.sub_process.is_alive()
 
-    async def start(self):
+    def start(self):
         """Starts the tweepy Stream."""
         # Avoid being rate limited by Twitter when restarting the stream with the same follow list.
         if self.sub_process and not set(self.sub_process.follows) != set(self.get_follows()):
@@ -668,6 +668,10 @@ class TweepyStream(tweepy.StreamListener):
             self.sub_process = None
             self.daemon = None
 
+    async def restart(self):
+        self.stop()
+        await self.start()
+
     def quit(self):
         """Prepares for a safe unloading."""
         self.stop()
@@ -695,8 +699,9 @@ class TweepyStream(tweepy.StreamListener):
                 data = self.mp_queue.get(False)  # Do not block
             except QueueEmpty:
                 if not self.sub_process.is_alive():
-                    log.warning('{} appears dead.'.format(self.sub_process.pid))
-                    asyncio.ensure_future(self.stop())
+                    log.warning('{} appears dead. Restarting sub process.'.format(self.sub_process.pid))
+                    asyncio.ensure_future(self.restart())
+                    return
 
                 # Arbitrary sleep time after an unsuccessful poll
                 await asyncio.sleep(4)
