@@ -30,7 +30,7 @@ def setup(bot):
 
     cog = Twitter(bot)
     bot.add_cog(cog)
-    asyncio.ensure_future(cog.stream.start(), loop=bot.loop)
+    cog.stream.start()
 
 
 class TwitterError(commands.CommandError):
@@ -121,12 +121,12 @@ class Twitter:
         if channel.guild is not None:
             self.conf.remove_channels(channel)
             self.conf.save()
-            await self.stream.start()
+            self.stream.start()
 
     async def on_guild_remove(self, guild):
         self.conf.remove_channels(*guild.channels)
         self.conf.save()
-        await self.stream.start()
+        self.stream.start()
 
     @commands.group(name='twitter')
     async def twitter_group(self, ctx):
@@ -668,9 +668,9 @@ class TweepyStream(tweepy.StreamListener):
             self.sub_process = None
             self.daemon = None
 
-    async def restart(self):
+    def restart(self):
         self.stop()
-        await self.start()
+        self.start()
 
     def quit(self):
         """Prepares for a safe unloading."""
@@ -700,7 +700,7 @@ class TweepyStream(tweepy.StreamListener):
             except QueueEmpty:
                 if not self.sub_process.is_alive():
                     log.warning('{} appears dead. Restarting sub process.'.format(self.sub_process.pid))
-                    asyncio.ensure_future(self.restart())
+                    self.restart()
                     return
 
                 # Arbitrary sleep time after an unsuccessful poll
