@@ -18,4 +18,4 @@ OEMBED_PROVIDERS = DATA + 'oEmbed_providers.json'
 
 LOGS = WORKDIR + '/logs/'
 BOT_LOG = LOGS + 'bot.log'
-TWITTER_SUBPROCESS_LOG = LOGS + 'twitter-sub-process-{pid}.log'
+TWITTER_SUBPROCESS_LOG = LOGS + 'twitter-sub-process.log'

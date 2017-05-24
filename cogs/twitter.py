@@ -110,7 +110,7 @@ class Twitter:
                 await ctx.send(error)
             except discord.Forbidden:
                 warning = 'Missing the `Send Messages` permission to send the following error to {}: {}'.format(ctx.message.channel.mention, error)
-                log.warning(warning)
+                log.debug('Sending warning to {} : {}'.format(ctx.author.id, warning))
                 await ctx.author.send(warning)
 
     async def on_ready(self):
@@ -190,7 +190,7 @@ class Twitter:
                     raise TwitterError('User "{}" not found.'.format(handle)) from e
                 else:
                     log.error(str(e))
-                    raise TwitterError('Unknown error, this has been logged.') from e
+                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
             conf = discord.utils.get(self.conf.follows, id=user.id_str)
 
             # Update the saved screen name if it changed
@@ -218,7 +218,7 @@ class Twitter:
             except tweepy.TweepError as e:
                 self.conf.follows.remove(conf)
                 log.error(str(e))
-                raise TwitterError('Unknown error, this has been logged.') from e
+                raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
 
         if discord.utils.get(conf.discord_channels, id=ctx.channel.id):
             raise TwitterError('Already following "{}" on this channel.'.format(handle))
@@ -302,7 +302,7 @@ class Twitter:
                     raise TwitterError('User "{}" not found.'.format(handle)) from e
                 else:
                     log.error(str(e))
-                    raise TwitterError('Unknown error, this has been logged.') from e
+                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
             conf = discord.utils.get(self.conf.follows, id=user.id_str)
 
             # Update the saved screen name if it changed
@@ -454,9 +454,9 @@ class Twitter:
             try:
                 data = await oembed.fetch_oembed_data(url)
             except oembed.OembedException as e:
-                log.warning(str(e))
+                log.debug(str(e))
             except Exception as e:
-                log.warning('Error while fetching oEmbed data for {} : {}'.format(url, e))
+                log.error('Error while fetching oEmbed data for {} : {}'.format(url, e))
             else:
                 # Some providers return their errors in the resp content with a 200
                 if 'type' not in data:
@@ -508,7 +508,7 @@ class Twitter:
         except Exception as e:
             embed = None
             content = 'Failed to prepare embed for ' + tweet.tweet_web_url
-            log.error('Failed to prepare embed {} : {} '.format(e, tweet_str))
+            log.error('{}\nError : {}\nTweet : {} '.format(content, e, tweet_str))
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
@@ -518,19 +518,19 @@ class Twitter:
 
             # Check if the channel still exists
             if discord_channel is None:
-                log.error('Channel {} unavailable to display {}.'.format(channel.id, tweet.tweet_url))
+                log.debug('Channel {} unavailable to display {}.'.format(channel.id, tweet.tweet_url))
                 continue
 
             # Check for required permissions
             perms = discord_channel.permissions_for(discord_channel.guild.me)
             if not perms.embed_links:
                 warning = '`Embed links` permission missing to display {}.'.format(tweet.tweet_url)
-                log.warning(warning)
+                log.debug(warning)
 
                 try:
                     await discord_channel.send(warning)
                 except discord.DiscordException as e:
-                    log.error('Could not send warning to channel {} : {}'.format(discord_channel.id, e))
+                    log.debug('Could not send warning to channel {} : {}'.format(discord_channel.id, e))
 
                 continue
 
@@ -538,7 +538,7 @@ class Twitter:
                 # Send the message to the appropriate channel
                 await discord_channel.send(content=content, embed=embed)
             except Exception as e:
-                log.error('Failed to send message on channel {} : Error : {} : Content : {} : Embed : {}'.format(channel.id, e, content, embed.to_dict() if embed else 'None'))
+                log.error('Failed to send message on channel {}\n Error : {}\nContent : {}\nEmbed : {}'.format(channel.id, e, content, embed.to_dict() if embed else 'None'))
                 continue
 
             log.debug('Successfully sent message on channel {} : Content {} : Embed {}'.format(channel.id, content, embed.to_dict() if embed else 'None'))
@@ -579,8 +579,8 @@ class SubProcessStream(multiprocessing.Process):
         # Setup the logging for the sub-process
         rlog = logging.getLogger()
         rlog.setLevel(logging.INFO)
-        handler = logging.FileHandler(paths.TWITTER_SUBPROCESS_LOG.format(pid=os.getpid()), encoding='utf-8')
-        handler.setFormatter(logging.Formatter('{asctime} {levelname} {name} {message}', style='{'))
+        handler = logging.FileHandler(paths.TWITTER_SUBPROCESS_LOG, encoding='utf-8')
+        handler.setFormatter(logging.Formatter(str(os.getpid()) + ' {asctime} {levelname} {name} {message}', style='{'))
         rlog.addHandler(handler)
 
         # Do not join the queue's bg thread on exit
@@ -699,7 +699,7 @@ class TweepyStream(tweepy.StreamListener):
                 data = self.mp_queue.get(False)  # Do not block
             except QueueEmpty:
                 if not self.sub_process.is_alive():
-                    log.warning('{} appears dead. Restarting sub process.'.format(self.sub_process.pid))
+                    log.info('{} appears dead. Restarting sub process.'.format(self.sub_process.pid))
                     self.restart()
                     return
 
@@ -707,7 +707,7 @@ class TweepyStream(tweepy.StreamListener):
                 await asyncio.sleep(4)
             except Exception as e:
                 # Might be triggered when the sub_process is terminated while putting data in the queue
-                log.error('Queue polling error: ' + str(e))
+                log.error('Queue polling error, exiting daemon. ' + str(e))
                 break
             else:
                 if data is not None:
