@@ -11,16 +11,16 @@ from .util import agarify, utils
 
 
 def setup(bot):
-    bot.add_cog(Misc())
+    bot.add_cog(Misc(bot))
 
 
 class Misc:
     """No comment."""
-    def __init__(self):
+    def __init__(self, bot):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
         }
-        self.google_session = aiohttp.ClientSession(headers=headers)
+        self.google_session = aiohttp.ClientSession(headers=headers, loop=bot.loop)
 
     def __unload(self):
         self.google_session.close()
