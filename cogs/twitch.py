@@ -194,16 +194,16 @@ class Twitch:
         if user_id not in self.conf.follows.keys() or ctx.channel.id not in self.conf.follows[user_id]:
             raise commands.BadArgument('Not following "{}" on this channel.'.format(channel))
 
-        # Remove the discord channel from the conf and clean it up
+        # Remove the discord channel from the conf and clean it up if no other channel follows that stream
         del self.conf.follows[user_id][ctx.channel.id]
         if not self.conf.follows[user_id]:
             del self.conf.follows[user_id]
-        self.conf.save()
+            # Cleanup the live streams cache
+            try:
+                del self.live_cache[user_id]
+            except KeyError:
+                pass
 
-        # Cleanup the live streams cache
-        try:
-            del self.live_cache[user_id]
-        except KeyError:
-            pass
+        self.conf.save()
 
         await ctx.send('\N{OK HAND SIGN}')
