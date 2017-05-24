@@ -19,6 +19,8 @@ class TwitchConfig(config.ConfigElement):
     def __init__(self, client_id, **kwargs):
         self.client_id = client_id
         self.follows = kwargs.get('follows', {})
+        for k, v in self.follows.items():
+            self.follows[k] = utils.dict_keys_to_int(v)
 
     def remove_channels(self, *channels):
         """Unregister the given channels from every followed channel, and
@@ -102,7 +104,7 @@ class Twitch:
             try:
                 streams_chunk = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': ', '.join(chunk), 'limit': 100})
             except utils.HTTPError as e:
-                raise Exception('HTTP error when fetching streams chunk #{}, trying again in 10 seconds...'.format(i / 100 + 1)) from e
+                raise Exception('HTTP error when fetching streams chunk #{}'.format(i / 100 + 1)) from e
 
             # Extract the newly live streams
             for stream in streams_chunk['streams']:
@@ -122,23 +124,20 @@ class Twitch:
         self.live_cache = live_cache
 
     async def notify(self, stream):
-        user_id = str(stream['channel']['_id'])
-
         # Build the embed
         embed = discord.Embed(title='Click here to join the fun !', url=stream['channel']['url'], colour=0x738bd7)
         embed.set_author(name=stream['channel']['display_name'])
         embed.set_thumbnail(url=stream['channel']['logo'])
         embed.set_image(url=stream['preview']['large'])
-        embed.add_field(name='Playing', value=stream['game'])
-        embed.add_field(name=stream['channel']['status'], value='\N{ZERO WIDTH SPACE}', inline=False)
+        embed.add_field(name=stream['channel']['status'], value='Playing ' + stream['game'])
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
 
         # Send the notification to every interested channel
-        for channel_id in self.conf.follows[user_id]:
+        for channel_id, message in self.conf.follows[str(stream['channel']['_id'])].items():
             destination = self.bot.get_channel(channel_id)
-            await destination.send(embed=embed)
+            await destination.send(message, embed=embed)
 
     async def get_user(self, channel):
         data = await utils.fetch_page('https://api.twitch.tv/kraken/users', session=self.session, params={'login': channel})
@@ -155,22 +154,24 @@ class Twitch:
 
     @twitch_group.command(name='follow', no_pm=True)
     @commands.has_permissions(manage_guild=True)
-    async def twitch_follow(self, ctx, channel):
+    async def twitch_follow(self, ctx, channel, *, message=''):
         """Follows a twitch channel.
 
         When the given Twitch channel goes online, a notification will be sent
         in the Discord channel this command was used in.
+
+        The message will be sent along the stream notification.
         """
         user = await self.get_user(channel)
         user_id = user['_id']
 
         # Register it in the conf
         if user_id not in self.conf.follows.keys():
-            self.conf.follows[user_id] = [ctx.channel.id]
+            self.conf.follows[user_id] = {ctx.channel.id: message}
         elif ctx.channel.id in self.conf.follows[user_id]:
             raise commands.BadArgument('Already following "{}" on this channel.'.format(channel))
         else:
-            self.conf.follows[user_id].append(ctx.channel.id)
+            self.conf.follows[user_id][ctx.channel.id] = message
         self.conf.save()
 
         # Update the live streams cache if the stream is live
@@ -194,7 +195,7 @@ class Twitch:
             raise commands.BadArgument('Not following "{}" on this channel.'.format(channel))
 
         # Remove the discord channel from the conf and clean it up
-        self.conf.follows[user_id].remove(ctx.channel.id)
+        del self.conf.follows[user_id][ctx.channel.id]
         if not self.conf.follows[user_id]:
             del self.conf.follows[user_id]
         self.conf.save()
