@@ -30,19 +30,19 @@ class TwitchConfig(config.ConfigElement):
         conf_to_remove = set()
 
         # Check every followed channel
-        for channel_id, destinations in self.follows.items():
+        for stream_id, destinations in self.follows.items():
             # Remove the given channels from this followed channel
             for channel in channels:
                 try:
-                    destinations.remove(channel)
-                except ValueError:
+                    del destinations[channel]
+                except KeyError:
                     pass
             if not destinations:
-                conf_to_remove.add(channel_id)
+                conf_to_remove.add(stream_id)
 
         # Cleanup the followed channels
-        if conf_to_remove:
-            self.follows = {k: v for k, v in self.follows.items() if k not in conf_to_remove}
+        for stream_id in conf_to_remove:
+            del self.follows[stream_id]
 
 
 class Twitch:
