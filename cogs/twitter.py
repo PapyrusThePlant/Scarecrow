@@ -254,9 +254,14 @@ class Twitter:
         """Displays the status of the Twitter stream."""
         guild_channels = set(c.id for c in ctx.guild.channels)
 
+        total_followed_count = 0
+        total_displayed_count = 0
         followed_count = 0
         displayed_count = 0
         for chan_conf in self.conf.follows:
+            total_followed_count += 1
+            total_displayed_count += sum(c.received_count for c in chan_conf.discord_channels)
+
             # Check if this channel is displayed in the guild
             if set(c.id for c in chan_conf.discord_channels) & guild_channels:
                 followed_count += 1
@@ -266,16 +271,16 @@ class Twitter:
         minutes = (time.time() - ctx.bot.start_time) / 60
         processed_average = self.processed_tweets / minutes
         processed_average = '< 1' if processed_average < 1 else round(processed_average)
-        tweets_processed = '{} (avg {} / min)'.format(self.processed_tweets, processed_average)
+        tweets_processed = 'Average of {}/min since last startup'.format(processed_average)
 
         # Display the info
         if self.stream.running:
             embed = discord.Embed(title='Stream status', description='Online', colour=0x00ff00)
         else:
             embed = discord.Embed(title='Stream status', description='Offline', colour=0xff0000)
-        embed.add_field(name='Tweets processed since startup', value=tweets_processed, inline=False)
-        embed.add_field(name='Channels followed', value=followed_count)
-        embed.add_field(name='Tweets displayed', value=displayed_count)
+        embed.add_field(name='Tweets processed', value=tweets_processed, inline=False)
+        embed.add_field(name='Channels followed', value='{} of the {} followed overall'.format(followed_count, total_followed_count))
+        embed.add_field(name='Tweets displayed', value='{} out of the {} displayed overall'.format(displayed_count, total_displayed_count))
 
         await ctx.send(embed=embed)
 
