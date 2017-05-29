@@ -11,48 +11,42 @@ import discord
 import discord.ext.commands as commands
 
 
-class GuildChannelConverter(commands.Converter):
+class GuildChannelConverter(commands.IDConverter):
     def __init__(self):
-        self._id_regex = re.compile(r'([0-9]{15,21})$')
+        super().__init__()
 
-    def _get_id_match(self):
-        return self._id_regex.match(self.argument)
-
-    def convert(self):
-        match = self._get_id_match()
+    async def convert(self, ctx, argument):
+        match = self._get_id_match(argument)
 
         if match is None:
             # not a mention
-            result = discord.utils.get(self.ctx.bot.get_all_channels(), name=self.argument)
+            result = discord.utils.get(ctx.bot.get_all_channels(), name=argument)
         else:
             guild_id = int(match.group(1))
-            result = self.ctx.bot.get_channel(guild_id)
+            result = ctx.bot.get_channel(guild_id)
 
         if not isinstance(result, (discord.TextChannel, discord.VoiceChannel)):
-            raise commands.BadArgument('Guild "{}" not found.'.format(self.argument))
+            raise commands.BadArgument('Guild "{}" not found.'.format(argument))
 
         return result
 
 
-class GuildConverter(commands.Converter):
+class GuildConverter(commands.IDConverter):
     def __init__(self):
-        self._id_regex = re.compile(r'([0-9]{15,21})$')
+        super().__init__()
 
-    def _get_id_match(self):
-        return self._id_regex.match(self.argument)
-
-    def convert(self):
-        match = self._get_id_match()
+    async def convert(self, ctx, argument):
+        match = self._get_id_match(argument)
 
         if match is None:
             # not a mention
-            result = discord.utils.get(self.ctx.bot.guilds, name=self.argument)
+            result = discord.utils.get(ctx.bot.guilds, name=argument)
         else:
             guild_id = int(match.group(1))
-            result = self.ctx.bot.get_guild(guild_id)
+            result = ctx.bot.get_guild(guild_id)
 
         if not isinstance(result, discord.Guild):
-            raise commands.BadArgument('Guild "{}" not found.'.format(self.argument))
+            raise commands.BadArgument('Guild "{}" not found.'.format(argument))
 
         return result
 

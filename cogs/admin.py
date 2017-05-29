@@ -54,7 +54,7 @@ class Admin:
                 return False
         return True
 
-    def resolve_target(self, ctx, target):
+    async def resolve_target(self, ctx, target):
         if target == 'channel':
             return ctx.channel, self.ignored.channels
         elif target == 'guild' or target == 'server':
@@ -62,9 +62,7 @@ class Admin:
 
         # Try converting to a text channel
         try:
-            conv = commands.TextChannelConverter()
-            conv.prepare(ctx, target)
-            channel = conv.convert()
+            channel = await commands.TextChannelConverter().convert(ctx, target)
         except commands.BadArgument:
             pass
         else:
@@ -72,9 +70,7 @@ class Admin:
 
         # Try converting to a user
         try:
-            conv = commands.MemberConverter()
-            conv.prepare(ctx, target)
-            member = conv.convert()
+            member = await commands.MemberConverter().convert(ctx, target)
         except commands.BadArgument:
             pass
         else:
@@ -87,9 +83,7 @@ class Admin:
 
         # Convert to a guild
         try:
-            conv = utils.GuildConverter()
-            conv.prepare(ctx, target)
-            guild = conv.convert()
+            guild = await utils.GuildConverter().convert(ctx, target)
         except:
             pass
         else:
@@ -124,7 +118,7 @@ class Admin:
 
         The target can be a name, an ID, the keyword 'channel' or 'server'.
         """
-        target, conf = self.resolve_target(ctx, target)
+        target, conf = await self.resolve_target(ctx, target)
         self.validate_ignore_target(ctx, target)
 
         # Save the ignore
@@ -141,7 +135,7 @@ class Admin:
     @commands.has_permissions(manage_guild=True)
     async def unignore(self, ctx, *, target):
         """Un-ignores a channel, a user (server-wide), or a whole server."""
-        target, conf = self.resolve_target(ctx, target)
+        target, conf = await self.resolve_target(ctx, target)
         self.validate_ignore_target(ctx, target)
 
         try:
