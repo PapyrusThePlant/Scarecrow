@@ -1,22 +1,25 @@
 from os import curdir
 
-WORKDIR = curdir
+WORK_DIR = f'{curdir}/'
 
-COGS = f'{WORKDIR}/cogs/'
+COGS_DIR_NAME = 'cogs'
+COGS_DIR = f'{WORK_DIR}{COGS_DIR_NAME}/'
 
-CONFIG = f'{WORKDIR}/conf/'
-BOT_CONFIG = f'{CONFIG}bot.json'
-IGNORED_CONFIG = f'{CONFIG}ignored.json'
-PREFIXES_CONFIG = f'{CONFIG}prefixes.json'
-TWITCH_CONFIG = f'{CONFIG}twitch.json'
-TWITTER_CONFIG = f'{CONFIG}twitter.json'
+CONFIG_DIR_NAME = 'conf'
+CONFIG_DIR = f'{WORK_DIR}{CONFIG_DIR_NAME}/'
+BOT_CONFIG = f'{CONFIG_DIR}bot.json'
+IGNORED_CONFIG = f'{CONFIG_DIR}ignored.json'
+PREFIXES_CONFIG = f'{CONFIG_DIR}prefixes.json'
+TWITCH_CONFIG = f'{CONFIG_DIR}twitch.json'
+TWITTER_CONFIG = f'{CONFIG_DIR}twitter.json'
 
-DATA = f'{WORKDIR}/data/'
-INSULTS = f'{DATA}insults.txt'
-POLLS = f'{DATA}polls.json'
-WEEBNAMES = f'{DATA}weeb_names.txt'
-OEMBED_PROVIDERS = f'{DATA}oEmbed_providers.json'
+DATA_DIR_NAME = 'data'
+DATA_DIR = f'{WORK_DIR}{DATA_DIR_NAME}/'
+INSULTS = f'{DATA_DIR}insults.txt'
+WEEBNAMES = f'{DATA_DIR}weeb_names.txt'
+OEMBED_PROVIDERS = f'{DATA_DIR}oEmbed_providers.json'
 
-LOGS = f'{WORKDIR}/logs/'
-BOT_LOG = f'{LOGS}bot.log'
-TWITTER_SUBPROCESS_LOG = f'{LOGS}twitter-sub-process.log'
+LOGS_DIR_NAME = 'logs'
+LOGS_DIR = f'{WORK_DIR}{LOGS_DIR_NAME}/'
+BOT_LOG = f'{LOGS_DIR}bot.log'
+TWITTER_SUBPROCESS_LOG = f'{LOGS_DIR}twitter-sub-process.log'

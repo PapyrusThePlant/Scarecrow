@@ -11,6 +11,7 @@ import discord
 from discord.ext import commands
 import psutil
 
+import paths
 from .util import utils
 
 
@@ -27,25 +28,12 @@ class Dev:
         # Owner commands only
         return ctx.author.id == ctx.bot.owner.id
 
-    def resolve_module_name(self, name):
-        if name in self.bot.cogs:
-            return self.bot.cogs[name].__module__
-        elif name in self.bot.extensions:
-            return name
-        elif name in [ext.split('.')[-1] for ext in self.bot.extensions.keys()]:
-            return f'cogs.{name}'
-        else:
-            return None
-
     @commands.group(name='cogs', invoke_without_command=True)
     async def cogs_group(self, ctx):
         """Lists currently loaded cogs."""
-        if ctx.subcommand_passed is not None:
-            return
-
         entries = []
 
-        for name in ctx.bot.cogs:
+        for name in sorted(ctx.bot.cogs):
             cog = ctx.bot.cogs[name]
 
             # Get the first line of the doc
@@ -62,7 +50,7 @@ class Dev:
     @cogs_group.command(name='load')
     async def cogs_load(self, ctx, *, name: str):
         """Loads a cog from name."""
-        module_path = f'cogs.{name.lower()}'
+        module_path = f'{paths.COGS_DIR_NAME}.{name.lower()}'
         if module_path in ctx.bot.extensions:
             raise commands.BadArgument(f'"{name}" already loaded.')
 
@@ -76,7 +64,7 @@ class Dev:
     @cogs_group.command(name='reload')
     async def cogs_reload(self, ctx, name: str):
         """Reloads a cog."""
-        module_path = self.resolve_module_name(name)
+        module_path = f'{paths.COGS_DIR_NAME}.{name.lower()}'
         if module_path is None:
             raise commands.BadArgument(f'"{name}" not loaded.')
 
@@ -88,7 +76,7 @@ class Dev:
     @cogs_group.command(name='unload')
     async def cogs_unload(self, ctx, *, name: str):
         """Unloads a cog."""
-        module_path = self.resolve_module_name(name)
+        module_path = f'{paths.COGS_DIR_NAME}.{name.lower()}'
         if module_path is None:
             raise commands.BadArgument(f'"{name}" not loaded.')
 

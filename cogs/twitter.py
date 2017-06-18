@@ -22,12 +22,6 @@ log = logging.getLogger(__name__)
 
 def setup(bot):
     log.info('Loading extension.')
-
-    # Delete irrelevant sub-process logs
-    for entry in os.scandir(paths.LOGS):
-        if entry.is_file() and 'twitter' in entry.name:
-            os.remove(entry.path)
-
     cog = Twitter(bot)
     bot.add_cog(cog)
     cog.stream.start()

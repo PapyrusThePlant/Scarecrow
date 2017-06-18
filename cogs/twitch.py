@@ -79,6 +79,7 @@ class Twitch:
                 streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': channels})
             except utils.HTTPError as e:
                 # Re-schedule the daemon on error
+                log.info(f'Error on initial poll, rescheduling. {e}')
                 self.daemon = self.bot.loop.create_task(self._daemon())
                 return
             else:

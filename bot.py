@@ -34,7 +34,7 @@ class Bot(commands.Bot):
         super().__init__(description=self.conf.description,
                          command_prefix=commands.when_mentioned_or('€'),
                          help_attrs={'hidden': True})
-        self.load_extensions(paths.COGS)
+        self.load_extensions(paths.COGS_DIR)
 
         # Accept restarts after everything has been initialised without issue
         self.do_restart = True
