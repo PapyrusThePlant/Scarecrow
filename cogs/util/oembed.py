@@ -26,13 +26,13 @@ class OembedException(Exception):
 
 class EndpointNotFound(OembedException):
     def __init__(self, url):
-        message = 'No endpoint has been found that matches the url "{}"'.format(url)
+        message = f'No endpoint has been found that matches the url "{url}"'
         super().__init__(message)
 
 
 class NoOembedData(OembedException):
     def __init__(self, url):
-        message = 'Failed to retreive oembed data for the url "{}"'.format(url)
+        message = f'Failed to retreive oembed data for the url "{url}"'
         super().__init__(message)
 
 

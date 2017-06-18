@@ -26,7 +26,7 @@ class GuildChannelConverter(commands.IDConverter):
             result = ctx.bot.get_channel(guild_id)
 
         if not isinstance(result, (discord.TextChannel, discord.VoiceChannel)):
-            raise commands.BadArgument('Guild "{}" not found.'.format(argument))
+            raise commands.BadArgument(f'Guild "{argument}" not found.')
 
         return result
 
@@ -46,7 +46,7 @@ class GuildConverter(commands.IDConverter):
             result = ctx.bot.get_guild(guild_id)
 
         if not isinstance(result, discord.Guild):
-            raise commands.BadArgument('Guild "{}" not found.'.format(argument))
+            raise commands.BadArgument(f'Guild "{argument}" not found.')
 
         return result
 
@@ -60,11 +60,7 @@ class HTTPError(Exception):
         else:
             self.resp_msg = message
 
-        fmt = '{0.reason} (status code: {0.status})'
-        if len(self.resp_msg):
-            fmt += ': {1}'
-
-        super().__init__(fmt.format(self.response, self.resp_msg))
+        super().__init__(f'{resp.reason} (status code: {resp/status}){f": {self.resp_message}" if len(self.resp_msg) else ""}')
 
 
 def dict_keys_to_int(d):
@@ -76,7 +72,7 @@ class OrderedCounter(collections.Counter, collections.OrderedDict):
     """A counter that remembers the order elements are first encountered."""
 
     def __repr__(self):
-        return '{}({})'.format(self.__class__.__name__, repr(collections.OrderedDict(self)))
+        return f'{self.__class__.__name__}({repr(collections.OrderedDict(self))})'
 
     def __reduce__(self):
         return self.__class__, (collections.OrderedDict(self),)
@@ -91,18 +87,8 @@ def duration_to_str(duration):
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
 
-    # Create the string format
-    if days > 0:
-        fmt = '{d} days, {h} hours, {m} minutes, {s} seconds'
-    elif hours > 0:
-        fmt = '{h} hours, {m} minutes, {s} seconds'
-    elif minutes > 0:
-        fmt = '{m} minutes, {s} seconds'
-    else:
-        fmt = '{s} seconds'
-
-    # Create the string and return it
-    return fmt.format(d=days, h=hours, m=minutes, s=seconds)
+    # Create a fancy string
+    return f"{f'{days} days, ' if days > 0 else ''}{f'{hours} hours, ' if hours > 0 else ''}{f'{minutes} minutes, ' if minutes > 0 else ''}{seconds} seconds"
 
 
 async def fetch_page(url, **kwargs):
@@ -140,25 +126,20 @@ async def fetch_page(url, **kwargs):
 
 def format_block(content, language=''):
     """Formats text into a code block."""
-    return '```{}\n{}\n```'.format(language, content)
+    return f'```{language}\n{content}\n```'
 
 
 def indented_entry_to_str(entries, indent=0, sep=' '):
     """Pretty formatting."""
     # Get the longest keys' width
-    # width = [max([len(t[i]) for t in entries]) for i in range(0, len(entries) - 1)]
     width = max([len(t[0]) for t in entries])
 
     output = []
-
-    # Set the format for each line
-    if indent > 0:
-        fmt = '{0:{indent}}{1:{width}}{sep}{2}'
-    else:
-        fmt = '{1:{width}}{sep}{2}'
-
     for name, entry in entries:
-        output.append(fmt.format('', name, entry, width=width, indent=indent, sep=sep))
+        if indent > 0:
+            output.append(f'{"":{indent}}{name:{width}}{sep}{entry}')
+        else:
+            output.append(f'{name:{width}}{sep}{entry}')
 
     return '\n'.join(output)
 

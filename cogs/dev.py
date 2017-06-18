@@ -33,7 +33,7 @@ class Dev:
         elif name in self.bot.extensions:
             return name
         elif name in [ext.split('.')[-1] for ext in self.bot.extensions.keys()]:
-            return 'cogs.{}'.format(name)
+            return f'cogs.{name}'
         else:
             return None
 
@@ -62,14 +62,14 @@ class Dev:
     @cogs_group.command(name='load')
     async def cogs_load(self, ctx, *, name: str):
         """Loads a cog from name."""
-        module_path = 'cogs.{}'.format(name.lower())
+        module_path = f'cogs.{name.lower()}'
         if module_path in ctx.bot.extensions:
-            raise commands.BadArgument('"{}" already loaded.'.format(name))
+            raise commands.BadArgument(f'"{name}" already loaded.')
 
         try:
             ctx.bot.load_extension(module_path)
         except ImportError as e:
-            raise commands.BadArgument('Could not find module "{}".'.format(name)) from e
+            raise commands.BadArgument(f'Could not find module "{name}".') from e
 
         await ctx.send('\N{OK HAND SIGN}')
 
@@ -78,7 +78,7 @@ class Dev:
         """Reloads a cog."""
         module_path = self.resolve_module_name(name)
         if module_path is None:
-            raise commands.BadArgument('"{}" not loaded.'.format(name))
+            raise commands.BadArgument(f'"{name}" not loaded.')
 
         ctx.bot.unload_extension(module_path)
         ctx.bot.load_extension(module_path)
@@ -90,7 +90,7 @@ class Dev:
         """Unloads a cog."""
         module_path = self.resolve_module_name(name)
         if module_path is None:
-            raise commands.BadArgument('"{}" not loaded.'.format(name))
+            raise commands.BadArgument(f'"{name}" not loaded.')
 
         ctx.bot.unload_extension(module_path)
         await ctx.send('\N{OK HAND SIGN}')
@@ -104,7 +104,7 @@ class Dev:
         code = code.strip('` ')
 
         # Wrap the code inside a coroutine to allow asyncronous keywords
-        code = 'async def painting_of_a_happy_little_tree(ctx):\n' + textwrap.indent(code, '    ')
+        code = f'async def painting_of_a_happy_little_tree(ctx):\n{textwrap.indent(code, "    ")}'
         stdout = io.StringIO()
         env = dict(globals())
 
@@ -113,13 +113,13 @@ class Dev:
             exec(code, env)
             coro = env.pop('painting_of_a_happy_little_tree')(ctx)
         except SyntaxError as e:
-            content = '{0.text}{1:>{0.offset}}\n{2}: {0.msg}'.format(e, '^', type(e).__name__)
+            content = f'{e.text}{"^":>{e.offset}}\n{type(e).__name__}{e.msg}'
         else:
             try:
                 with redirect_stdout(stdout):
                     result = await coro
             except:
-                content = '{}{}'.format(stdout.getvalue(), traceback.format_exc())
+                content = f'{stdout.getvalue()}{traceback.format_exc()}'
             else:
                 # Execution succeeded, save the return value and build the output content
                 content = stdout.getvalue()
@@ -140,12 +140,11 @@ class Dev:
         for member in ctx.bot.get_all_members():
             members += 1
             uniques.add(member.id)
-        memory = '{0:.2f} Mb'.format(psutil.Process().memory_full_info().uss / 1048576)
+        memory = f'{psutil.Process().memory_full_info().uss / 1048576:.2f} Mb'
         objects = Counter(type(o).__name__ for o in gc.get_objects())
         objects_str = utils.format_block(objects.most_common(n), language='py')
 
-        fmt = 'Guilds: {}\nMembers: {} ({} uniques)\nMemory: {}\nObjects: {}'
-        await ctx.send(fmt.format(len(ctx.bot.guilds), members, len(uniques), memory, objects_str))
+        await ctx.send(f'Guilds: {len(ctx.bot.guilds)}\nMembers: {members} ({len(uniques)} uniques)\nMemory: {memory}\nObjects: {objects_str}')
 
     @commands.command()
     async def update(self, ctx):

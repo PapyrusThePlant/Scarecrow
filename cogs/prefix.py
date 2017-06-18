@@ -36,7 +36,7 @@ class Prefix:
             prefixes = self.conf.global_
 
         if 'mention' in prefixes:
-            prefixes[prefixes.index('mention')] = bot.user.mention + ' '
+            prefixes[prefixes.index('mention')] = f'{bot.user.mention} '
 
         return prefixes
 

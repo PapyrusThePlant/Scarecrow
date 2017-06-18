@@ -47,7 +47,7 @@ class Misc:
 
         data = await utils.fetch_page(url, timeout=5)
         if data is None:
-            content = 'Timed out on {} .'.format(url)
+            content = f'Timed out on {url} .'
         else:
             content = loader(data)
 
@@ -69,7 +69,7 @@ class Misc:
                 return None
             else:
                 e.title = 'Calculator'
-                e.description = '{} {}'.format(formula, result)
+                e.description = f'{formula} {result}'
             return e
 
         # check for unit conversion card
@@ -88,7 +88,7 @@ class Misc:
                 return None
             else:
                 e.title = 'Unit Conversion'
-                e.description = '{} {} = {} {}'.format(source_value, source_unit, target_value, target_unit)
+                e.description = f'{source_value} {source_unit} = {target_value} {target_unit}'
                 return e
 
         # check for currency conversion card
@@ -104,7 +104,7 @@ class Misc:
                 return None
             else:
                 e.title = 'Currency Conversion'
-                e.description = '{} {}'.format(source , target)
+                e.description = f'{source} {target}'
                 return e
 
         # Check for translation card
@@ -117,7 +117,7 @@ class Misc:
             except:
                 return None
             else:
-                e.title = 'Translation from {} to {}'.format(source_language, target_language)
+                e.title = f'Translation from {source_language} to {target_language}'
                 e.description = translation
                 return e
 
@@ -133,7 +133,7 @@ class Misc:
                     definitions = category.findall("./ol/li/div[@class='vmod']//div[@class='_Jig']/div/span")
                     body = []
                     for index, definition in enumerate(definitions, 1):
-                        body.append('{}. {}'.format(index, definition.text))
+                        body.append(f'{index}. {definition.text}')
                     e.add_field(name=lexical_category, value='\n'.join(body), inline=False)
             except:
                 return None
@@ -151,7 +151,7 @@ class Misc:
                 return None
             else:
                 e.title = time_place
-                e.description = '{}\n{}'.format(the_time, the_date)
+                e.description = f'{the_time}\n{the_date}'
                 return e
 
         # check for weather card
@@ -170,13 +170,13 @@ class Misc:
             except:
                 return None
             else:
-                e.title = 'Weather in ' + location
+                e.title = f'Weather in {location}'
                 e.description = summary
                 e.set_thumbnail(url=image)
-                e.add_field(name='Temperature', value='{}°C - {}°F'.format(temp_degrees, temp_farenheit))
+                e.add_field(name='Temperature', value=f'{temp_degrees}°C - {temp_farenheit}°F')
                 e.add_field(name='Precipitations', value=precipitations)
                 e.add_field(name='Humidity', value=humidity)
-                e.add_field(name='Wind speed', value='{} - {}'.format(wind_kmh, wind_mph))
+                e.add_field(name='Wind speed', value=f'{wind_kmh} - {wind_mph}')
                 return e
 
         # Check for quick search, release date or timeline
@@ -239,7 +239,8 @@ class Misc:
                 return None
             else:
                 e.title = title
-                e.description = '*{}*\n{}'.format(body[0], '\n'.join(body[1:]))
+                lf = '\n'
+                e.description = f'*{body[0]}*\n{lf.join(body[1:])}'
                 return e
 
         # Parse quick search cards
@@ -259,7 +260,7 @@ class Misc:
                     title = ' '.join(title_node.itertext()).strip()
                     body_node = quick_search.find("./div/div[@class='kp-header']//a")
                     summary = body_node.text
-                    url = 'https://www.google.com' + body_node.attrib['href']
+                    url = f'https://www.google.com{body_node.attrib["href"]}'
                     thumbnail = None
             except:
                 pass
@@ -336,10 +337,10 @@ class Misc:
 
             # Build the response from the search results
             title, url, description = search_results[0]
-            additional_results = '\n'.join('<{}>'.format(r[1]) for r in search_results[1:min(top_n + 1, len(search_results))])
+            additional_results = '\n'.join(f'<{r[1]}>' for r in search_results[1:min(top_n + 1, len(search_results))])
 
             # Text response
-            response = '**{}**\n{}\n{}\n\n**Additional Results**\n{}'.format(title, url, description, additional_results)
+            response = f'**{title}**\n{url}\n{description}\n\n**Additional Results**\n{additional_results}'
             await ctx.send(response)
 
             # Embed response (not worth using when the search return a link to a video)
@@ -359,7 +360,7 @@ class Misc:
         await ctx.send(utils.random_line(paths.INSULTS))
 
     @commands.command()
-    async def weebnames(self,ctx, wanted_gender=None):
+    async def weebnames(self, ctx, wanted_gender=None):
         """Looking for a name for your new waifu?
 
         A prefered gender can be specified between f(emale), m(ale), x(mixed).
@@ -371,7 +372,6 @@ class Misc:
                 return line[0] == wanted_gender
             line = utils.random_line(paths.WEEBNAMES, predicate if wanted_gender else None)
             gender, name, remark = line[:-1].split('|')
-
-            content += '[{}] {} {}\n'.format(gender, name, '({})'.format(remark) if remark else '')
+            content += f'[{gender}] {name} {f"({remark})" if remark else ""}\n'
 
         await ctx.send(utils.format_block(content))

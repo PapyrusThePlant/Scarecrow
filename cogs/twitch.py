@@ -89,7 +89,7 @@ class Twitch:
             try:
                 await self.poll_streams()
             except Exception as e:
-                log.info('Polling error, retrying in 10 seconds: {}'.format(e))
+                log.info(f'Polling error, retrying in 10 seconds: {e}')
                 await asyncio.sleep(10)
             else:
                 await asyncio.sleep(60)
@@ -104,7 +104,7 @@ class Twitch:
             try:
                 streams_chunk = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': ', '.join(chunk), 'limit': 100})
             except utils.HTTPError as e:
-                raise Exception('HTTP error when fetching streams chunk #{}'.format(i / 100 + 1)) from e
+                raise Exception(f'HTTP error when fetching streams chunk #{i / 100 + 1}') from e
 
             # Extract the newly live streams
             for stream in streams_chunk['streams']:
@@ -117,7 +117,7 @@ class Twitch:
                 try:
                     await self.notify(live_cache[stream_id])
                 except Exception as e:
-                    log.error('Notification error: {}'.format(e))
+                    log.error(f'Notification error: {e}')
 
         # Update the live cache
         del self.live_cache
@@ -169,7 +169,7 @@ class Twitch:
         if user_id not in self.conf.follows.keys():
             self.conf.follows[user_id] = {ctx.channel.id: message}
         elif ctx.channel.id in self.conf.follows[user_id]:
-            raise commands.BadArgument('Already following "{}" on this channel.'.format(channel))
+            raise commands.BadArgument(f'Already following "{channel}" on this channel.')
         else:
             self.conf.follows[user_id][ctx.channel.id] = message
         self.conf.save()
@@ -192,7 +192,7 @@ class Twitch:
         user = await self.get_user(channel)
         user_id = user['_id']
         if user_id not in self.conf.follows.keys() or ctx.channel.id not in self.conf.follows[user_id]:
-            raise commands.BadArgument('Not following "{}" on this channel.'.format(channel))
+            raise commands.BadArgument(f'Not following "{channel}" on this channel.')
 
         # Remove the discord channel from the conf and clean it up if no other channel follows that stream
         del self.conf.follows[user_id][ctx.channel.id]

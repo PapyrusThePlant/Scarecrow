@@ -53,7 +53,7 @@ class Bot(commands.Bot):
                 try:
                     self.load_extension(extension)
                 except Exception as e:
-                    log.warning('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+                    log.warning(f'Failed to load extension {extension}\n{type(e)}: {e}')
 
     def unload_extensions(self):
         # Unload every cog
@@ -65,7 +65,7 @@ class Bot(commands.Bot):
             await ctx.send(str(error))
         elif isinstance(error, commands.CommandInvokeError):
             tb = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
-            content = 'Ignoring exception in command {} : {}'.format(ctx.command, tb)
+            content = f'Ignoring exception in command {ctx.command} : {tb}'
             log.error(content)
             await ctx.send('An unexpected error has occurred and has been logged.')
 
@@ -75,7 +75,7 @@ class Bot(commands.Bot):
             return
 
         tb = ''.join(traceback.format_exc())
-        content = 'Ignoring exception in {} : {}'.format(event_method, tb)
+        content = f'Ignoring exception in {event_method} : {tb}'
         log.error(content)
 
     async def on_ready(self):

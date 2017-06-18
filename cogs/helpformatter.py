@@ -27,13 +27,13 @@ class HelpFormatter(commands.HelpFormatter):
             # Ugly indent shenanigans
             if base_indent:
                 if iterator.__length_hint__() > 0:
-                    indent = base_indent + '\u251c\u2500 '
+                    indent = f'{base_indent}\u251c\u2500 '
                 else:
-                    indent = base_indent + '\u2514\u2500 '
+                    indent = f'{base_indent}\u2514\u2500 '
             else:
                 indent = self.base_indent
 
-            entry = '{0}{1:<{width}} {2}'.format(indent, name, command.short_doc, width=max_width - len(indent))
+            entry = f'{indent}{name:<{max_width - len(indent)}} {command.short_doc}'
             shortened = self.shorten(entry)
             self._paginator.add_line(shortened)
 

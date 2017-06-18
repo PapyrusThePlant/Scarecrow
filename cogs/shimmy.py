@@ -4,6 +4,7 @@ import discord
 import discord.ext.commands as commands
 
 
+SHIMMY_USER_ID = 140526957686161408
 SHIMMY_GUILD_ID = 140880261360517120
 NSFW_ROLE_ID = 261189004681019392
 
@@ -59,7 +60,7 @@ class Shimmy:
     @commands.command(no_pm=True)
     @commands.has_permissions(manage_guild=True)
     async def stream(self, ctx, *, description=None):
-        shimmy = ctx.guild.get_member(140526957686161408)
+        shimmy = ctx.guild.get_member(SHIMMY_USER_ID)
         embed = discord.Embed(title='Click here to join the fun !', url='https://twitch.tv/shimmyx')
         embed.set_author(name=shimmy.display_name, icon_url=shimmy.avatar_url)
         embed.description = description or "Guess who's streaming? It's ~~slothsenpai~~ shimmysenpai ! Kyaa\~\~"

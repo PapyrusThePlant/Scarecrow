@@ -84,7 +84,7 @@ class _ConfigDecoder:
                 if inspect.ismodule(obj):
                     obj = getattr(obj, part, None)
                     if obj is None:
-                        raise KeyError('Could not find {} in {}'.format(part, obj.__name__))
+                        raise KeyError(f'Could not find {part} in {obj.__name__}')
                 elif inspect.isclass(obj):
                     obj = obj.__dict__[part]
                 else:

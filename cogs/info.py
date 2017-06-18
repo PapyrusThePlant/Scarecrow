@@ -24,29 +24,12 @@ class Info:
     def _get_memory_str(self):
         # Expressed in bytes, turn to Mb and round to 2 decimals
         mem_info = psutil.Process().memory_full_info()
-        return '{0:.2f} Mb'.format(mem_info.uss / 1048576)
+        return f'{mem_info.uss / 1048576:.2f} Mb'
 
     def _get_uptime_str(self):
         # Get the uptime
         uptime = round(time.time() - self.start_time)
-
-        # Extract minutes, hours and days
-        minutes, seconds = divmod(uptime, 60)
-        hours, minutes = divmod(minutes, 60)
-        days, hours = divmod(hours, 24)
-
-        # Create the string format
-        if days > 0:
-            fmt = '{d} days, {h} hours, {m} minutes, {s} seconds'
-        elif hours > 0:
-            fmt = '{h} hours, {m} minutes, {s} seconds'
-        elif minutes > 0:
-            fmt = '{m} minutes, {s} seconds'
-        else:
-            fmt = '{s} seconds'
-
-        # Create the string and return it
-        return fmt.format(d=days, h=hours, m=minutes, s=seconds)
+        return utils.duration_to_str(uptime)
 
     @commands.command(aliases=['charinfos'])
     async def charinfo(self, ctx, *, data: str):
@@ -82,7 +65,7 @@ class Info:
             entries = [
                 ('Character', data),
                 ('Name', unicodedata.name(data, 'None')),
-                ('Code point', '{:04x}'.format(ord(data)))
+                ('Code point', f'{ord(data):04x}')
             ]
             decomposition = unicodedata.decomposition(data)
             if decomposition != '':
@@ -104,8 +87,7 @@ class Info:
             await ctx.send(utils.format_block(content))
         else:
             # Minimal info for each character
-            fmt = '`{}` | `\\u{:04x}` | {} | {}'
-            entries = [fmt.format(c, ord(c), unicodedata.name(c, 'None'), url_fmt.format(ord(c))) for c in data]
+            entries = [f'`{c}` | `\\u{ord(c):04x}` | `{unicodedata.name(c, "None")}` | {url_fmt.format(ord(c))}' for c in data]
             content = '\n'.join(entries)
             await ctx.send(content)
 
@@ -119,14 +101,14 @@ class Info:
             unique_members.add(member.id)
         unique_members_count = len(unique_members)
 
-        members_str = '{} ({} unique)'.format(members_count, unique_members_count)
+        members_str = f'{members_count} ({unique_members_count} unique)'
         owner = ctx.guild.get_member(ctx.bot.owner.id) or ctx.bot.owner
         perms = discord.Permissions(84992) # Read messages, read message history, send messages, embed links
         invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
         prefixes = ctx.bot.command_prefix(ctx.bot, ctx.message)
 
         embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=0x738bd7)
-        embed.set_author(name='{0.display_name} ({0})'.format(owner), icon_url=owner.avatar_url)
+        embed.set_author(name=f'{owner.display_name} ({owner})', icon_url=owner.avatar_url)
         embed.add_field(name='Command prefixes', value="'" + "', '".join(prefixes) + "'")
         embed.add_field(name='Servers', value=len(ctx.bot.guilds))
         embed.add_field(name='Members', value=members_str)
@@ -150,7 +132,7 @@ class Info:
         embed.add_field(name='ID', value=channel.id)
         embed.add_field(name='Server', value=channel.guild.name)
         embed.add_field(name='Type', value='Text channel' if isinstance(channel, discord.TextChannel) else 'Voice channel')
-        embed.add_field(name='Position', value='#' + str(channel.position + 1))
+        embed.add_field(name='Position', value=f'#{channel.position + 1}')
 
         if isinstance(channel, discord.VoiceChannel):
             embed.add_field(name='Bitrate', value=str(channel.bitrate))
@@ -190,12 +172,11 @@ class Info:
         # Count the channels
         text_channels = len(guild.text_channels)
         voice_channels = len(guild.voice_channels)
-        channels_fmt = 'Text : {} ({} locked)\n' \
-                       'Voice : {} ({} locked)'
-        channels = channels_fmt.format(text_channels, locked_text, voice_channels, locked_voice)
+        channels = f'Text : {text_channels} ({locked_text} locked)\n' \
+                   f'Voice : {voice_channels} ({locked_voice} locked)'
 
         # Count the members
-        members_by_status = Counter('{}{}'.format(str(m.status), '_bot' if m.bot else '') for m in guild.members)
+        members_by_status = Counter(f'{m.status}{"_bot" if m.bot else ""}' for m in guild.members)
         members_by_status['online'] += members_by_status['online_bot']
         members_by_status['idle'] += members_by_status['idle_bot']
         members_by_status['offline'] += members_by_status['offline_bot']
@@ -250,8 +231,7 @@ class Info:
         if member.voice:
             vc = member.voice.channel
             other_people = len(vc.members) - 1
-            voice_fmt = '{} with {} others' if other_people else '{} by themselves'
-            voice = voice_fmt.format(vc.name, other_people)
+            voice = f'{vc.name}, {"with {other_people} others" if other_people else "by themselves"}'
         else:
             voice = 'Not connected.'
 
@@ -259,7 +239,7 @@ class Info:
         embed.set_author(name=str(member))
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='ID', value=member.id)
-        embed.add_field(name='Servers', value='{} shared'.format(shared))
+        embed.add_field(name='Servers', value=f'{shared} shared')
         embed.add_field(name='Joined', value=member.joined_at)
         embed.add_field(name='Roles', value=', '.join(roles))
         embed.add_field(name='Voice', value=voice)

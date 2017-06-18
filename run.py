@@ -70,7 +70,7 @@ if __name__ == '__main__':
         log.info('Running bot...')
         bot.run()
     except Exception as e:
-        log.exception('Exiting on exception : {}'.format(e))
+        log.exception(f'Exiting on exception : {e}')
     else:
         log.info('Exiting normally')
     finally:

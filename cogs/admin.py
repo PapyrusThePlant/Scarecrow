@@ -90,7 +90,7 @@ class Admin:
             return guild, self.ignored.guilds
 
         # Nope
-        raise commands.BadArgument('"{}" not found.'.format(target))
+        raise commands.BadArgument(f'"{target}" not found.')
 
     def validate_ignore_target(self, ctx, target):
         owner_id = ctx.bot.owner.id
@@ -167,17 +167,17 @@ class Admin:
     async def on_command(self, ctx):
         self.commands_used[ctx.command.qualified_name] += 1
         if ctx.guild is None:
-            log.info('DM:{0.name}:{0.id}:{1}'.format(ctx.author, ctx.message.content))
+            log.info(f'DM:{ctx.author.name}:{ctx.author.id}:{ctx.message.content}')
         else:
-            log.info('{0.name}:{0.id}:{1.name}:{1.id}:{2.name}:{2.id}:{3}'.format(ctx.guild, ctx.channel, ctx.author, ctx.message.content))
+            log.info(f'{ctx.guild.name}:{ctx.guild.id}:{ctx.channel.name}:{ctx.channel.id}:{ctx.author.name}:{ctx.author.id}:{ctx.message.content}')
 
     async def on_guild_join(self, guild):
         # Log that the bot has been added somewhere
-        log.info('GUILD_JOIN:{0.name}:{0.id}:{1.name}:{1.id}:'.format(guild, guild.owner))
+        log.info(f'GUILD_JOIN:{guild.name}:{guild.id}:{guild.owner.name}:{guild.owner.id}:')
         if guild.id in self.ignored.guilds:
-            log.info('IGNORED GUILD:{0.name}:{0.id}:'.format(guild))
+            log.info(f'IGNORED GUILD:{guild.name}:{guild.id}:')
             await guild.leave()
 
     async def on_guild_remove(self, guild):
         # Log that the bot has been removed from somewhere
-        log.info('GUILD_REMOVE:{0.name}:{0.id}:{1.name}:{1.id}:'.format(guild, guild.owner))
+        log.info(f'GUILD_REMOVE:{guild.name}:{guild.id}:{guild.owner.name}:{guild.owner.id}:')

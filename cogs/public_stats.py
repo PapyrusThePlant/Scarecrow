@@ -37,7 +37,7 @@ class PublicStats:
             return
 
         # Post to DiscordBots
-        url = 'https://bots.discord.pw/api/bots/{}/stats'.format(self.bot.user.id)
+        url = f'https://bots.discord.pw/api/bots/{self.bot.user.id}/stats'
         headers = {
             'authorization': self.bot.conf.dbots_token,
             'content-type': 'application/json'

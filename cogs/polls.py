@@ -17,7 +17,7 @@ class Polls:
     """Polls commands"""
     def __init__(self, bot):
         self.bot = bot
-        self.keycaps_emojis = [str(i) + '\u20e3' for i in range(1, 10)]
+        self.keycaps_emojis = [f'{i}\u20e3' for i in range(1, 10)]
         self.keycaps_emojis.append('\N{KEYCAP TEN}')
 
     @commands.command(name='instantpoll', aliases=['ip'])
@@ -29,8 +29,8 @@ class Polls:
             raise commands.BadArgument('Too many options (max 10).')
 
         poll = discord.Embed(title=title, colour=0x738bd7)
-        poll.description = '\n'.join('{} {}'.format(self.keycaps_emojis[i], o)for i, o in enumerate(options))
-        poll.set_author(name='{0.display_name} ({0})'.format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+        poll.description = '\n'.join(f'{self.keycaps_emojis[i]} {o}' for i, o in enumerate(options))
+        poll.set_author(name=f'{ctx.message.author.display_name} ({ctx.message.author})', icon_url=ctx.message.author.avatar_url)
         poll.set_footer(text='Vote using reactions !')
 
         message = await ctx.send(embed=poll)
@@ -50,21 +50,20 @@ class Polls:
             return msg.channel == message.channel and msg.author == message.author
 
         # Start with the poll's title
-        to_delete.append(await ctx.send("Yay let's make a poll !\n"
-                                        "What will its title be?"))
+        to_delete.append(await ctx.send("Yay let's make a poll !\nWhat will its title be?"))
         title = await ctx.bot.wait_for('message', check=check, timeout=60)
         if not title:
-            raise commands.UserInputError('{} You took too long, aborting poll creation.'.format(message.author.mention))
+            raise commands.UserInputError(f'{message.author.mention} You took too long, aborting poll creation.')
         to_delete.append(title)
 
         # Loop and register the poll's options until the user says we're done
-        to_delete.append(await ctx.send("Ok ! Now tell me a maximum of 10 options to choose from, in order."))
+        to_delete.append(await ctx.send('Ok ! Now tell me a maximum of 10 options to choose from, in order.'))
         options = []
         while True:
-            to_delete.append(await ctx.send("What will be entry #{}? (type `No more options` when you're done)".format(len(options) + 1)))
+            to_delete.append(await ctx.send(f"What will be entry #{len(options) + 1}? (type `No more options` when you're done)"))
             entry = await ctx.bot.wait_for('message', check=check, timeout=60)
             if not entry:
-                raise commands.UserInputError('{} You took too long, aborting poll creation.'.format(message.author.mention))
+                raise commands.UserInputError('{message.author.mention} You took too long, aborting poll creation.')
             to_delete.append(entry)
 
             if entry.content.lower() == 'no more options':
