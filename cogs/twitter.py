@@ -345,21 +345,21 @@ class Twitter:
         return valid[-limit:]
 
     async def fetch_missed_tweets(self):
-        missed = []
         # Gather the missed tweets
+        total = 0
         for chan_conf in self.conf.follows:
             try:
-                latest = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
+                missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
             except tweepy.TweepError as e:
                 log.info(f'Could not retrieve latest tweets from @{chan_conf.screen_name} : {e}')
             else:
-                if latest:
-                    log.info(f'Found {len(latest)} tweets to display for @{chan_conf.screen_name}')
-                missed.extend(latest)
-
-        missed.sort(key=lambda t: t.id)
-        for tweet in missed:
-            await self.tweepy_on_status(tweet)
+                if missed:
+                    total += len(missed)
+                    log.info(f'Found {len(missed)} tweets to display for @{chan_conf.screen_name}')
+                    missed.sort(key=lambda t: t.id)
+                    for tweet in missed:
+                        await self.tweepy_on_status(tweet)
+        log.info(f'A total of {total} tweets were found missing.')
 
     def prepare_tweet(self, tweet, nested=False):
         if isinstance(tweet, dict):
