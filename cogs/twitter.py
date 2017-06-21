@@ -348,10 +348,14 @@ class Twitter:
         missed = []
         # Gather the missed tweets
         for chan_conf in self.conf.follows:
-            latest = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
-            if latest:
-                log.info(f'Found {len(latest)} tweets to display for @{chan_conf.screen_name}')
-            missed.extend(latest)
+            try:
+                latest = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
+            except tweepy.TweepError as e:
+                log.info(f'Could not retrieve latest tweets from @{chan_conf.screen_name} : {e}')
+            else:
+                if latest:
+                    log.info(f'Found {len(latest)} tweets to display for @{chan_conf.screen_name}')
+                missed.extend(latest)
 
         missed.sort(key=lambda t: t.id)
         for tweet in missed:
