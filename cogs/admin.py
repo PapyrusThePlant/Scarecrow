@@ -27,7 +27,7 @@ class Admin:
         self.commands_used = Counter()
         self.ignored = config.Config(paths.IGNORED_CONFIG, encoding='utf-8')
 
-    def __global_check(self, ctx):
+    def __global_check_once(self, ctx):
         """A global check used on every command."""
         author = ctx.author
         guild = ctx.guild
