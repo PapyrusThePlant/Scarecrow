@@ -39,10 +39,14 @@ if __name__ == '__main__':
 
     # Setup the root logger
     rlog = logging.getLogger()
-    rlog.setLevel(logging.DEBUG if debug_instance else logging.INFO)
+    rlog.setLevel(logging.INFO)
     handler = logging.FileHandler(paths.BOT_LOG, encoding='utf-8')
     handler.setFormatter(logging.Formatter('{asctime}:{levelname}:{name}:{message}', style='{'))
     rlog.addHandler(handler)
+
+    # Setup the cogs logger
+    if debug_instance:
+        logging.getLogger('cogs').setLevel(logging.DEBUG)
 
     # Redirect stdout and stderr to the log file
     sys.stdout = StreamToLogger(logging.getLogger('STDOUT'), logging.INFO)
