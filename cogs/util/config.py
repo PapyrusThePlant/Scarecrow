@@ -1,6 +1,7 @@
+import collections
 import inspect
 import json
-import collections
+import os
 
 
 class Config:
@@ -20,13 +21,15 @@ class Config:
 
     def save(self):
         """Saves the config on disk"""
-        with open(self.file, 'w', encoding=self.encoding) as fp:
+        tmp_file = self.file + '~'
+        with open(tmp_file, 'w', encoding=self.encoding) as fp:
             json.dump(self._data, fp, ensure_ascii=True, cls=self.encoder)
+        os.replace(tmp_file, self.file)
 
     # utility
 
-    def __contains__(self, *args, **kwargs):
-        return self._data.__contains__(*args, **kwargs)
+    def __contains__(self, item):
+        return item in self._data
 
     def __len__(self):
         return len(self._data)
