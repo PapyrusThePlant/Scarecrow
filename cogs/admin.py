@@ -39,6 +39,9 @@ class Admin:
             if guild.id in self.ignored.guilds:
                 return False
 
+            if ctx.channel.id in self.ignored.channels:
+                return False
+
             # Guild owners can't be ignored
             if author.id == guild.owner.id:
                 return True
