@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def setup(bot):
-    bot.add_cog(Admin())
+    bot.add_cog(Admin(bot.conf))
 
 
 class IgnoredConfig(config.ConfigElement):
@@ -23,9 +23,10 @@ class IgnoredConfig(config.ConfigElement):
 
 class Admin:
     """Bot management commands and events."""
-    def __init__(self):
+    def __init__(self, bot_conf):
         self.commands_used = Counter()
         self.ignored = config.Config(paths.IGNORED_CONFIG, encoding='utf-8')
+        self.bot_conf = bot_conf
 
     def __global_check_once(self, ctx):
         """A global check used on every command."""
@@ -166,6 +167,8 @@ class Admin:
     async def status(self, ctx, *, status=None):
         """Changes the bot's status."""
         await ctx.bot.change_presence(game=discord.Game(name=status))
+        self.bot_conf.status = status
+        self.bot_conf.save()
 
     async def on_command(self, ctx):
         self.commands_used[ctx.command.qualified_name] += 1

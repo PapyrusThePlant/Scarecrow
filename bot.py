@@ -5,6 +5,7 @@ import re
 import time
 import traceback
 
+import discord
 import discord.ext.commands as commands
 
 import paths
@@ -17,6 +18,7 @@ class BotConfig(config.ConfigElement):
     def __init__(self, token, description, **kwargs):
         self.description = description
         self.token = token
+        self.status = kwargs.get('status', None)
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -82,6 +84,8 @@ class Bot(commands.Bot):
         self.app_info = await self.application_info()
         self.owner = self.app_info.owner
         log.info('Logged in Discord as {0.name} (id: {0.id})'.format(self.user))
+        if self.conf.status:
+            await self.change_presence(game=discord.Game(name=self.conf.status))
 
     async def on_message(self, message):
         # Ignore bot messages (that includes our own)
