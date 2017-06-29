@@ -78,7 +78,6 @@ class ChannelConfig(config.ConfigElement):
     def __init__(self, id, feed_creator, **kwargs):
         self.id = id
         self.feed_creator = feed_creator
-        self.received_count = kwargs.pop('received_count', 0)
 
 
 class Twitter:
@@ -91,7 +90,6 @@ class Twitter:
         self.conf = config.Config(paths.TWITTER_CONFIG, encoding='utf-8')
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
-        self.processed_tweets = 0
         self.latest_received = 0
 
     def __unload(self):
@@ -263,18 +261,11 @@ class Twitter:
                 followed_count += 1
                 displayed_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in guild_channels)
 
-        # Calculate the average tweets processed per minute
-        minutes = (time.time() - ctx.bot.start_time) / 60
-        processed_average = self.processed_tweets / minutes
-        processed_average = '< 1' if processed_average < 1 else round(processed_average)
-        tweets_processed = f'Average of {processed_average}/min since last startup'
-
         # Display the info
         if self.stream.running:
             embed = discord.Embed(title='Stream status', description='Online', colour=0x00ff00)
         else:
             embed = discord.Embed(title='Stream status', description='Offline', colour=0xff0000)
-        embed.add_field(name='Tweets processed', value=tweets_processed, inline=False)
         embed.add_field(name='Channels followed', value=f'{followed_count} of the {total_followed_count} followed overall')
         embed.add_field(name='Tweets displayed', value=f'{displayed_count} out of the {total_displayed_count} displayed overall')
 
@@ -508,7 +499,6 @@ class Twitter:
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
-        self.processed_tweets += 1
         if tweet.id > self.latest_received:
             self.latest_received = tweet.id
 
