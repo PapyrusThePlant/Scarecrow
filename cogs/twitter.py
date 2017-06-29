@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 def setup(bot):
-    log.info('Loading extension.')
+    log.debug('Loading extension.')
     cog = Twitter(bot)
     bot.add_cog(cog)
     cog.stream.start()
@@ -75,8 +75,9 @@ class FollowConfig(config.ConfigElement):
 
 
 class ChannelConfig(config.ConfigElement):
-    def __init__(self, id, **kwargs):
+    def __init__(self, id, feed_creator, **kwargs):
         self.id = id
+        self.feed_creator = feed_creator
         self.received_count = kwargs.pop('received_count', 0)
 
 
@@ -103,9 +104,7 @@ class Twitter:
             try:
                 await ctx.send(error)
             except discord.Forbidden:
-                warning = f'Missing the `Send Messages` permission to send the following error to {ctx.message.channel.mention}: {error}'
-                log.debug(f'Sending warning to {ctx.author.id} : {warning}')
-                await ctx.author.send(warning)
+                await ctx.author.send(f'Missing the `Send Messages` permission to send the following error to {ctx.message.channel.mention}: {error}')
 
     async def on_ready(self):
         # Check if we've missed any tweet
@@ -169,8 +168,11 @@ class Twitter:
         See https://dev.twitter.com/streaming/overview/request-parameters#follow
         """
         # Check for required permissions
-        if not ctx.channel.permissions_for(ctx.guild.me).embed_links:
-            raise TwitterError('The `Embed Links` permission in this channel is required to display tweets properly.')
+        perms = ctx.channel.permissions_for(ctx.guild.me)
+        if not perms.send_messages:
+            raise TwitterError(f'The `Send Messages` permission in {ctx.channel.mention} is required to display tweets.')
+        if not perms.embed_links:
+            raise TwitterError(f'The `Embed Links` permission in {ctx.channel.mention} is required to display tweets properly.')
 
         sane_handle = handle.lower().lstrip('@')
         conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
@@ -218,7 +220,7 @@ class Twitter:
             raise TwitterError(f'Already following "{handle}" on this channel.')
 
         # Add new discord channel
-        conf.discord_channels.append(ChannelConfig(ctx.channel.id))
+        conf.discord_channels.append(ChannelConfig(ctx.channel.id, ctx.author.id))
         self.conf.save()
         await ctx.send('\N{OK HAND SIGN}')
 
@@ -344,6 +346,22 @@ class Twitter:
         valid.sort(key=lambda t: t.id)
         return valid[-limit:]
 
+    async def notify_channels(self, message, *channels):
+        for channel in channels:
+            await self.notify_channel(message, channel)
+
+    async def notify_channel(self, message, channel):
+        ch = self.bot.get_channel(channel.id)
+        try:
+            await ch.send(message)
+        except discord.Forbidden:
+            message = f'Missing `Send Messages` permission in {ch.mention} to display:\n{message}'
+            creator = discord.utils.get(ch.members, id=channel.feed_creator)
+            try:
+                await creator.send(message)
+            except:
+                pass # Oh well.
+
     async def fetch_missed_tweets(self):
         # Gather the missed tweets
         total = 0
@@ -351,6 +369,9 @@ class Twitter:
             try:
                 missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
             except tweepy.TweepError as e:
+                if e.reason == 'Not authorized.':
+                    await self.notify_channels(f'Could not check for missed tweets for {chan_conf.screen_name}. The channel is protected, consider unfollowing it.', *chan_conf.discord_channels)
+
                 log.info(f'Could not retrieve latest tweets from @{chan_conf.screen_name} : {e}')
             else:
                 if missed:
@@ -359,7 +380,8 @@ class Twitter:
                     missed.sort(key=lambda t: t.id)
                     for tweet in missed:
                         await self.tweepy_on_status(tweet)
-        log.info(f'A total of {total} tweets were found missing.')
+        if total:
+            log.info(f'A total of {total} tweets were found missing.')
 
     def prepare_tweet(self, tweet, nested=False):
         if isinstance(tweet, dict):
@@ -457,8 +479,6 @@ class Twitter:
             try:
                 data = await oembed.fetch_oembed_data(url)
             except oembed.OembedException as e:
-                log.debug(str(e))
-            except Exception as e:
                 log.error(f'Error while fetching oEmbed data for {url} : {e}')
             else:
                 # Some providers return their errors in the resp content with a 200
@@ -505,51 +525,32 @@ class Twitter:
             chan_conf.screen_name = tweet.author.screen_name.lower()
             self.conf.save()
 
-        try:
-            embed = await self.prepare_embed(tweet)
-            content = None
-        except Exception as e:
-            embed = None
-            content = f'Failed to prepare embed for {tweet.tweet_web_url}'
-            log.error(f'{content}\nError : {e}\nTweet : {tweet_str} ')
-
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
+
+        try:
+            embed = await self.prepare_embed(tweet)
+        except Exception as e:
+            content = f'Failed to prepare embed for {tweet.tweet_web_url}'
+            log.error(f'{content}\nError : {e}\nTweet : {tweet_str} ')
+            await self.notify_channels(f'{content}. This has been logged.', *chan_conf.discord_channels)
+            return
 
         for channel in chan_conf.discord_channels:
             discord_channel = self.bot.get_channel(channel.id)
 
-            # Check if the channel still exists
-            if discord_channel is None:
-                log.debug(f'Channel {channel.id} unavailable to display {tweet.tweet_url}.')
-                continue
-
-            # Check for required permissions
-            perms = discord_channel.permissions_for(discord_channel.guild.me)
-            if not perms.embed_links:
-                warning = f'`Embed links` permission missing to display {tweet.tweet_url}.'
-                log.debug(warning)
-
-                try:
-                    await discord_channel.send(warning)
-                except discord.DiscordException as e:
-                    log.debug(f'Could not send warning to channel {discord_channel.id} : {e}')
-
-                continue
-
             try:
                 # Send the message to the appropriate channel
-                await discord_channel.send(content=content, embed=embed)
-            except Exception as e:
-                log.error(f'Failed to send message on channel {channel.id}\nError : {e}\nContent : {content}\nEmbed : {embed.to_dict() if embed else "None"}')
-                continue
-
-            log.debug(f'Successfully sent message on channel {channel.id} : Content {content} : Embed {embed.to_dict() if embed else "None"}')
-            # Update stats and latest id when processing newer tweets
-            if tweet.id > chan_conf.latest_received:
-                channel.received_count += 1
-                chan_conf.latest_received = tweet.id
-                self.conf.save()
+                await discord_channel.send(embed=embed)
+            except discord.Forbidden:
+                # Notify if we're missing permissions
+                await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', channel)
+            else:
+                # Update stats and latest id when processing newer tweets
+                if tweet.id > chan_conf.latest_received:
+                    channel.received_count += 1
+                    chan_conf.latest_received = tweet.id
+                    self.conf.save()
 
 
 class TweepyAPI(tweepy.API):
