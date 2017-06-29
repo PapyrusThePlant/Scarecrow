@@ -6,7 +6,6 @@ import logging
 import multiprocessing
 import os
 import textwrap
-import time
 from queue import Empty as QueueEmpty
 
 import tweepy
@@ -15,7 +14,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from .util import config, oembed
+from .util import config, oembed, utils
 
 log = logging.getLogger(__name__)
 
@@ -34,28 +33,29 @@ class TwitterError(commands.CommandError):
 class TwitterConfig(config.ConfigElement):
     def __init__(self, credentials, **kwargs):
         self.credentials = credentials
-        self.follows = kwargs.pop('follows', [])
+        self.follows = kwargs.pop('follows', {})
 
     def remove_channels(self, *channels):
         """Unregister the given channels from every FollowConfig, and
         removes any FollowConfig that end up without any channel.
         """
-        channels = set(c.id for c in channels)
         conf_to_remove = set()
 
         # Check every FollowConfig
-        for chan_conf in self.follows:
-            if set(c.id for c in chan_conf.discord_channels) & channels:
-                # Remove the given channels from this FollowConfig
-                dchans_to_remove = set(c for c in chan_conf.discord_channels if c.id in channels)
-                chan_conf.discord_channels = [c for c in chan_conf.discord_channels if c not in dchans_to_remove]
+        for follow_conf in self.follows:
+            for channel in channels:
+                try:
+                    del follow_conf.discord_channels[channel.id]
+                except KeyError:
+                    pass
 
                 # If this FollowConfig ended up with 0 channel, save it to remove it later
-                if not chan_conf.discord_channels:
-                    conf_to_remove.add(chan_conf)
+                if not follow_conf.discord_channels:
+                    conf_to_remove.add(follow_conf)
 
-        if conf_to_remove:
-            self.follows = [c for c in self.follows if c not in conf_to_remove]
+        # Remove the FollowConfig we don't need
+        for follow_conf in conf_to_remove:
+            del self.follows[follow_conf.id]
 
 
 class TwitterCredentials(config.ConfigElement):
@@ -70,7 +70,7 @@ class FollowConfig(config.ConfigElement):
     def __init__(self, id, screen_name, **kwargs):
         self.id = id
         self.screen_name = screen_name
-        self.discord_channels = kwargs.pop('discord_channels', [])
+        self.discord_channels = utils.dict_keys_to_int(kwargs.pop('discord_channels', {}))
         self.latest_received = kwargs.pop('latest_received', 0)
 
 
@@ -173,7 +173,7 @@ class Twitter:
             raise TwitterError(f'The `Embed Links` permission in {ctx.channel.mention} is required to display tweets properly.')
 
         sane_handle = handle.lower().lstrip('@')
-        conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
+        conf = discord.utils.get(self.conf.follows.values(), screen_name=sane_handle)
         if conf is None:
             # Retrieve the user info in case his screen name changed
             partial = functools.partial(self.api.get_user, screen_name=sane_handle)
@@ -185,7 +185,7 @@ class Twitter:
                 else:
                     log.error(str(e))
                     raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-            conf = discord.utils.get(self.conf.follows, id=user.id_str)
+            conf = self.conf.follows.get(user.id_str)
 
             # Update the saved screen name if it changed
             if conf is not None:
@@ -204,21 +204,21 @@ class Twitter:
                 self.latest_received = latest[0].id
             # Register the new channel
             conf = FollowConfig(user.id_str, sane_handle, latest_received=self.latest_received)
-            self.conf.follows.append(conf)
+            self.conf.follows[conf.id] = conf
 
             try:
                 # Restart the stream
                 self.stream.start()
             except tweepy.TweepError as e:
-                self.conf.follows.remove(conf)
+                del self.conf.follows[conf.id]
                 log.error(str(e))
                 raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
 
-        if discord.utils.get(conf.discord_channels, id=ctx.channel.id):
+        if ctx.channel.id in conf.discord_channels:
             raise TwitterError(f'Already following "{handle}" on this channel.')
 
         # Add new discord channel
-        conf.discord_channels.append(ChannelConfig(ctx.channel.id, ctx.author.id))
+        conf.discord_channels[ctx.channel.id] = ChannelConfig(ctx.channel.id, ctx.author.id)
         self.conf.save()
         await ctx.send('\N{OK HAND SIGN}')
 
@@ -246,28 +246,10 @@ class Twitter:
     @twitter_group.command(name='status', no_pm=True)
     async def twitter_status(self, ctx):
         """Displays the status of the Twitter stream."""
-        guild_channels = set(c.id for c in ctx.guild.channels)
-
-        total_followed_count = 0
-        total_displayed_count = 0
-        followed_count = 0
-        displayed_count = 0
-        for chan_conf in self.conf.follows:
-            total_followed_count += 1
-            total_displayed_count += sum(c.received_count for c in chan_conf.discord_channels)
-
-            # Check if this channel is displayed in the guild
-            if set(c.id for c in chan_conf.discord_channels) & guild_channels:
-                followed_count += 1
-                displayed_count += sum(c.received_count for c in chan_conf.discord_channels if c.id in guild_channels)
-
-        # Display the info
         if self.stream.running:
             embed = discord.Embed(title='Stream status', description='Online', colour=0x00ff00)
         else:
             embed = discord.Embed(title='Stream status', description='Offline', colour=0xff0000)
-        embed.add_field(name='Channels followed', value=f'{followed_count} of the {total_followed_count} followed overall')
-        embed.add_field(name='Tweets displayed', value=f'{displayed_count} out of the {total_displayed_count} displayed overall')
 
         await ctx.send(embed=embed)
 
@@ -283,7 +265,7 @@ class Twitter:
         handle, it will avoid unwanted mentions in Discord.
         """
         sane_handle = handle.lower().lstrip('@')
-        conf = discord.utils.get(self.conf.follows, screen_name=sane_handle)
+        conf = discord.utils.get(self.conf.follows.values(), screen_name=sane_handle)
         if conf is None:
             # Retrieve the user info in case his screen name changed
             partial = functools.partial(self.api.get_user, screen_name=sane_handle)
@@ -295,23 +277,24 @@ class Twitter:
                 else:
                     log.error(str(e))
                     raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-            conf = discord.utils.get(self.conf.follows, id=user.id_str)
+            conf = self.conf.follows.get(user.id_str)
 
             # Update the saved screen name if it changed
             if conf is not None:
                 conf.screen_name = user.screen_name.lower()
                 self.conf.save()
 
-        chan_conf = discord.utils.get(conf.discord_channels, id=ctx.message.channel.id) if conf is not None else None
-
+        chan_conf = conf.discord_channels.get(ctx.message.channel.id) if conf is not None else None
         if chan_conf is None:
             raise TwitterError(f'Not following {handle} on this channel.')
 
         # Remove the Discord channel from the Twitter channel conf
-        conf.discord_channels.remove(chan_conf)
+        del conf.discord_channels[chan_conf.id]
+        del chan_conf
+
+        # If there are no more Discord channel to feed, unfollow the Twitter channel
         if not conf.discord_channels:
-            # If there are no more Discord channel to feed, unfollow the Twitter channel
-            self.conf.follows.remove(conf)
+            del self.conf.follows[conf.id]
             del conf
 
             # Update the tweepy stream
@@ -321,7 +304,6 @@ class Twitter:
                 self.stream.stop()
 
         self.conf.save()
-
         await ctx.send('\N{OK HAND SIGN}')
 
     async def get_latest_valid(self, channel_id=None, screen_name=None, limit=0, since_id=0):
@@ -356,7 +338,7 @@ class Twitter:
     async def fetch_missed_tweets(self):
         # Gather the missed tweets
         total = 0
-        for chan_conf in self.conf.follows:
+        for chan_conf in self.conf.follows.values():
             try:
                 missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
             except tweepy.TweepError as e:
@@ -491,7 +473,7 @@ class Twitter:
         if status.in_reply_to_status_id or status.in_reply_to_user_id:
             # Ignore replies
             return True
-        elif from_stream and status.author.id_str not in self.stream.get_follows():
+        elif from_stream and status.author.id_str not in self.conf.follows:
             # The stream includes replies to tweets from channels we're following, ignore them
             return True
         else:
@@ -508,7 +490,7 @@ class Twitter:
         tweet_str = json.dumps(tweet._json, separators=(',', ':'), ensure_ascii=True)
         log.debug(f'Received tweet: {tweet_str}')
 
-        chan_conf = discord.utils.get(self.conf.follows, id=tweet.author.id_str)
+        chan_conf = self.conf.follows.get(tweet.author.id_str)
 
         # Update the saved screen name if it changed
         if chan_conf.screen_name != tweet.author.screen_name:
@@ -526,7 +508,7 @@ class Twitter:
             await self.notify_channels(f'{content}. This has been logged.', *chan_conf.discord_channels)
             return
 
-        for channel in chan_conf.discord_channels:
+        for channel in chan_conf.discord_channels.values():
             discord_channel = self.bot.get_channel(channel.id)
 
             try:
@@ -538,7 +520,6 @@ class Twitter:
             else:
                 # Update stats and latest id when processing newer tweets
                 if tweet.id > chan_conf.latest_received:
-                    channel.received_count += 1
                     chan_conf.latest_received = tweet.id
                     self.conf.save()
 
@@ -631,7 +612,7 @@ class TweepyStream(tweepy.StreamListener):
     def start(self):
         """Starts the tweepy Stream."""
         # Avoid being rate limited by Twitter when restarting the stream with the same follow list.
-        if self.sub_process and not set(self.sub_process.follows) != set(self.get_follows()):
+        if self.sub_process and not set(self.sub_process.follows) != set(self.conf.follows.keys()):
             return
 
         # Kill the current stream before starting a new one
@@ -645,7 +626,7 @@ class TweepyStream(tweepy.StreamListener):
         log.info('Creating sub-process.')
         self.mp_queue = multiprocessing.Queue()
         self.mp_queue.cancel_join_thread()
-        self.sub_process = SubProcessStream(self.mp_queue, self.conf.credentials, self.get_follows())
+        self.sub_process = SubProcessStream(self.mp_queue, self.conf.credentials, list(self.conf.follows.keys()))
 
         # Schedule the polling daemon (it will take care of starting the child process)
         self.daemon = asyncio.ensure_future(self._run())
@@ -670,10 +651,6 @@ class TweepyStream(tweepy.StreamListener):
         """Prepares for a safe unloading."""
         self.stop()
         self.handler = None
-
-    def get_follows(self):
-        """Returns a list containing the Twitter ID of the channels we're following."""
-        return [c.id for c in self.conf.follows]
 
     async def _run(self):
         """Polling daemon that checks the multi-processes queue for data and dispatches it to `on_data`."""
