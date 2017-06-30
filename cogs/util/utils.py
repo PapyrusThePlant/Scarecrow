@@ -60,7 +60,7 @@ class HTTPError(Exception):
         else:
             self.resp_msg = message
 
-        super().__init__(f'{resp.reason} (status code: {resp.status}){f": {self.resp_message}" if len(self.resp_msg) else ""}')
+        super().__init__(f'{resp.reason} (status code: {resp.status}){f": {self.resp_msg}" if self.resp_msg else ""}')
 
 
 def dict_keys_to_int(d):
