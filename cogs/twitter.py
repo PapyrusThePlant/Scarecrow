@@ -42,7 +42,7 @@ class TwitterConfig(config.ConfigElement):
         conf_to_remove = set()
 
         # Check every FollowConfig
-        for follow_conf in self.follows:
+        for follow_conf in self.follows.values():
             for channel in channels:
                 try:
                     del follow_conf.discord_channels[channel.id]
