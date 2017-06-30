@@ -1,4 +1,5 @@
 import copy
+import os
 import time
 import unicodedata
 from collections import Counter
@@ -107,6 +108,9 @@ class Info:
         invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
         prefixes = ctx.bot.command_prefix(ctx.bot, ctx.message)
 
+        command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/%h) %s' -n 5"
+        changes = os.popen(command).read().strip()
+
         embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=0x738bd7)
         embed.set_author(name=f'{owner.display_name} ({owner})', icon_url=owner.avatar_url)
         embed.add_field(name='Command prefixes', value="'" + "', '".join(prefixes) + "'")
@@ -114,6 +118,8 @@ class Info:
         embed.add_field(name='Members', value=members_str)
         embed.add_field(name='Memory', value=self._get_memory_str())
         embed.add_field(name='Uptime', value=self._get_uptime_str())
+        embed.add_field(name='Latest changes', value=changes, inline=False)
+        embed.add_field(name='\N{ZERO WIDTH SPACE}', value='For any question about the bot, announcements and an easy way to get in touch with me, feel free to join the dedicated [discord server](https://discord.gg/M85dw9u).')
         embed.set_footer(text='Powered by discord.py', icon_url='http://i.imgur.com/5BFecvA.png')
 
         await ctx.send(embed=embed)
