@@ -51,8 +51,9 @@ class Polls:
 
         # Start with the poll's title
         to_delete.append(await ctx.send("Yay let's make a poll !\nWhat will its title be?"))
-        title = await ctx.bot.wait_for('message', check=check, timeout=60)
-        if not title:
+        try:
+            title = await ctx.bot.wait_for('message', check=check, timeout=60)
+        except asyncio.TimeoutError:
             raise commands.UserInputError(f'{message.author.mention} You took too long, aborting poll creation.')
         to_delete.append(title)
 
@@ -61,9 +62,10 @@ class Polls:
         options = []
         while True:
             to_delete.append(await ctx.send(f"What will be entry #{len(options) + 1}? (type `No more options` when you're done)"))
-            entry = await ctx.bot.wait_for('message', check=check, timeout=60)
-            if not entry:
-                raise commands.UserInputError('{message.author.mention} You took too long, aborting poll creation.')
+            try:
+                entry = await ctx.bot.wait_for('message', check=check, timeout=60)
+            except asyncio.TimeoutError:
+                raise commands.UserInputError(f'{message.author.mention} You took too long, aborting poll creation.')
             to_delete.append(entry)
 
             if entry.content.lower() == 'no more options':
