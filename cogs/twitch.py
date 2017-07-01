@@ -150,6 +150,7 @@ class Twitch:
         return data['users'][0]
 
     @commands.group(name='twitch')
+    @commands.has_permissions(manage_guild=True)
     async def twitch_group(self, ctx):
         pass
 

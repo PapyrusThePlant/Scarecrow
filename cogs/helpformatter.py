@@ -22,12 +22,9 @@ class HelpFormatter(commands.HelpFormatter):
 
     async def _add_subcommands_to_page(self, max_width, commands, base_indent=None):
         """Adds commands/subcommands and their description to the paginator."""
-        iterator = iter(sorted(commands))
+        to_display = [(name, cmd) for name, cmd in commands if name not in cmd.aliases and await cmd.can_run(self.context)]
+        iterator = iter(sorted(to_display))
         for name, command in iterator:
-            if name in command.aliases or not await command.can_run(self.context):
-                # skip aliases and commands the user can't run
-                continue
-
             # Ugly indent shenanigans
             if base_indent:
                 if iterator.__length_hint__() > 0:

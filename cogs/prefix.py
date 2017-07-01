@@ -45,6 +45,7 @@ class Prefix:
             del self.conf.guild_specific[guild.id]
 
     @commands.group(name='prefix', no_pm=True)
+    @commands.has_permissions(manage_guild=True)
     async def prefix_group(self, ctx):
         pass
 
