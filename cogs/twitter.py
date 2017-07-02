@@ -298,7 +298,7 @@ class Twitter:
             del conf
 
             # Update the tweepy stream
-            if len(self.conf.follows) > 0:
+            if self.conf.follows:
                 self.stream.start()
             else:
                 self.stream.stop()
@@ -343,7 +343,7 @@ class Twitter:
                 missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
             except tweepy.TweepError as e:
                 if e.reason == 'Not authorized.':
-                    await self.notify_channels(f'Could not check for missed tweets for {chan_conf.screen_name}. The channel is protected, consider unfollowing it.', *chan_conf.discord_channels)
+                    await self.notify_channels(f'Could not check for missed tweets for {chan_conf.screen_name}. The channel is protected, consider unfollowing it.', *chan_conf.discord_channels.values())
 
                 log.info(f'Could not retrieve latest tweets from @{chan_conf.screen_name} : {e}')
             else:
@@ -505,7 +505,7 @@ class Twitter:
         except Exception as e:
             content = f'Failed to prepare embed for {tweet.tweet_web_url}'
             log.error(f'{content}\nError : {e}\nTweet : {tweet_str} ')
-            await self.notify_channels(f'{content}. This has been logged.', *chan_conf.discord_channels)
+            await self.notify_channels(f'{content}. This has been logged.', *chan_conf.discord_channels.values())
             return
 
         for channel in chan_conf.discord_channels.values():
