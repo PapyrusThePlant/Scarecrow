@@ -243,6 +243,30 @@ class Twitter:
             embed.add_field(name=name, value=description, inline=False)
         await ctx.send(embed=embed)
 
+    @twitter_group.command(name='list', no_pm=True)
+    async def twitter_list(self, ctx):
+        """Lists the followed channels on the server."""
+        follows = {}
+        channels = set(c.id for c in ctx.guild.text_channels) # for faster `in` lookup
+
+        # Map channel ids to a list of screen names followed in that channel
+        for twitter_id, conf in self.conf.follows.items():
+            for channel_id in conf.discord_channels.keys():
+                if channel_id in channels:
+                    channel = discord.utils.get(ctx.guild.text_channels, id=channel_id)
+                    follows.setdefault(channel, []).append(conf.screen_name)
+
+        if not follows:
+            raise TwitterError('Not following any channel on this server.')
+
+        # Build the embed response
+        embed = discord.Embed(description='Followed channels:', colour=0x738bd7)
+        for channel, channels in sorted(follows.items(), key=lambda t: t[0].position):
+            handles = ', '.join(f'@\N{ZERO WIDTH SPACE}{c}' for c in sorted(channels))
+            embed.add_field(name=f'#{channel.name}', value=handles, inline=False)
+
+        await ctx.send(embed=embed)
+
     @twitter_group.command(name='status', no_pm=True)
     async def twitter_status(self, ctx):
         """Displays the status of the Twitter stream."""
