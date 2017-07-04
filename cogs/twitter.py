@@ -476,7 +476,7 @@ class Twitter:
             try:
                 data = await oembed.fetch_oembed_data(url)
             except oembed.OembedException as e:
-                log.error(f'Error while fetching oEmbed data for {url} : {e}')
+                log.debug(e)
             else:
                 # Some providers return their errors in the resp content with a 200
                 if 'type' not in data:

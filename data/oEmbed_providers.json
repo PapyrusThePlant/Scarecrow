@@ -334,6 +334,25 @@
     ]
   },
   {
+    "provider_name": "DocDroid",
+    "provider_url": "https:\/\/www.docdroid.net\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/*.docdroid.net\/*",
+          "http:\/\/*.docdroid.net\/*",
+          "https:\/\/docdro.id\/*",
+          "http:\/\/docdro.id\/*"
+        ],
+        "url": "https:\/\/www.docdroid.net\/api\/oembed",
+        "formats": [
+          "json"
+        ],
+        "discovery": true
+      }
+    ]
+  },
+  {
     "provider_name": "Docs",
     "provider_url": "https:\/\/www.docs.com",
     "endpoints": [
@@ -425,7 +444,8 @@
     "endpoints": [
       {
         "schemes": [
-          "https:\/\/eyrie.io\/board\/*"
+          "https:\/\/eyrie.io\/board\/*",
+          "https:\/\/eyrie.io\/sparkfun\/*"
         ],
         "url": "https:\/\/eyrie.io\/v1\/oembed",
         "discovery": true
@@ -442,6 +462,20 @@
           "https:\/\/www.facebook.com\/video.php"
         ],
         "url": "https:\/\/www.facebook.com\/plugins\/video\/oembed.json",
+        "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "Flat",
+    "provider_url": "https:\/\/flat.io",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/flat.io\/score\/*",
+          "https:\/\/*.flat.io\/score\/*"
+        ],
+        "url": "https:\/\/flat.io\/services\/oembed",
         "discovery": true
       }
     ]
@@ -470,6 +504,20 @@
           "https:\/\/fiso.foxsports.com.au\/isomorphic-widget\/*"
         ],
         "url": "https:\/\/fiso.foxsports.com.au\/oembed"
+      }
+    ]
+  },
+  {
+    "provider_name": "FrameBuzz",
+    "provider_url": "https:\/\/framebuzz.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/framebuzz.com\/v\/*",
+          "https:\/\/framebuzz.com\/v\/*"
+        ],
+        "url": "https:\/\/framebuzz.com\/oembed\/",
+        "discovery": true
       }
     ]
   },
@@ -557,6 +605,21 @@
           "https:\/\/www.gfycat.com\/*"
         ],
         "url": "https:\/\/api.gfycat.com\/v1\/oembed",
+        "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "GIPHY",
+    "provider_url": "https:\/\/giphy.com",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/giphy.com\/gifs\/*",
+          "http:\/\/gph.is\/*",
+          "https:\/\/media.giphy.com\/media\/*\/giphy.gif"
+        ],
+        "url": "http:\/\/giphy.com\/services\/oembed",
         "discovery": true
       }
     ]
@@ -653,6 +716,34 @@
     ]
   },
   {
+    "provider_name": "Inoreader",
+    "provider_url": "https:\/\/www.inoreader.com",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/www.inoreader.com\/oembed\/"
+        ],
+        "url": "https:\/\/www.inoreader.com\/oembed\/api\/",
+        "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "inphood",
+    "provider_url": "http:\/\/inphood.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/*.inphood.com\/*"
+        ],
+        "url": "http:\/\/api.inphood.com\/oembed",
+        "formats": [
+          "json"
+        ]
+      }
+    ]
+  },
+  {
     "provider_name": "Instagram",
     "provider_url": "https:\/\/instagram.com",
     "endpoints": [
@@ -660,10 +751,14 @@
         "schemes": [
           "http:\/\/instagram.com\/p\/*",
           "http:\/\/instagr.am\/p\/*",
+          "http:\/\/www.instagram.com\/p\/*",
+          "http:\/\/www.instagr.am\/p\/*",
           "https:\/\/instagram.com\/p\/*",
-          "https:\/\/instagr.am\/p\/*"
+          "https:\/\/instagr.am\/p\/*",
+          "https:\/\/www.instagram.com\/p\/*",
+          "https:\/\/www.instagr.am\/p\/*"
         ],
-        "url": "http:\/\/api.instagram.com\/oembed",
+        "url": "https:\/\/api.instagram.com\/oembed",
         "formats": [
           "json"
         ]
@@ -708,6 +803,20 @@
     ]
   },
   {
+    "provider_name": "Kit",
+    "provider_url": "https:\/\/kit.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/kit.com\/*\/*",
+          "https:\/\/kit.com\/*\/*"
+        ],
+        "url": "https:\/\/embed.kit.com\/oembed",
+        "discovery": true
+      }
+    ]
+  },
+  {
     "provider_name": "Kitchenbowl",
     "provider_url": "http:\/\/www.kitchenbowl.com",
     "endpoints": [
@@ -717,6 +826,19 @@
         ],
         "url": "http:\/\/www.kitchenbowl.com\/oembed",
         "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "Knacki",
+    "provider_url": "http:\/\/jdr.knacki.info",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/jdr.knacki.info\/meuh\/*",
+          "https:\/\/jdr.knacki.info\/meuh\/*"
+        ],
+        "url": "https:\/\/jdr.knacki.info\/oembed"
       }
     ]
   },
@@ -743,6 +865,19 @@
           "http:\/\/mathembed.com\/latex?inputText=*"
         ],
         "url": "http:\/\/mathembed.com\/oembed"
+      }
+    ]
+  },
+  {
+    "provider_name": "me.me",
+    "provider_url": "https:\/\/me.me\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/me.me\/i\/*"
+        ],
+        "url": "https:\/\/me.me\/oembed",
+        "discovery": true
       }
     ]
   },
@@ -813,6 +948,26 @@
     ]
   },
   {
+    "provider_name": "nanoo.tv",
+    "provider_url": "https:\/\/www.nanoo.tv\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/*.nanoo.tv\/link\/*",
+          "http:\/\/nanoo.tv\/link\/*",
+          "http:\/\/*.nanoo.pro\/link\/*",
+          "http:\/\/nanoo.pro\/link\/*",
+          "https:\/\/*.nanoo.tv\/link\/*",
+          "https:\/\/nanoo.tv\/link\/*",
+          "https:\/\/*.nanoo.pro\/link\/*",
+          "https:\/\/nanoo.pro\/link\/*"
+        ],
+        "url": "https:\/\/www.nanoo.tv\/services\/oembed",
+        "discovery": true
+      }
+    ]
+  },
+  {
     "provider_name": "nfb.ca",
     "provider_url": "http:\/\/www.nfb.ca\/",
     "endpoints": [
@@ -822,6 +977,19 @@
         ],
         "url": "http:\/\/www.nfb.ca\/remote\/services\/oembed\/",
         "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "Odds.com.au",
+    "provider_url": "https:\/\/www.odds.com.au",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/www.odds.com.au\/*",
+          "https:\/\/odds.com.au\/*"
+        ],
+        "url": "https:\/\/www.odds.com.au\/api\/oembed\/"
       }
     ]
   },
@@ -875,6 +1043,28 @@
     ]
   },
   {
+    "provider_name": "Orbitvu",
+    "provider_url": "https:\/\/orbitvu.co",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/orbitvu.co\/001\/*\/ov3601\/view",
+          "https:\/\/orbitvu.co\/001\/*\/ov3601\/*\/view",
+          "https:\/\/orbitvu.co\/001\/*\/ov3602\/*\/view",
+          "https:\/\/orbitvu.co\/001\/*\/2\/orbittour\/*\/view",
+          "https:\/\/orbitvu.co\/001\/*\/1\/2\/orbittour\/*\/view",
+          "http:\/\/orbitvu.co\/001\/*\/ov3601\/view",
+          "http:\/\/orbitvu.co\/001\/*\/ov3601\/*\/view",
+          "http:\/\/orbitvu.co\/001\/*\/ov3602\/*\/view",
+          "http:\/\/orbitvu.co\/001\/*\/2\/orbittour\/*\/view",
+          "http:\/\/orbitvu.co\/001\/*\/1\/2\/orbittour\/*\/view"
+        ],
+        "url": "http:\/\/orbitvu.co\/service\/oembed",
+        "discovery": true
+      }
+    ]
+  },
+  {
     "provider_name": "Oumy",
     "provider_url": "https:\/\/www.oumy.com\/",
     "endpoints": [
@@ -904,6 +1094,24 @@
     ]
   },
   {
+    "provider_name": "Pixdor",
+    "provider_url": "http:\/\/www.pixdor.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/store.pixdor.com\/place-marker-widget\/*\/show",
+          "https:\/\/store.pixdor.com\/map\/*\/show"
+        ],
+        "url": "https:\/\/store.pixdor.com\/oembed",
+        "formats": [
+          "json",
+          "xml"
+        ],
+        "discovery": true
+      }
+    ]
+  },
+  {
     "provider_name": "Poll Daddy",
     "provider_url": "http:\/\/polldaddy.com",
     "endpoints": [
@@ -914,6 +1122,18 @@
           "http:\/\/*.polldaddy.com\/ratings\/*"
         ],
         "url": "http:\/\/polldaddy.com\/oembed\/"
+      }
+    ]
+  },
+  {
+    "provider_name": "Port",
+    "provider_url": "http:\/\/www.sellwithport.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/app.sellwithport.com\/#\/buyer\/*"
+        ],
+        "url": "https:\/\/api.sellwithport.com\/v1.0\/buyer\/oembed"
       }
     ]
   },
@@ -1068,6 +1288,19 @@
     ]
   },
   {
+    "provider_name": "Screen9",
+    "provider_url": "http:\/\/www.screen9.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/console.screen9.com\/*",
+          "https:\/\/*.screen9.tv\/*"
+        ],
+        "url": "https:\/\/api.screen9.com\/oembed"
+      }
+    ]
+  },
+  {
     "provider_name": "Screencast.com",
     "provider_url": "http:\/\/www.screencast.com\/",
     "endpoints": [
@@ -1086,6 +1319,22 @@
           "http:\/\/www.screenr.com\/*\/"
         ],
         "url": "http:\/\/www.screenr.com\/api\/oembed.{format}"
+      }
+    ]
+  },
+  {
+    "provider_name": "ScribbleMaps",
+    "provider_url": "https:\/\/scribblemaps.com",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/www.scribblemaps.com\/maps\/view\/*",
+          "https:\/\/www.scribblemaps.com\/maps\/view\/*",
+          "http:\/\/scribblemaps.com\/maps\/view\/*",
+          "https:\/\/scribblemaps.com\/maps\/view\/*"
+        ],
+        "url": "https:\/\/scribblemaps.com\/api\/services\/oembed.{format}",
+        "discovery": true
       }
     ]
   },
@@ -1336,9 +1585,11 @@
     "endpoints": [
       {
         "schemes": [
-          "https:\/\/www.nytimes.com\/svc\/oembed"
+          "https:\/\/www.nytimes.com\/svc\/oembed",
+          "https:\/\/nytimes.com\/*",
+          "https:\/\/*.nytimes.com\/*"
         ],
-        "url": "https:\/\/www.nytimes.com\/svc\/oembed",
+        "url": "https:\/\/www.nytimes.com\/svc\/oembed\/json\/",
         "discovery": true
       }
     ]
@@ -1352,6 +1603,26 @@
           "https:\/\/theysaidso.com\/image\/*"
         ],
         "url": "https:\/\/theysaidso.com\/extensions\/oembed\/",
+        "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "TickCounter",
+    "provider_url": "https:\/\/www.tickcounter.com",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/www.tickcounter.com\/countdown\/*",
+          "http:\/\/www.tickcounter.com\/countup\/*",
+          "http:\/\/www.tickcounter.com\/ticker\/*",
+          "http:\/\/www.tickcounter.com\/worldclock\/*",
+          "https:\/\/www.tickcounter.com\/countdown\/*",
+          "https:\/\/www.tickcounter.com\/countup\/*",
+          "https:\/\/www.tickcounter.com\/ticker\/*",
+          "https:\/\/www.tickcounter.com\/worldclock\/*"
+        ],
+        "url": "https:\/\/www.tickcounter.com\/oembed",
         "discovery": true
       }
     ]
@@ -1390,6 +1661,47 @@
     ]
   },
   {
+    "provider_name": "Twitter",
+    "provider_url": "http:\/\/www.twitter.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/twitter.com\/*\/status\/*"
+        ],
+        "url": "https:\/\/publish.twitter.com\/oembed"
+      }
+    ]
+  },
+  {
+    "provider_name": "Ubideo",
+    "provider_url": "https:\/\/player.ubideo.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/player.ubideo.com\/*"
+        ],
+        "url": "https:\/\/player.ubideo.com\/api\/oembed.json",
+        "formats": [
+          "json"
+        ]
+      }
+    ]
+  },
+  {
+    "provider_name": "UOL",
+    "provider_url": "https:\/\/mais.uol.com.br\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/*.uol.com.br\/view\/*",
+          "https:\/\/*.uol.com.br\/video\/*"
+        ],
+        "url": "https:\/\/mais.uol.com.br\/apiuol\/v3\/oembed\/view",
+        "discovery": true
+      }
+    ]
+  },
+  {
     "provider_name": "Ustream",
     "provider_url": "http:\/\/www.ustream.tv",
     "endpoints": [
@@ -1414,6 +1726,26 @@
           "http:\/\/uttles.com\/uttle\/*"
         ],
         "url": "http:\/\/uttles.com\/api\/reply\/oembed",
+        "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "VeeR VR",
+    "provider_url": "http:\/\/veer.tv\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "http:\/\/veer.tv\/videos\/*"
+        ],
+        "url": "https:\/\/api.veer.tv\/oembed",
+        "discovery": true
+      },
+      {
+        "schemes": [
+          "http:\/\/veervr.tv\/videos\/*"
+        ],
+        "url": "https:\/\/api.veervr.tv\/oembed",
         "discovery": true
       }
     ]
@@ -1495,6 +1827,19 @@
           "https:\/\/vine.co\/v\/*"
         ],
         "url": "https:\/\/vine.co\/oembed.json",
+        "discovery": true
+      }
+    ]
+  },
+  {
+    "provider_name": "Vlipsy",
+    "provider_url": "https:\/\/vlipsy.com\/",
+    "endpoints": [
+      {
+        "schemes": [
+          "https:\/\/vlipsy.com\/*"
+        ],
+        "url": "https:\/\/vlipsy.com\/oembed",
         "discovery": true
       }
     ]
