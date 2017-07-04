@@ -236,7 +236,7 @@ class Twitter:
         if not results:
             raise TwitterError('No result.')
 
-        embed = discord.Embed(colour=0x738bd7)
+        embed = discord.Embed(colour=discord.Colour.blurple())
         for user in results:
             name = f'{user.name} - @{user.screen_name}'
             description = textwrap.shorten(user.description, 1024) if user.description else 'No description.'
@@ -260,7 +260,7 @@ class Twitter:
             raise TwitterError('Not following any channel on this server.')
 
         # Build the embed response
-        embed = discord.Embed(description='Followed channels:', colour=0x738bd7)
+        embed = discord.Embed(description='Followed channels:', colour=discord.Colour.blurple())
         for channel, channels in sorted(follows.items(), key=lambda t: t[0].position):
             handles = ', '.join(f'@\N{ZERO WIDTH SPACE}{c}' for c in sorted(channels))
             embed.add_field(name=f'#{channel.name}', value=handles, inline=False)
@@ -271,9 +271,9 @@ class Twitter:
     async def twitter_status(self, ctx):
         """Displays the status of the Twitter stream."""
         if self.stream.running:
-            embed = discord.Embed(title='Stream status', description='Online', colour=0x00ff00)
+            embed = discord.Embed(title='Stream status', description='Online', colour=discord.Colour.green())
         else:
-            embed = discord.Embed(title='Stream status', description='Offline', colour=0xff0000)
+            embed = discord.Embed(title='Stream status', description='Offline', colour=discord.Colour.red())
 
         await ctx.send(embed=embed)
 

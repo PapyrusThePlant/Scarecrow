@@ -28,7 +28,7 @@ class Polls:
         if len(options) > 10:
             raise commands.BadArgument('Too many options (max 10).')
 
-        poll = discord.Embed(title=title, colour=0x738bd7)
+        poll = discord.Embed(title=title, colour=discord.Colour.blurple())
         poll.description = '\n'.join(f'{self.keycaps_emojis[i]} {o}' for i, o in enumerate(options))
         poll.set_author(name=f'{ctx.message.author.display_name} ({ctx.message.author})', icon_url=ctx.message.author.avatar_url)
         poll.set_footer(text='Vote using reactions !')

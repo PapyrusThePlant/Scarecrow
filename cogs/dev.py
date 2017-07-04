@@ -137,7 +137,7 @@ class Dev:
     @commands.command()
     async def update(self, ctx):
         """Updates the bot."""
-        embed = discord.Embed(colour=0x738bd7, description='Updating bot...')
+        embed = discord.Embed(colour=discord.Colour.blurple(), description='Updating bot...')
         message = await ctx.send(embed=embed)
 
         process = await asyncio.create_subprocess_exec('git', 'pull', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)

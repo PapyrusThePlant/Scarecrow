@@ -57,7 +57,7 @@ class Misc:
         if node is None:
             return None
 
-        e = discord.Embed(colour=0x738bd7)
+        e = discord.Embed(colour=discord.Colour.blurple())
 
         # check if it's a calculator card:
         calculator = node.find(".//div[@id='cwmcwd']")
@@ -344,7 +344,7 @@ class Misc:
             await ctx.send(response)
 
             # Embed response (not worth using when the search return a link to a video)
-            # embed = discord.Embed(colour=0x738bd7, title=title, url=url, description=description)
+            # embed = discord.Embed(colour=discord.Colour.blurple(), title=title, url=url, description=description)
             # embed.add_field(name='Additional Results', value=additional_results, inline=False)
         else:
             # Add the search results to the embed with the card info

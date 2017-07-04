@@ -126,7 +126,7 @@ class Twitch:
 
     async def notify(self, stream):
         # Build the embed
-        embed = discord.Embed(title='Click here to join the fun !', url=stream['channel']['url'], colour=0x738bd7)
+        embed = discord.Embed(title='Click here to join the fun !', url=stream['channel']['url'], colour=discord.Colour.blurple())
         embed.set_author(name=stream['channel']['display_name'])
         embed.set_thumbnail(url=stream['channel']['logo'])
         embed.set_image(url=stream['preview']['large'])

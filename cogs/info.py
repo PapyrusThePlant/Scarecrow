@@ -111,7 +111,7 @@ class Info:
         command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/%h) %s' -n 5"
         changes = os.popen(command).read().strip()
 
-        embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=0x738bd7)
+        embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=discord.Colour.blurple())
         embed.set_author(name=f'{owner.display_name} ({owner})', icon_url=owner.avatar_url)
         embed.add_field(name='Command prefixes', value="'" + "', '".join(prefixes) + "'")
         embed.add_field(name='Servers', value=len(ctx.bot.guilds))
@@ -134,7 +134,7 @@ class Info:
         if channel is None:
             channel = ctx.channel
 
-        embed = discord.Embed(description=channel.mention, colour=0x738bd7)
+        embed = discord.Embed(description=channel.mention, colour=discord.Colour.blurple())
         embed.add_field(name='ID', value=channel.id)
         embed.add_field(name='Server', value=channel.guild.name)
         embed.add_field(name='Type', value='Text channel' if isinstance(channel, discord.TextChannel) else 'Voice channel')
@@ -206,9 +206,9 @@ class Info:
 
         # Create and fill the embed
         if invite is not None:
-            embed = discord.Embed(title='Server invite', url=invite.url, colour=0x738bd7)
+            embed = discord.Embed(title='Server invite', url=invite.url, colour=discord.Colour.blurple())
         else:
-            embed = discord.Embed(colour=0x738bd7)
+            embed = discord.Embed(colour=discord.Colour.blurple())
         embed.set_author(name=guild.name, url=guild.icon_url, icon_url=guild.icon_url)
         embed.add_field(name='ID', value=guild.id)
         embed.add_field(name='Owner', value=str(guild.owner))
@@ -241,7 +241,7 @@ class Info:
         else:
             voice = 'Not connected.'
 
-        embed = discord.Embed(title=member.display_name, url=member.avatar_url, colour=0x738bd7)
+        embed = discord.Embed(title=member.display_name, url=member.avatar_url, colour=discord.Colour.blurple())
         embed.set_author(name=str(member))
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='ID', value=member.id)
