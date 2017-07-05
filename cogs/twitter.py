@@ -77,6 +77,7 @@ class ChannelConfig(config.ConfigElement):
     def __init__(self, id, feed_creator, **kwargs):
         self.id = id
         self.feed_creator = feed_creator
+        self.message = kwargs.pop('message', None)
 
 
 class Twitter:
@@ -124,6 +125,42 @@ class Twitter:
     async def twitter_group(self, ctx):
         pass
 
+    @twitter_group.command(name='setmessage', aliases=['editmessage'], no_pm=True)
+    @commands.has_permissions(manage_guild=True)
+    async def twitter_setmessage(self, ctx, handle, *, message=None):
+        """Sets a custom message for all the tweets of a given Twitter channel.
+
+        If a message was already set, it will be overridden. Omitting
+        the message will remove it for that feed.
+        """
+        sane_handle = handle.lower().lstrip('@')
+        conf = discord.utils.get(self.conf.follows.values(), screen_name=sane_handle)
+        if conf is None:
+            # Retrieve the user info in case his screen name changed
+            partial = functools.partial(self.api.get_user, screen_name=sane_handle)
+            try:
+                user = await ctx.bot.loop.run_in_executor(None, partial)
+            except tweepy.TweepError as e:
+                if e.api_code == 50:
+                    raise TwitterError(f'User "{handle}" not found.') from e
+                else:
+                    log.error(str(e))
+                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
+            conf = self.conf.follows.get(user.id_str)
+
+            # Update the saved screen name if it changed
+            if conf is not None:
+                conf.screen_name = user.screen_name.lower()
+                self.conf.save()
+
+        chan_conf = conf.discord_channels.get(ctx.message.channel.id) if conf is not None else None
+        if chan_conf is None:
+            raise TwitterError(f'Not following {handle} on this channel.')
+
+        chan_conf.message = message
+        await ctx.send('\N{OK HAND SIGN}')
+
+
     @twitter_group.command(name='fetch', no_pm=True)
     async def twitter_fetch(self, ctx, handle, limit: int=1):
         """Retrieves the latest tweets from a channel and displays them.
@@ -154,11 +191,13 @@ class Twitter:
 
     @twitter_group.command(name='follow', no_pm=True)
     @commands.has_permissions(manage_guild=True)
-    async def twitter_follow(self, ctx, handle):
+    async def twitter_follow(self, ctx, handle, *, message=None):
         """Follows a Twitter channel.
 
         The tweets from the given Twitter channel will be
-        sent to the channel this command was used in.
+        sent to the channel this command was used in. If provided,
+        the message will be attached to every tweet, so be wary of
+        mention spam with this.
 
         You do not need to include the '@' before the Twitter channel's
         handle, it will avoid unwanted mentions in Discord.
@@ -219,7 +258,7 @@ class Twitter:
             raise TwitterError(f'Already following "{handle}" on this channel.')
 
         # Add new discord channel
-        conf.discord_channels[ctx.channel.id] = ChannelConfig(ctx.channel.id, ctx.author.id)
+        conf.discord_channels[ctx.channel.id] = ChannelConfig(ctx.channel.id, ctx.author.id, message=message)
         self.conf.save()
         await ctx.send('\N{OK HAND SIGN}')
 
@@ -542,7 +581,7 @@ class Twitter:
 
             try:
                 # Send the message to the appropriate channel
-                await discord_channel.send(embed=embed)
+                await self.bot.get_channel(channel.id).send(channel.message, embed=embed)
             except discord.Forbidden:
                 # Notify if we're missing permissions
                 await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', channel)
