@@ -23,7 +23,6 @@ def setup(bot):
     log.debug('Loading extension.')
     cog = Twitter(bot)
     bot.add_cog(cog)
-    cog.stream.start()
 
 
 class TwitterError(commands.CommandError):
@@ -105,6 +104,8 @@ class Twitter:
                 await ctx.author.send(f'Missing the `Send Messages` permission to send the following error to {ctx.message.channel.mention}: {error}')
 
     async def on_ready(self):
+        if not self.stream.running:
+            self.stream.start()
         # Check if we've missed any tweet
         await self.fetch_missed_tweets()
 
@@ -532,8 +533,12 @@ class Twitter:
             await self.notify_channels(f'{content}. This has been logged.', *chan_conf.discord_channels.values())
             return
 
+        invalids = set()
         for channel in chan_conf.discord_channels.values():
             discord_channel = self.bot.get_channel(channel.id)
+            if not discord_channel:
+                invalids.add(channel)
+                continue
 
             try:
                 # Send the message to the appropriate channel
@@ -546,6 +551,12 @@ class Twitter:
                 if tweet.id > chan_conf.latest_received:
                     chan_conf.latest_received = tweet.id
                     self.conf.save()
+
+        # Cleanup invalid channels
+        if invalids:
+            self.conf.remove_channels(*invalids)
+            self.conf.save()
+            self.stream.start()
 
 
 class TweepyAPI(tweepy.API):

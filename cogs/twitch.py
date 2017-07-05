@@ -56,7 +56,7 @@ class Twitch:
         }
         self.session = aiohttp.ClientSession(loop=bot.loop, headers=default_headers)
         self.live_cache = {}
-        self.daemon = bot.loop.create_task(self._daemon())
+        self.daemon = None
 
     def __unload(self):
         self.session.close()
@@ -70,6 +70,10 @@ class Twitch:
     async def on_guild_remove(self, guild):
         self.conf.remove_channels(*guild.channels)
         self.conf.save()
+
+    async def on_ready(self):
+        if not self.daemon:
+            self.daemon = self.bot.loop.create_task(self._daemon())
 
     async def _daemon(self):
         # Live cache initialisation

@@ -80,7 +80,7 @@ class Bot(commands.Bot):
         content = f'Ignoring exception in {event_method} : {tb}'
         log.error(content)
 
-    async def on_ready(self):
+    async def on_connect(self):
         self.app_info = await self.application_info()
         self.owner = self.app_info.owner
         log.info('Logged in Discord as {0.name} (id: {0.id})'.format(self.user))
