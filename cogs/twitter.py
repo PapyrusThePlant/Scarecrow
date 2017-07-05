@@ -121,18 +121,7 @@ class Twitter:
         self.conf.save()
         self.stream.start()
 
-    @commands.group(name='twitter')
-    async def twitter_group(self, ctx):
-        pass
-
-    @twitter_group.command(name='setmessage', aliases=['editmessage'], no_pm=True)
-    @commands.has_permissions(manage_guild=True)
-    async def twitter_setmessage(self, ctx, handle, *, message=None):
-        """Sets a custom message for all the tweets of a given Twitter channel.
-
-        If a message was already set, it will be overridden. Omitting
-        the message will remove it for that feed.
-        """
+    async def get_confs(self, ctx, handle, create=False):
         sane_handle = handle.lower().lstrip('@')
         conf = discord.utils.get(self.conf.follows.values(), screen_name=sane_handle)
         if conf is None:
@@ -152,12 +141,48 @@ class Twitter:
             if conf is not None:
                 conf.screen_name = user.screen_name.lower()
                 self.conf.save()
+            elif create:
+                # The Twitter API does not support following protected users
+                # https://dev.twitter.com/streaming/overview/request-parameters#follow
+                if user.protected:
+                    raise TwitterError('This channel is protected and cannot be followed.')
+
+                if self.latest_received == 0:
+                    partial = functools.partial(self.api.user_timeline, user_id=user.id, count=1)
+                    latest = await ctx.bot.loop.run_in_executor(None, partial)
+                    self.latest_received = latest[0].id
+                # Register the new channel
+                conf = FollowConfig(user.id_str, sane_handle, latest_received=self.latest_received)
+                self.conf.follows[conf.id] = conf
+
+                try:
+                    # Restart the stream
+                    self.stream.start()
+                except tweepy.TweepError as e:
+                    del self.conf.follows[conf.id]
+                    log.error(str(e))
+                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
 
         chan_conf = conf.discord_channels.get(ctx.message.channel.id) if conf is not None else None
+        return conf, chan_conf
+
+    @commands.group(name='twitter')
+    async def twitter_group(self, ctx):
+        pass
+
+    @twitter_group.command(name='setmessage', aliases=['editmessage'], no_pm=True)
+    @commands.has_permissions(manage_guild=True)
+    async def twitter_setmessage(self, ctx, handle, *, message=None):
+        """Sets a custom message for all the tweets of a given Twitter channel.
+
+        If a message was already set, it will be overridden. Omitting
+        the message will remove it for that feed.
+        """
+        conf, chan_conf = await self.get_confs(ctx, handle)
         if chan_conf is None:
             raise TwitterError(f'Not following {handle} on this channel.')
-
         chan_conf.message = message
+        self.conf.save()
         await ctx.send('\N{OK HAND SIGN}')
 
 
@@ -212,49 +237,8 @@ class Twitter:
         if not perms.embed_links:
             raise TwitterError(f'The `Embed Links` permission in {ctx.channel.mention} is required to display tweets properly.')
 
-        sane_handle = handle.lower().lstrip('@')
-        conf = discord.utils.get(self.conf.follows.values(), screen_name=sane_handle)
-        if conf is None:
-            # Retrieve the user info in case his screen name changed
-            partial = functools.partial(self.api.get_user, screen_name=sane_handle)
-            try:
-                user = await ctx.bot.loop.run_in_executor(None, partial)
-            except tweepy.TweepError as e:
-                if e.api_code == 50:
-                    raise TwitterError(f'User "{handle}" not found.') from e
-                else:
-                    log.error(str(e))
-                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-            conf = self.conf.follows.get(user.id_str)
-
-            # Update the saved screen name if it changed
-            if conf is not None:
-                conf.screen_name = user.screen_name.lower()
-                self.conf.save()
-
-        if conf is None:
-            # The Twitter API does not support following protected users
-            # https://dev.twitter.com/streaming/overview/request-parameters#follow
-            if user.protected:
-                raise TwitterError('This channel is protected and cannot be followed.')
-
-            if self.latest_received == 0:
-                partial = functools.partial(self.api.user_timeline, user_id=user.id, count=1)
-                latest = await ctx.bot.loop.run_in_executor(None, partial)
-                self.latest_received = latest[0].id
-            # Register the new channel
-            conf = FollowConfig(user.id_str, sane_handle, latest_received=self.latest_received)
-            self.conf.follows[conf.id] = conf
-
-            try:
-                # Restart the stream
-                self.stream.start()
-            except tweepy.TweepError as e:
-                del self.conf.follows[conf.id]
-                log.error(str(e))
-                raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-
-        if ctx.channel.id in conf.discord_channels:
+        conf, chan_conf = await self.get_confs(ctx, handle, create=True)
+        if chan_conf:
             raise TwitterError(f'Already following "{handle}" on this channel.')
 
         # Add new discord channel
@@ -328,27 +312,7 @@ class Twitter:
         You do not need to include the '@' before the Twitter channel's
         handle, it will avoid unwanted mentions in Discord.
         """
-        sane_handle = handle.lower().lstrip('@')
-        conf = discord.utils.get(self.conf.follows.values(), screen_name=sane_handle)
-        if conf is None:
-            # Retrieve the user info in case his screen name changed
-            partial = functools.partial(self.api.get_user, screen_name=sane_handle)
-            try:
-                user = await ctx.bot.loop.run_in_executor(None, partial)
-            except tweepy.TweepError as e:
-                if e.api_code == 50:
-                    raise TwitterError(f'User "{handle}" not found.') from e
-                else:
-                    log.error(str(e))
-                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-            conf = self.conf.follows.get(user.id_str)
-
-            # Update the saved screen name if it changed
-            if conf is not None:
-                conf.screen_name = user.screen_name.lower()
-                self.conf.save()
-
-        chan_conf = conf.discord_channels.get(ctx.message.channel.id) if conf is not None else None
+        conf, chan_conf = await self.get_confs(ctx, handle)
         if chan_conf is None:
             raise TwitterError(f'Not following {handle} on this channel.')
 
@@ -554,11 +518,11 @@ class Twitter:
         tweet_str = json.dumps(tweet._json, separators=(',', ':'), ensure_ascii=True)
         log.debug(f'Received tweet: {tweet_str}')
 
-        chan_conf = self.conf.follows.get(tweet.author.id_str)
+        conf = self.conf.follows.get(tweet.author.id_str)
 
         # Update the saved screen name if it changed
-        if chan_conf.screen_name != tweet.author.screen_name:
-            chan_conf.screen_name = tweet.author.screen_name.lower()
+        if conf.screen_name != tweet.author.screen_name:
+            conf.screen_name = tweet.author.screen_name.lower()
             self.conf.save()
 
         # Make sure we're ready to send messages
@@ -569,26 +533,26 @@ class Twitter:
         except Exception as e:
             content = f'Failed to prepare embed for {tweet.tweet_web_url}'
             log.error(f'{content}\nError : {e}\nTweet : {tweet_str} ')
-            await self.notify_channels(f'{content}. This has been logged.', *chan_conf.discord_channels.values())
+            await self.notify_channels(f'{content}. This has been logged.', *conf.discord_channels.values())
             return
 
         invalids = set()
-        for channel in chan_conf.discord_channels.values():
-            discord_channel = self.bot.get_channel(channel.id)
+        for chan_conf in conf.discord_channels.values():
+            discord_channel = self.bot.get_channel(chan_conf.id)
             if not discord_channel:
-                invalids.add(channel)
+                invalids.add(chan_conf)
                 continue
 
             try:
                 # Send the message to the appropriate channel
-                await self.bot.get_channel(channel.id).send(channel.message, embed=embed)
+                await self.bot.get_channel(chan_conf.id).send(chan_conf.message, embed=embed)
             except discord.Forbidden:
                 # Notify if we're missing permissions
-                await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', channel)
+                await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', chan_conf)
             else:
                 # Update stats and latest id when processing newer tweets
-                if tweet.id > chan_conf.latest_received:
-                    chan_conf.latest_received = tweet.id
+                if tweet.id > conf.latest_received:
+                    conf.latest_received = tweet.id
                     self.conf.save()
 
         # Cleanup invalid channels
