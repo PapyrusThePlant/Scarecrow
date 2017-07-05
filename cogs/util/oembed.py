@@ -45,6 +45,15 @@ def find_oembed_endpoint(url):
 
     raise EndpointNotFound(url)
 
+async def do_fetch(url):
+    try:
+        return await utils.fetch_page(url, params={'url': url, 'format': 'json'})
+    except:
+        try:
+            return await utils.fetch_page(url, data={'url': url, 'format': 'json'})
+        except:
+            return None
+
 
 async def fetch_oembed_data(url):
     data = None
@@ -53,18 +62,9 @@ async def fetch_oembed_data(url):
         endpoint = find_oembed_endpoint(url)
     except EndpointNotFound:
         for endpoint_url in oEmbed_discovery:
-            try:
-                data = await utils.fetch_page(endpoint_url, params={'url': url, 'format': 'json'})
-            except:
-                try:
-                    data = await utils.fetch_page(endpoint_url, data={'url': url, 'format': 'json'})
-                except:
-                    pass
+            data = await do_fetch(endpoint_url)
     else:
-        try:
-            data = await utils.fetch_page(endpoint, params={'url': url, 'format': 'json'})
-        except:
-            data = await utils.fetch_page(endpoint, data={'url': url, 'format': 'json'})
+        data = await do_fetch(endpoint)
 
     if isinstance(data, dict):
         return data
