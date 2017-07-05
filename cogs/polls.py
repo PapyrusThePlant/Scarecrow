@@ -24,7 +24,12 @@ class Polls:
     async def instant_poll(self, ctx, title, *options):
         """Creates a poll.
 
-        There can be at most 10 options."""
+        To have a title and/or options with multiple words, surround
+        them with double quotes. e.g:
+            `@Scarecrow#8745 ip "Is this a good feature?" yes "I'm not sure" no`
+
+        Note that there can be at most 10 options to choose from.
+        """
         if len(options) > 10:
             raise commands.BadArgument('Too many options (max 10).')
 
@@ -41,7 +46,7 @@ class Polls:
     async def poll(self, ctx):
         """Interactively create a poll.
 
-        This is a more user friendly version of the instantpoll command.
+        This is a more user friendly version of the `instantpoll` command.
         """
         message = ctx.message
         to_delete = [message]
