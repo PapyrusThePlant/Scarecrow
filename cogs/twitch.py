@@ -158,7 +158,8 @@ class Twitch:
     async def twitch_group(self, ctx):
         pass
 
-    @twitch_group.command(name='follow', no_pm=True)
+    @twitch_group.command(name='follow')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def twitch_follow(self, ctx, channel, *, message=''):
         """Follows a twitch channel.
@@ -187,7 +188,8 @@ class Twitch:
 
         await ctx.send('\N{OK HAND SIGN}')
 
-    @twitch_group.command(name='unfollow', no_pm=True)
+    @twitch_group.command(name='unfollow')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def twitch_unfollow(self, ctx, channel):
         """Unfollows a twitch channel.

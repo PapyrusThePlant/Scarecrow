@@ -48,7 +48,8 @@ class Shimmy:
     def __local_check(self, ctx):
         return ctx.guild is not None and ctx.guild.id == SHIMMY_GUILD_ID
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     async def nsfw(self, ctx):
         """Tries to add the NSFW role to a member."""
         if self.nsfw_role is None:
@@ -57,7 +58,8 @@ class Shimmy:
         await ctx.author.add_roles(self.nsfw_role)
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def stream(self, ctx, *, description=None):
         shimmy = ctx.guild.get_member(SHIMMY_USER_ID)
@@ -68,7 +70,7 @@ class Shimmy:
         await ctx.send(content='@here', embed=embed)
         await ctx.message.delete()
 
-    @commands.command(no_pm=True)
+    @commands.command()
     async def ball(self, ctx, *, question):
         """Scarecrow's 8-Ball reaches into the future, to find the answers to your questions.
 

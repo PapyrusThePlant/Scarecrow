@@ -44,12 +44,14 @@ class Prefix:
         if guild.id in self.conf.guild_specific:
             del self.conf.guild_specific[guild.id]
 
-    @commands.group(name='prefix', no_pm=True)
+    @commands.group(name='prefix')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def prefix_group(self, ctx):
         pass
 
-    @prefix_group.command(name='add', no_pm=True)
+    @prefix_group.command(name='add')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def prefix_add(self, ctx, prefix):
         """Adds a command prefix specific to this server.
@@ -73,8 +75,9 @@ class Prefix:
         self.conf.save()
         await ctx.send('\N{OK HAND SIGN}')
 
+    @prefix_group.command(name='remove')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    @prefix_group.command(name='remove', no_pm=True)
     async def prefix_remove(self, ctx, prefix):
         """Removes a command prefix specific to this server."""
         sid = ctx.guild.id

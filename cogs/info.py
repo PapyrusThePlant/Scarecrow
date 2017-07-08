@@ -124,7 +124,8 @@ class Info:
 
         await ctx.send(embed=embed)
 
-    @info_group.command(name='channel', no_pm=True)
+    @info_group.command(name='channel')
+    @commands.guild_only()
     async def info_channel(self, ctx, *, channel: utils.GuildChannelConverter=None):
         """Shows information about the channel.
 
@@ -149,7 +150,8 @@ class Info:
 
         await ctx.send(embed=embed)
 
-    @info_group.command(name='guild', aliases=['server'], no_pm=True)
+    @info_group.command(name='guild', aliases=['server'])
+    @commands.guild_only()
     async def info_guild(self, ctx):
         """Shows information about the server."""
         guild = ctx.guild
@@ -222,7 +224,8 @@ class Info:
 
         await ctx.send(embed=embed)
 
-    @info_group.command(name='user', no_pm=True)
+    @info_group.command(name='user')
+    @commands.guild_only()
     async def info_user(self, ctx, *, member: discord.Member):
         """Shows information about a user.
 

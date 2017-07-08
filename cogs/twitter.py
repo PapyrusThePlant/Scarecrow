@@ -170,7 +170,8 @@ class Twitter:
     async def twitter_group(self, ctx):
         pass
 
-    @twitter_group.command(name='setmessage', aliases=['editmessage'], no_pm=True)
+    @twitter_group.command(name='setmessage', aliases=['editmessage'])
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def twitter_setmessage(self, ctx, handle, *, message=None):
         """Sets a custom message for all the tweets of a given Twitter channel.
@@ -185,8 +186,8 @@ class Twitter:
         self.conf.save()
         await ctx.send('\N{OK HAND SIGN}')
 
-
-    @twitter_group.command(name='fetch', no_pm=True)
+    @twitter_group.command(name='fetch')
+    @commands.guild_only()
     async def twitter_fetch(self, ctx, handle, limit: int=1):
         """Retrieves the latest tweets from a channel and displays them.
 
@@ -214,7 +215,8 @@ class Twitter:
             embed = await self.prepare_embed(tweet)
             await ctx.send(embed=embed)
 
-    @twitter_group.command(name='follow', no_pm=True)
+    @twitter_group.command(name='follow')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def twitter_follow(self, ctx, handle, *, message=None):
         """Follows a Twitter channel.
@@ -267,7 +269,8 @@ class Twitter:
             embed.add_field(name=name, value=description, inline=False)
         await ctx.send(embed=embed)
 
-    @twitter_group.command(name='list', no_pm=True)
+    @twitter_group.command(name='list')
+    @commands.guild_only()
     async def twitter_list(self, ctx):
         """Lists the followed channels on the server."""
         follows = {}
@@ -291,7 +294,7 @@ class Twitter:
 
         await ctx.send(embed=embed)
 
-    @twitter_group.command(name='status', no_pm=True)
+    @twitter_group.command(name='status')
     async def twitter_status(self, ctx):
         """Displays the status of the Twitter stream."""
         if self.stream.running:
@@ -301,7 +304,8 @@ class Twitter:
 
         await ctx.send(embed=embed)
 
-    @twitter_group.command(name='unfollow', no_pm=True)
+    @twitter_group.command(name='unfollow')
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def twitter_unfollow(self, ctx, handle):
         """Unfollows a Twitter channel.

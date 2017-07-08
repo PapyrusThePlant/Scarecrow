@@ -115,7 +115,8 @@ class Admin:
             # Do not ignore voice channels
             raise commands.BadArgument('Cannot ignore/unignore voice channels.')
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def ignore(self, ctx, *, target):
         """Ignores a channel, a user (server-wide), or a whole server.
@@ -135,7 +136,8 @@ class Admin:
         else:
             await ctx.send('\N{OK HAND SIGN}')
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def unignore(self, ctx, *, target):
         """Un-ignores a channel, a user (server-wide), or a whole server."""
