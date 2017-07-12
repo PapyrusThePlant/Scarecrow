@@ -91,6 +91,7 @@ class Twitter:
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
         self.latest_received = 0
+        self.fetching = False
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -370,7 +371,7 @@ class Twitter:
     async def fetch_missed_tweets(self):
         # Gather the missed tweets
         total = 0
-        for chan_conf in self.conf.follows.values():
+        for chan_conf in self.conf.follows.copy().values():
             try:
                 missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
             except tweepy.TweepError as e:
