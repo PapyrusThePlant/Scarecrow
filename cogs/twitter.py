@@ -369,9 +369,8 @@ class Twitter:
                 pass # Oh well.
 
     async def fetch_missed_tweets(self):
-        # Gather the missed tweets
-        total = 0
-        for chan_conf in self.conf.follows.copy().values():
+        async def fetcher(chan_conf):
+            missed = []
             try:
                 missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
             except tweepy.TweepError as e:
@@ -381,13 +380,23 @@ class Twitter:
                 log.info(f'Could not retrieve latest tweets from @{chan_conf.screen_name} : {e}')
             else:
                 if missed:
-                    total += len(missed)
                     log.info(f'Found {len(missed)} tweets to display for @{chan_conf.screen_name}')
                     missed.sort(key=lambda t: t.id)
                     for tweet in missed:
                         await self.tweepy_on_status(tweet)
-        if total:
-            log.info(f'A total of {total} tweets were found missing.')
+            finally:
+                return len(missed) # This can throw, it is fine
+
+        tasks = []
+        for chan_conf in self.conf.follows.values():
+            tasks.append(fetcher(chan_conf))
+        ret = await asyncio.gather(*tasks, loop=self.bot.loop, return_exceptions=True)
+        t = [], []
+        for item in ret:
+            t[isinstance(item, Exception)].append(item)
+        results, errors = t
+        log.info(f'A total of {sum(results)} tweets were found missing.')
+        log.info(f'A total of {len(errors)} errors occurred during the fetching of missing tweets.')
 
     def prepare_tweet(self, tweet, nested=False):
         if isinstance(tweet, dict):
