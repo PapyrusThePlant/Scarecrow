@@ -24,6 +24,10 @@ def setup(bot):
     cog = Twitter(bot)
     bot.add_cog(cog)
 
+    # Force the on_ready call if the bot is already ready
+    if bot.is_ready():
+        bot.loop.create_task(cog.on_ready())
+
 
 class TwitterError(commands.CommandError):
     pass
