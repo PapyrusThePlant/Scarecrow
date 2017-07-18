@@ -64,12 +64,18 @@ class Bot(commands.Bot):
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand)):
-            await ctx.send(str(error))
-        elif isinstance(error, commands.CommandInvokeError):
+            message = str(error)
+        elif isinstance(error, commands.CommandInvokeError) and not isinstance(error.original, discord.Forbidden):
             tb = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
-            content = f'Ignoring exception in command {ctx.command} : {tb}'
-            log.error(content)
-            await ctx.send('An unexpected error has occurred and has been logged.')
+            log.error(f'Ignoring exception in command {ctx.command} : {tb}')
+            message = 'An unexpected error has occurred and has been logged.'
+        else:
+            return
+        
+        try:
+            await ctx.send(message)
+        except discord.Forbidden:
+            pass
 
     async def on_error(self, event_method, *args, **kwargs):
         # Skip if a cog defines this event
