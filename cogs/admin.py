@@ -115,6 +115,31 @@ class Admin:
             # Do not ignore voice channels
             raise commands.BadArgument('Cannot ignore/unignore voice channels.')
 
+    @commands.command(aliases=['checkpermissions'])
+    async def checkperms(self, ctx):
+        name = ctx.bot.user.name
+        perms_str = 'Read Messages, Send Messages, Manage Messages, Embed Links, Read Message History, Use External Emojis, Add Reactions'
+        perms = discord.Permissions(486464)
+
+        # Check the integration role
+        role = discord.utils.get(ctx.guild.roles, name=name)
+        if not role or not perms <= role.permissions:
+            raise commands.UserInputError(f'Please make sure the integration role `{name}` has all the following permissions and is added to the bot :\n'
+                                          f'{perms_str}.\n'
+                                          f'Note that you can also kick and re-invite the bot with its default permissions.')
+
+        # Check every channel for overwrites
+        failed = []
+        for channel in sorted(ctx.guild.text_channels, key=lambda c: c.position):
+            if not perms <= channel.permissions_for(ctx.guild.me):
+                failed.append(channel)
+        if failed:
+            raise commands.UserInputError(f'Please make sure the channel permissions overwrites for the following channels do not remove these permissions from the bot :\n'
+                                          f'{perms_str}.\n'
+                                          f'{" ".join(c.mention for c in failed)}')
+
+        await ctx.send('All good.')
+
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
