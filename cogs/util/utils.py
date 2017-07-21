@@ -11,6 +11,28 @@ import discord
 import discord.ext.commands as commands
 
 
+class Dice(commands.Converter):
+    regex = re.compile('^(?P<rolls>[0-9]*)d(?P<faces>[0-9]*)')
+
+    def __init__(self):
+        self.rolls = 0
+        self.faces = 0
+
+    async def convert(self, ctx, argument):
+        match = self.regex.match(argument.lower())
+        if not match:
+            raise commands.BadArgument('Wrong dice format.')
+        self.rolls = int(match.group('rolls'))
+        self.faces = int(match.group('faces'))
+        return self
+
+    def roll(self):
+        results = []
+        for i in range(self.rolls):
+            results.append(random.randint(1, self.faces))
+        return results
+
+
 class GuildChannelConverter(commands.IDConverter):
     def __init__(self):
         super().__init__()

@@ -360,6 +360,16 @@ class Misc:
         await ctx.send(utils.random_line(paths.INSULTS))
 
     @commands.command()
+    async def roll(self, ctx, dice: utils.Dice):
+        """Rolls a dice.
+
+        The dice to roll are given as a string in the format NdN.
+        """
+        results = dice.roll()
+        total = sum(results)
+        await ctx.send(f"Results : {', '.join([str(r) for r in results])}\nTotal : {total}\nAverage : {total / dice.rolls:.{self.faces + 2}}\nMinimum : {min(results)}\nMaximum : {max(results)}")
+
+    @commands.command()
     async def weebnames(self, ctx, wanted_gender=None):
         """Looking for a name for your new waifu?
 
