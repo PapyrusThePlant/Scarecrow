@@ -267,11 +267,22 @@ class Twitter:
         if not results:
             raise TwitterError('No result.')
 
-        embed = discord.Embed(colour=discord.Colour.blurple())
-        for user in results:
-            name = f'{user.name} - @{user.screen_name}'
-            description = textwrap.shorten(user.description, 1024) if user.description else 'No description.'
-            embed.add_field(name=name, value=description, inline=False)
+        if len(results) > 1:
+            embed = discord.Embed(colour=discord.Colour.blurple())
+            for user in results:
+                name = f'{user.name} - @{user.screen_name}'
+                urls = user.entities.get('description', None).get('urls', [])
+                description = self.replace_entities(user.description, urls) if user.description else 'No description.'
+                embed.add_field(name=name, value=description, inline=False)
+        else:
+            user = results[0]
+            urls = user.entities.get('description', None).get('urls', [])
+            description = self.replace_entities(user.description, urls) if user.description else 'No description.'
+            embed = discord.Embed(colour=discord.Colour.blurple(), title=user.name, description=description, url=f'https://twitter.com/{user.screen_name}')
+            embed.set_author(name=f'@{user.screen_name}')
+            embed.set_thumbnail(url=user.profile_image_url_https)
+            embed.add_field(name='Tweets', value=user.statuses_count)
+            embed.add_field(name='Followers', value=user.followers_count)
         await ctx.send(embed=embed)
 
     @twitter_group.command(name='list')
@@ -402,14 +413,30 @@ class Twitter:
         log.info(f'A total of {sum(results)} tweets were found missing.')
         log.info(f'A total of {len(errors)} errors occurred during the fetching of missing tweets.')
 
+    def replace_entities(self, text, urls, additional_matches=()):
+        for url in urls.copy():
+            if url['url'] is None or url['url'] == '' \
+                    or url['expanded_url'] is None or url['expanded_url'] == '':
+                # Because receiving something like this is possible:
+                # "urls": [ {
+                #     "indices": [ 141, 141 ],
+                #     "url": "",
+                #     "expanded_url": null
+                #   } ],
+                urls.remove(url)
+            elif url['expanded_url'] in additional_matches:
+                text = text.replace(url['url'], '').strip()
+                urls.remove(url)
+            else:
+                text = text.replace(url['url'], url['expanded_url']).strip()
+        return text
+
     def prepare_tweet(self, tweet, nested=False):
         if isinstance(tweet, dict):
             tweet = tweepy.Status.parse(self.api, tweet)
 
         tweet.tweet_web_url = f'https://twitter.com/i/web/status/{tweet.id}'
         tweet.tweet_url = f'https://twitter.com/{tweet.author.screen_name}/status/{tweet.id}'
-        urls = tweet.entities.get('urls', [])
-        media = tweet.entities.get('media', [])
 
         if not nested and tweet.is_quote_status:
             if not hasattr(tweet, 'quoted_status'):
@@ -425,28 +452,12 @@ class Twitter:
             sub_tweet = None
 
         # Remove the links to the attached media
-        for medium in media:
+        for medium in tweet.entities.get('media', []):
             tweet.text = tweet.text.replace(medium['url'], '')
 
         # Replace links in the tweet with the expanded url for lisibility
-        for url in urls.copy():
-            if url['url'] is None or url['url'] == '' \
-                    or url['expanded_url'] is None or url['expanded_url'] == '':
-                # Because receiving something like this is possible:
-                # "urls": [ {
-                #     "indices": [ 141, 141 ],
-                #     "url": "",
-                #     "expanded_url": null
-                #   } ],
-                urls.remove(url)
-            elif url['expanded_url'] == tweet.tweet_url \
-                    or url['expanded_url'] == tweet.tweet_web_url \
-                    or (sub_tweet is not None and (url['expanded_url'] == sub_tweet.tweet_url
-                                                   or url['expanded_url'] == sub_tweet.tweet_web_url)):
-                tweet.text = tweet.text.replace(url['url'], '').strip()
-                urls.remove(url)
-            else:
-                tweet.text = tweet.text.replace(url['url'], url['expanded_url']).strip()
+        matches = (tweet.tweet_url, tweet.tweet_web_url, sub_tweet.tweet_url, sub_tweet.tweet_web_url)
+        tweet.text = self.replace_entities(tweet.text, tweet.entities.get('urls', []), additional_matches=matches)
 
         # Decode html entities
         tweet.text = html.unescape(tweet.text).strip()
