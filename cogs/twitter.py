@@ -456,7 +456,9 @@ class Twitter:
             tweet.text = tweet.text.replace(medium['url'], '')
 
         # Replace links in the tweet with the expanded url for lisibility
-        matches = (tweet.tweet_url, tweet.tweet_web_url, sub_tweet.tweet_url, sub_tweet.tweet_web_url)
+        matches = [tweet.tweet_url, tweet.tweet_web_url]
+        if sub_tweet:
+            matches.extend([sub_tweet.tweet_url, sub_tweet.tweet_web_url])
         tweet.text = self.replace_entities(tweet.text, tweet.entities.get('urls', []), additional_matches=matches)
 
         # Decode html entities
