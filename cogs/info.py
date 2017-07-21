@@ -104,9 +104,18 @@ class Info:
 
         members_str = f'{members_count} ({unique_members_count} unique)'
         owner = (ctx.guild.get_member(ctx.bot.owner.id) if ctx.guild else None) or ctx.bot.owner
-        perms = discord.Permissions(84992) # Read messages, read message history, send messages, embed links
-        invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
         prefixes = ctx.bot.command_prefix(ctx.bot, ctx.message)
+
+        # Create the bot invite link with the following permissions :
+        #  * Read Messages
+        #  * Send Messages
+        #  * Manage Messages
+        #  * Embed Links
+        #  * Read Message History
+        #  * Use External Emojis
+        #  * Add Reactions
+        perms = discord.Permissions(486464)
+        invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
 
         command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/%h) %s' -n 5"
         changes = os.popen(command).read().strip()

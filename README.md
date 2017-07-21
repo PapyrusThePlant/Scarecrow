@@ -28,5 +28,5 @@ If you notice an actual bug, you can open an issue here, with info on what is ha
 
 For more general questions about the bot, general announcements and an easy way to get in touch with me, feel free to join the dedicated [discord server][discord invite].
 
-[bot invite]: https://discordapp.com/oauth2/authorize?client_id=172350367122718720&scope=bot&permissions=84992
+[bot invite]: https://discordapp.com/oauth2/authorize?client_id=172350367122718720&scope=bot&permissions=486464
 [discord invite]: https://discord.gg/M85dw9u
