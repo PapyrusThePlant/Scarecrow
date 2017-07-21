@@ -103,7 +103,7 @@ class Info:
         unique_members_count = len(unique_members)
 
         members_str = f'{members_count} ({unique_members_count} unique)'
-        owner = ctx.guild.get_member(ctx.bot.owner.id) if ctx.guild else None or ctx.bot.owner
+        owner = (ctx.guild.get_member(ctx.bot.owner.id) if ctx.guild else None) or ctx.bot.owner
         perms = discord.Permissions(84992) # Read messages, read message history, send messages, embed links
         invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
         prefixes = ctx.bot.command_prefix(ctx.bot, ctx.message)
