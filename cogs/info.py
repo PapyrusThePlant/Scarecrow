@@ -118,7 +118,8 @@ class Info:
         invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
 
         command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/%h) %s' -n 5"
-        changes = os.popen(command).read().strip()
+        with os.popen(command) as fp:
+            changes = fp.read().strip()
 
         embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=discord.Colour.blurple())
         embed.set_author(name=f'{owner.display_name} ({owner})', icon_url=owner.avatar_url)
