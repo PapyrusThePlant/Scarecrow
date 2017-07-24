@@ -15,22 +15,13 @@ from .util import utils
 
 def setup(bot):
     bot.add_cog(Info(bot))
+    psutil.Process().cpu_percent() # Initialise the first interval
 
 
 class Info:
     """When your curiosity takes over."""
     def __init__(self, bot):
-        self.start_time = bot.start_time
-
-    def _get_memory_str(self):
-        # Expressed in bytes, turn to Mb and round to 2 decimals
-        mem_info = psutil.Process().memory_full_info()
-        return f'{mem_info.uss / 1048576:.2f} Mb'
-
-    def _get_uptime_str(self):
-        # Get the uptime
-        uptime = round(time.time() - self.start_time)
-        return utils.duration_to_str(uptime)
+        self.bot = bot
 
     @commands.command(aliases=['charinfos'])
     async def charinfo(self, ctx, *, data: str):
@@ -106,6 +97,14 @@ class Info:
         owner = (ctx.guild.get_member(ctx.bot.owner.id) if ctx.guild else None) or ctx.bot.owner
         prefixes = ctx.bot.command_prefix(ctx.bot, ctx.message)
 
+        # Get cpu,  memory and uptime
+        proc = psutil.Process()
+        mem_info = proc.memory_full_info()
+        mem_str = f'{mem_info.uss / 1048576:.2f} Mb' # Expressed in bytes, turn to Mb and round to 2 decimals
+        cpu_str = f'{proc.cpu_percent() / psutil.cpu_count():.2f}%'
+        uptime = round(time.time() - self.bot.start_time)
+        uptime_str = utils.duration_to_str(uptime)
+
         # Create the bot invite link with the following permissions :
         #  * Read Messages
         #  * Send Messages
@@ -126,8 +125,9 @@ class Info:
         embed.add_field(name='Command prefixes', value="'" + "', '".join(prefixes) + "'")
         embed.add_field(name='Servers', value=len(ctx.bot.guilds))
         embed.add_field(name='Members', value=members_str)
-        embed.add_field(name='Memory', value=self._get_memory_str())
-        embed.add_field(name='Uptime', value=self._get_uptime_str())
+        embed.add_field(name='CPU', value=cpu_str)
+        embed.add_field(name='Memory', value=mem_str)
+        embed.add_field(name='Uptime', value=uptime_str)
         embed.add_field(name='Latest changes', value=changes, inline=False)
         embed.add_field(name='\N{ZERO WIDTH SPACE}', value='For any question about the bot, announcements and an easy way to get in touch with me, feel free to join the dedicated [discord server](https://discord.gg/M85dw9u).')
         embed.set_footer(text='Powered by discord.py', icon_url='http://i.imgur.com/5BFecvA.png')
