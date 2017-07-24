@@ -367,7 +367,10 @@ class Misc:
         """
         results = dice.roll()
         total = sum(results)
-        await ctx.send(f"Results : {', '.join([str(r) for r in results])}\nTotal : {total}\nAverage : {total / dice.rolls:.{self.faces + 2}}\nMinimum : {min(results)}\nMaximum : {max(results)}")
+        if dice.rolls > 1:
+            await ctx.send(f"Results : {', '.join([str(r) for r in results])}\nTotal : {total}\nAverage : {total / dice.rolls:.{dice.faces + 2}}\nMinimum : {min(results)}\nMaximum : {max(results)}")
+        else:
+            await ctx.send(f'Result : {str(results[0])}')
 
     @commands.command()
     async def weebnames(self, ctx, wanted_gender=None):
