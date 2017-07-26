@@ -95,7 +95,7 @@ class Twitter:
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
         self.latest_received = 0
-        self.fetching = False
+        self.fetcher = None
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -402,10 +402,18 @@ class Twitter:
             finally:
                 return len(missed) # This can throw, it is fine
 
+        # Cancel the any currently running fetcher
+        if self.fetcher and not self.fetcher.done():
+            self.fetcher.cancel()
+
+        # Gather all the fetchers into one
         tasks = []
         for chan_conf in self.conf.follows.values():
             tasks.append(fetcher(chan_conf))
-        ret = await asyncio.gather(*tasks, loop=self.bot.loop, return_exceptions=True)
+        self.fetcher = asyncio.gather(*tasks, loop=self.bot.loop, return_exceptions=True)
+
+        # Execute the fetcher and gather results
+        ret = await self.fetcher
         t = [], []
         for item in ret:
             t[isinstance(item, Exception)].append(item)
