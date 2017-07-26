@@ -33,7 +33,7 @@ class Prefix:
         if message.guild is not None:
             prefixes = self.conf.guild_specific.get(message.guild.id, []) + self.conf.global_
         else:
-            prefixes = self.conf.global_
+            prefixes = [] + self.conf.global_
 
         if 'mention' in prefixes:
             prefixes[prefixes.index('mention')] = f'{message.guild.me.mention if message.guild else bot.user.mention} '
