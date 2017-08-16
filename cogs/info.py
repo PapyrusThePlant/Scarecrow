@@ -15,7 +15,7 @@ from .util import utils
 
 def setup(bot):
     bot.add_cog(Info(bot))
-    psutil.Process().cpu_percent() # Initialise the first interval
+    psutil.cpu_percent() # Initialise the first interval
 
 
 class Info:
@@ -155,8 +155,6 @@ class Info:
             embed.add_field(name='Bitrate', value=str(channel.bitrate))
             embed.add_field(name='Members', value=str(len(channel.members)))
             embed.add_field(name='User limit', value=str(channel.user_limit) if channel.user_limit > 0 else 'None')
-        elif isinstance(channel, discord.TextChannel):
-            embed.add_field(name='Default channel', value='Yes' if channel.is_default else 'No')
 
         await ctx.send(embed=embed)
 
@@ -227,7 +225,6 @@ class Info:
         embed.add_field(name='Region', value=guild.region.value.title())
         embed.add_field(name='Members', value=members)
         embed.add_field(name='Channels', value=channels)
-        embed.add_field(name='Default channel', value=guild.default_channel.mention)
         embed.add_field(name='Roles', value=', '.join(roles))
         embed.set_footer(text='Server created the ')
         embed.timestamp = guild.created_at
