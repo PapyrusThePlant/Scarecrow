@@ -1,4 +1,5 @@
 git+https://github.com/PapyrusThePlant/discord.py.git@rewrite#egg=discord.py
+dice
 lxml
 psutil
 tweepy

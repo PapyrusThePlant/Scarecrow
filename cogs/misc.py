@@ -1,9 +1,13 @@
 import aiohttp
 import random
 
+import dice
 import discord
 import discord.ext.commands as commands
-from lxml import etree
+try:
+    from lxml import etree
+except:
+    pass
 from urllib.parse import urlparse, parse_qs
 
 import paths
@@ -360,17 +364,33 @@ class Misc:
         await ctx.send(utils.random_line(paths.INSULTS))
 
     @commands.command()
-    async def roll(self, ctx, dice: utils.Dice):
+    async def roll(self, ctx, *, expression):
         """Rolls a dice.
 
-        The dice to roll are given as a string in the format NdN.
+        The expression works like a simple equation parser with some extra operators.
+        The following operators are listed in order of precedence.
+        The dice ('d') operator takes an amount (A) and a number of sides (S), and returns a list of A random numbers between 1 and S. For example: 4d6 may return [6, 3, 2, 4].
+        If A is not specified, it is assumed you want to roll a single die. d6 is equivalent to 1d6.
+        Basic integer operations are available: 16 / 8 * 4 + 2 - 1 -> 9.
+        A set of rolls can be turned into an integer with the total (t) operator. 6d1t will return 6 instead of [1, 1, 1, 1, 1, 1]. Applying integer operations to a list of rolls will total them automatically.
+        A set of dice rolls can be sorted with the sort (s) operator. 4d6s will not change the return value, but the dice will be sorted from lowest to highest.
+        The lowest or highest rolls can be selected with ^ and v. 6d6^3 will keep the highest 3 rolls, whereas 6d6v3 will select the lowest 3 rolls.
         """
-        results = dice.roll()
-        total = sum(results)
-        if dice.rolls > 1:
-            await ctx.send(f"Results : {', '.join([str(r) for r in results])}\nTotal : {total}\nAverage : {total / dice.rolls:.{dice.faces + 2}}\nMinimum : {min(results)}\nMaximum : {max(results)}")
+        res = dice.roll(expression)
+        if isinstance(res, list):
+            embed = discord.Embed(title='Rolls', description=', '.join([str(r) for r in res]), colour=discord.Colour.blurple())
+            embed.add_field(name='Total', value=sum(res))
+            embed.add_field(name='Minimum', value=min(res))
+            embed.add_field(name='Maximum', value=max(res))
+            await ctx.send(embed=embed)
         else:
-            await ctx.send(f'Result : {str(results[0])}')
+            await ctx.send(f'Result : {res}')
+
+    @roll.error
+    async def roll_error(self, ctx, error):
+        if isinstance(error.original, dice.ParseException):
+            await ctx.send(error)
+            raise error # Abuse the lib's impl to skip the bot's `on_command_error`
 
     @commands.command()
     async def weebnames(self, ctx, wanted_gender=None):
