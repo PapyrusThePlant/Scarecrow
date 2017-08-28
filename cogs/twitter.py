@@ -113,7 +113,9 @@ class Twitter:
         if not self.stream.running:
             self.stream.start()
         # Check if we've missed any tweet
-        await self.fetch_missed_tweets()
+        if self.fetcher and not self.fetcher.done():
+            self.fetcher.cancel()
+        self.fetcher = self.bot.loop.create_task(self.fetch_missed_tweets())
 
     async def on_channel_delete(self, channel):
         if channel.guild is not None:
@@ -384,6 +386,9 @@ class Twitter:
                 pass # Oh well.
 
     async def fetch_missed_tweets(self):
+        if not self.conf.follows:
+            return
+
         async def fetcher(chan_conf):
             missed = []
             try:
@@ -402,24 +407,35 @@ class Twitter:
             finally:
                 return len(missed) # This can throw, it is fine
 
-        # Cancel the any currently running fetcher
-        if self.fetcher and not self.fetcher.done():
-            self.fetcher.cancel()
+        total = 0
+        exceptions = 0
+        log.info('Starting tweet retrieval')
+        for chan_conf in self.conf.follows.copy().values():
+            try:
+                total += await fetcher(chan_conf)
+            except Exception as e:
+                exceptions += 1
+                log.exception(f'Fetching {chan_conf.screen_name} threw {e}')
+        log.info(f'A total of {total} tweets were found missing.')
+        if exceptions > 0:
+            log.info(f'A total of {exceptions} errors occurred during the fetching of missing tweets.')
 
-        # Gather all the fetchers into one
-        tasks = []
-        for chan_conf in self.conf.follows.values():
-            tasks.append(fetcher(chan_conf))
-        self.fetcher = asyncio.gather(*tasks, loop=self.bot.loop, return_exceptions=True)
+        # Alternative solution that parallelises the tweets fetching, but the execution of the gathered tasks somehow
+        # blocks the bot for too long and kills it, maybe because too many tasks are scheduled at the same time (just
+        # under 1000 at the time I tested this).
+        # Maybe chunk the scheduling of fetching tasks to not clog the event loop.
+        # TODO : Find a working solution :eyes:
 
-        # Execute the fetcher and gather results
-        ret = await self.fetcher
-        t = [], []
-        for item in ret:
-            t[isinstance(item, Exception)].append(item)
-        results, errors = t
-        log.info(f'A total of {sum(results)} tweets were found missing.')
-        log.info(f'A total of {len(errors)} errors occurred during the fetching of missing tweets.')
+        # self.fetcher = asyncio.gather(fetcher(c) for c in self.conf.follows.values(), loop=self.bot.loop, return_exceptions=True)
+        # log.info('Scheduling missed tweets fetching.')
+        # ret = await self.fetcher
+        # t = [], []
+        # for item in ret:
+            # t[isinstance(item, Exception)].append(item)
+        # results, errors = t
+        # log.info(f'A total of {sum(results)} tweets were found missing.')
+        # if errors:
+            # log.info(f'A total of {len(errors)} errors occurred during the fetching of missing tweets.')
 
     def replace_entities(self, text, urls, additional_matches=()):
         for url in urls.copy():
