@@ -1,5 +1,4 @@
-Scarecrow
-=========
+# Scarecrow
 
 Scarecrow is a bot I made for friends and their servers, it has a cool twitter stream feature and some additional fun and eventually useful commands.
 
@@ -8,19 +7,26 @@ Scarecrow is a bot I made for friends and their servers, it has a cool twitter s
 Invite the bot to your server using [this link][bot invite], then perform commands using the bot's mention as the commands' prefix, e.g :
 
 ```
+@Scarecrow#8745 info
 @Scarecrow#8745 prefix add €
-@Scarecrow#8745 twitter follow discordapp
-```
-
-The help command will display the available commands list or information about the category or specific command you give it :
-
-```
-@Scarecrow#8745 help
-@Scarecrow#8745 help Misc
-@Scarecrow#8745 help twitter fetch
+€twitter search discord
+€twitter follow discordapp
 ```
 
 Note that commands altering the bot's behavior usually require the user to have the ``Manage Server`` permission.
+
+### The help command
+The `help` command is the best way to know what the bot or a command does.
+
+Typing `@Scarecrow#8745 help` will display the available commands (not everyone can run every command, see previous paragraph) as a list with a short description explaining their main purpose.
+
+For detailed info about a command named `foo`, type `@Scarecrow#8745 help foo`. e.g :
+
+```
+@Scarecrow#8745 help
+@Scarecrow#8745 help poll
+@Scarecrow#8745 help twitter fetch
+```
 
 ## Support
 
