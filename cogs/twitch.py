@@ -81,29 +81,40 @@ class Twitch:
             self.daemon = self.bot.loop.create_task(self._daemon())
 
     async def _daemon(self):
-        # Live cache initialisation
-        channels = ','.join(self.conf.follows.keys())
-        if channels:
-            try:
-                streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': channels})
-            except utils.HTTPError as e:
-                # Re-schedule the daemon on error
-                log.info(f'Error on initial poll, rescheduling. {e}')
-                self.daemon = self.bot.loop.create_task(self._daemon())
-                return
-            else:
-                self.live_cache = {str(s['channel']['_id']): s for s in streams['streams']}
+        if self.conf.follows:
+            # Live cache initialisation
+            while not self.live_cache:
+                try:
+                    streams = await self.poll_streams()
+                except Exception as e:
+                    log.info(f'Error on initial poll, retrying in 20 seconds: {e}')
+                    await asyncio.sleep(20)
+                else:
+                    self.live_cache = set(streams.keys())
 
         # ERMAHGERD ! MAH FRAVRIT LERP !
         while True:
             try:
-                await self.poll_streams()
+                streams = await self.poll_streams()
             except Exception as e:
                 log.info(f'Polling error, retrying in 60 seconds: {e}')
+            else:
+                # Send notifications for the streams that went live after we successfully retrieved all the chunks
+                for stream_id in streams:
+                    if stream_id not in self.live_cache:
+                        try:
+                            await self.notify(streams[stream_id])
+                        except Exception as e:
+                            log.error(f'Notification error: {e}')
+
+                # Update the live cache
+                del self.live_cache
+                self.live_cache = set(streams.keys())
+            finally:
                 await asyncio.sleep(60)
 
     async def poll_streams(self):
-        live_cache = {}
+        streams = {}
 
         # Get the streams statuses in chunks of 100
         channels = list(self.conf.follows.keys())
@@ -115,35 +126,25 @@ class Twitch:
                 raise Exception(f'HTTP error when fetching streams chunk #{i / 100 + 1}') from e
 
             # Extract the newly live streams
-            for stream in streams_chunk['streams']:
-                stream_id = str(stream['channel']['_id'])
-                live_cache[stream_id] = stream
+            for stream_info in streams_chunk['streams']:
+                stream_id = str(stream_info['channel']['_id'])
+                streams[stream_id] = stream_info
 
-        # Send notifications for the streams that went live after we successfully retrieved all the chunks
-        for stream_id in live_cache:
-            if stream_id not in self.live_cache:
-                try:
-                    await self.notify(live_cache[stream_id])
-                except Exception as e:
-                    log.error(f'Notification error: {e}')
+        return streams
 
-        # Update the live cache
-        del self.live_cache
-        self.live_cache = live_cache
-
-    async def notify(self, stream):
+    async def notify(self, stream_info):
         # Build the embed
-        embed = discord.Embed(title='Click here to join the fun !', url=stream['channel']['url'], colour=discord.Colour.blurple())
-        embed.set_author(name=stream['channel']['display_name'])
-        embed.set_thumbnail(url=stream['channel']['logo'])
-        embed.set_image(url=stream['preview']['large'])
-        embed.add_field(name=stream['channel']['status'], value='Playing ' + stream['game'])
+        embed = discord.Embed(title='Click here to join the fun !', url=stream_info['channel']['url'], colour=discord.Colour.blurple())
+        embed.set_author(name=stream_info['channel']['display_name'])
+        embed.set_thumbnail(url=stream_info['channel']['logo'])
+        embed.set_image(url=stream_info['preview']['large'])
+        embed.add_field(name=stream_info['channel']['status'], value='Playing ' + stream_info['game'])
 
         # Make sure we're ready to send messages
         await self.bot.wait_until_ready()
 
         # Send the notification to every interested channel
-        for channel_id, message in self.conf.follows[str(stream['channel']['_id'])].items():
+        for channel_id, message in self.conf.follows[str(stream_info['channel']['_id'])].items():
             destination = self.bot.get_channel(channel_id)
             await destination.send(message, embed=embed)
 
