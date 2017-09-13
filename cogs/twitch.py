@@ -99,9 +99,7 @@ class Twitch:
             try:
                 await self.poll_streams()
             except Exception as e:
-                log.info(f'Polling error, retrying in 10 seconds: {e}')
-                await asyncio.sleep(10)
-            else:
+                log.info(f'Polling error, retrying in 60 seconds: {e}')
                 await asyncio.sleep(60)
 
     async def poll_streams(self):
