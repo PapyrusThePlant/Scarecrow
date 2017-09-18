@@ -600,7 +600,7 @@ class Twitter:
             await self.notify_channels(f'{content}. This has been logged.', *conf.discord_channels.values())
             return
 
-        for chan_conf in conf.discord_channels.values():
+        for chan_conf in conf.discord_channels.copy().values():
             try:
                 # Send the message to the appropriate channel
                 await self.bot.get_channel(chan_conf.id).send(chan_conf.message, embed=embed)
