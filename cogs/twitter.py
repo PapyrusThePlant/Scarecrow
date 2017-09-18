@@ -42,6 +42,8 @@ class TwitterConfig(config.ConfigElement):
         """Unregister the given channels from every FollowConfig, and
         removes any FollowConfig that end up without any channel.
         """
+        removed = 0
+        unfollowed = 0
         conf_to_remove = set()
 
         # Check every FollowConfig
@@ -51,6 +53,8 @@ class TwitterConfig(config.ConfigElement):
                     del follow_conf.discord_channels[channel.id]
                 except KeyError:
                     pass
+                else:
+                    removed += 1
 
                 # If this FollowConfig ended up with 0 channel, save it to remove it later
                 if not follow_conf.discord_channels:
@@ -59,6 +63,9 @@ class TwitterConfig(config.ConfigElement):
         # Remove the FollowConfig we don't need
         for follow_conf in conf_to_remove:
             del self.follows[follow_conf.id]
+            unfollowed += 1
+
+        return removed, unfollowed
 
 
 class TwitterCredentials(config.ConfigElement):
@@ -119,12 +126,14 @@ class Twitter:
 
     async def on_channel_delete(self, channel):
         if channel.guild is not None:
-            self.conf.remove_channels(channel)
+            removed, unfollowed = self.conf.remove_channels(channel)
+            log.info(f'Deletion of channel {channel.id} removed {removed} feeds and unfollowed {unfollowed}.')
             self.conf.save()
             self.stream.start()
 
     async def on_guild_remove(self, guild):
-        self.conf.remove_channels(*guild.channels)
+        removed, unfollowed = self.conf.remove_channels(*guild.channels)
+        log.info(f'removal from guild {guild.id} removed {removed} feeds and unfollowed {unfollowed}.')
         self.conf.save()
         self.stream.start()
 
@@ -591,30 +600,20 @@ class Twitter:
             await self.notify_channels(f'{content}. This has been logged.', *conf.discord_channels.values())
             return
 
-        invalids = set()
         for chan_conf in conf.discord_channels.values():
-            discord_channel = self.bot.get_channel(chan_conf.id)
-            if not discord_channel:
-                invalids.add(chan_conf)
-                continue
-
             try:
                 # Send the message to the appropriate channel
                 await self.bot.get_channel(chan_conf.id).send(chan_conf.message, embed=embed)
             except discord.Forbidden:
                 # Notify if we're missing permissions
                 await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', chan_conf)
+            except Exception as e:
+                log.exception(f'Ignoring exception when sending tweet : {e}')
             else:
                 # Update stats and latest id when processing newer tweets
                 if tweet.id > conf.latest_received:
                     conf.latest_received = tweet.id
                     self.conf.save()
-
-        # Cleanup invalid channels
-        if invalids:
-            self.conf.remove_channels(*invalids)
-            self.conf.save()
-            self.stream.start()
 
 
 class TweepyAPI(tweepy.API):
