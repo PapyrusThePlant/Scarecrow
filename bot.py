@@ -104,6 +104,24 @@ class Bot(commands.Bot):
         # if message.content.startswith ... :3
         await self.process_commands(message)
 
+    async def get_message(self, channel, message_id):
+        # Look into the cache first
+        message = self._connection._get_message(message_id)
+        if message is not None:
+            return message
+
+        # Avoid get_message as its rate limit is terrible
+        try:
+            message = await channel.history(limit=1, before=discord.Object(id=message_id + 1)).next()
+
+            if message.id != message_id:
+                return None
+
+            self._connection._messages.append(message)
+            return message
+        except Exception:
+            return None
+
     def shutdown(self):
         self.do_restart = False
         # Log out of Discord
