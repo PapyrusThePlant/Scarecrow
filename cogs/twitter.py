@@ -5,7 +5,6 @@ import html
 import logging
 import multiprocessing
 import os
-import textwrap
 from queue import Empty as QueueEmpty
 
 import tweepy
@@ -14,7 +13,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from .util import config, oembed, utils
+from .util import checks, config, oembed, utils
 
 log = logging.getLogger(__name__)
 
@@ -23,10 +22,7 @@ def setup(bot):
     log.debug('Loading extension.')
     cog = Twitter(bot)
     bot.add_cog(cog)
-
-    # Force the on_ready call if the bot is already ready
-    if bot.is_ready():
-        bot.loop.create_task(cog.on_ready())
+    cog.stream.start()
 
 
 class TwitterError(commands.CommandError):
@@ -115,14 +111,6 @@ class Twitter:
                 await ctx.send(error)
             except discord.Forbidden:
                 await ctx.author.send(f'Missing the `Send Messages` permission to send the following error to {ctx.message.channel.mention}: {error}')
-
-    async def on_ready(self):
-        if not self.stream.running:
-            self.stream.start()
-        # Check if we've missed any tweet
-        if self.fetcher and not self.fetcher.done():
-            self.fetcher.cancel()
-        self.fetcher = self.bot.loop.create_task(self.fetch_missed_tweets())
 
     async def on_channel_delete(self, channel):
         if channel.guild is not None:
@@ -230,6 +218,16 @@ class Twitter:
         for tweet in to_display:
             embed = await self.prepare_embed(tweet)
             await ctx.send(embed=embed)
+
+    @twitter_group.command(name='fetch_missed')
+    @checks.is_owner()
+    async def twitter_fetch_missed(self, ctx):
+        """Checks if we've missed any tweet."""
+        if self.fetcher and not self.fetcher.done():
+            self.fetcher.cancel()
+        self.fetcher = self.bot.loop.create_task(self.fetch_missed_tweets())
+        await asyncio.wait([self.fetcher])
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @twitter_group.command(name='follow')
     @commands.guild_only()
