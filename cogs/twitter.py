@@ -601,9 +601,14 @@ class Twitter:
             return
 
         for chan_conf in conf.discord_channels.copy().values():
+            destination = self.bot.get_channel(chan_conf.id)
+            if destination is None:
+                log.warning(f'Channel {chan_conf.id} is unavailable, ignoring.')
+                continue
+
             try:
                 # Send the message to the appropriate channel
-                await self.bot.get_channel(chan_conf.id).send(chan_conf.message, embed=embed)
+                await destination.send(chan_conf.message, embed=embed)
             except discord.Forbidden:
                 # Notify if we're missing permissions
                 await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', chan_conf)
