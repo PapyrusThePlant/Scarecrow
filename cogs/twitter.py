@@ -112,12 +112,11 @@ class Twitter:
             except discord.Forbidden:
                 await ctx.author.send(f'Missing the `Send Messages` permission to send the following error to {ctx.message.channel.mention}: {error}')
 
-    async def on_channel_delete(self, channel):
-        if channel.guild is not None:
-            removed, unfollowed = self.conf.remove_channels(channel)
-            log.info(f'Deletion of channel {channel.id} removed {removed} feeds and unfollowed {unfollowed}.')
-            self.conf.save()
-            self.stream.start()
+    async def on_guild_channel_delete(self, channel):
+        removed, unfollowed = self.conf.remove_channels(channel)
+        log.info(f'Deletion of channel {channel.id} removed {removed} feeds and unfollowed {unfollowed}.')
+        self.conf.save()
+        self.stream.start()
 
     async def on_guild_remove(self, guild):
         removed, unfollowed = self.conf.remove_channels(*guild.channels)

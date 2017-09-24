@@ -67,10 +67,9 @@ class Twitch:
         self.session.close()
         self.daemon.cancel()
 
-    async def on_channel_delete(self, channel):
-        if channel.guild is not None:
-            self.conf.remove_channels(channel)
-            self.conf.save()
+    async def on_guild_channel_delete(self, channel):
+        self.conf.remove_channels(channel)
+        self.conf.save()
 
     async def on_guild_remove(self, guild):
         self.conf.remove_channels(*guild.channels)
