@@ -60,7 +60,7 @@ class Twitch:
             'Accept': 'application/vnd.twitchtv.v5+json'
         }
         self.session = aiohttp.ClientSession(loop=bot.loop, headers=default_headers)
-        self.live_cache = {}
+        self.live_cache = set()
         self.daemon = None
 
     def __unload(self):
@@ -107,7 +107,7 @@ class Twitch:
                             log.error(f'Notification error: {e}')
 
                 # Update the live cache
-                del self.live_cache
+                self.live_cache.clear()
                 self.live_cache = set(streams.keys())
             finally:
                 await asyncio.sleep(60)
@@ -187,7 +187,7 @@ class Twitch:
         # Update the live streams cache if the stream is live
         streams = await utils.fetch_page('https://api.twitch.tv/kraken/streams', session=self.session, params={'channel': user_id})
         if streams['_total'] == 1 and user_id not in self.live_cache:
-            self.live_cache[user_id] = streams['streams'][0]
+            self.live_cache.add(user_id)
 
         await ctx.send('\N{OK HAND SIGN}')
 
@@ -210,10 +210,7 @@ class Twitch:
         if not self.conf.follows[user_id]:
             del self.conf.follows[user_id]
             # Cleanup the live streams cache
-            try:
-                del self.live_cache[user_id]
-            except KeyError:
-                pass
+            self.live_cache.remove(user_id)
 
         self.conf.save()
 
