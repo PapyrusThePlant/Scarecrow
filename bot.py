@@ -89,9 +89,12 @@ class Bot(commands.Bot):
     async def on_connect(self):
         self.app_info = await self.application_info()
         self.owner = self.app_info.owner
-        log.info('Logged in Discord as {0.name} (id: {0.id})'.format(self.user))
+        log.info('Connected to Discord as {0.name} (id: {0.id})'.format(self.user))
         if self.conf.status:
             await self.change_presence(game=discord.Game(name=self.conf.status))
+
+    async def on_ready(self):
+        log.info("Guild streaming complete. We'ready.")
 
     async def on_message(self, message):
         # Ignore bot messages (that includes our own)

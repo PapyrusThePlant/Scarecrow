@@ -586,9 +586,6 @@ class Twitter:
             conf.screen_name = tweet.author.screen_name.lower()
             self.conf.save()
 
-        # Make sure we're ready to send messages
-        await self.bot.wait_until_ready()
-
         try:
             embed = await self.prepare_embed(tweet)
         except Exception as e:
@@ -596,6 +593,9 @@ class Twitter:
             log.error(f'{content}\nError : {e}\nTweet : {tweet_str} ')
             await self.notify_channels(f'{content}. This has been logged.', *conf.discord_channels.values())
             return
+
+        # Make sure we're ready to send messages
+        await self.bot.wait_until_ready()
 
         for chan_conf in conf.discord_channels.copy().values():
             destination = self.bot.get_channel(chan_conf.id)
