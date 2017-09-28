@@ -22,7 +22,8 @@ def setup(bot):
     log.debug('Loading extension.')
     cog = Twitter(bot)
     bot.add_cog(cog)
-    cog.stream.start()
+    if bot.is_ready():
+        cog.stream.start()
 
 
 class TwitterError(commands.CommandError):
@@ -122,6 +123,9 @@ class Twitter:
         removed, unfollowed = self.conf.remove_channels(*guild.channels)
         log.info(f'removal from guild {guild.id} removed {removed} feeds and unfollowed {unfollowed}.')
         self.conf.save()
+        self.stream.start()
+
+    async def on_ready(self):
         self.stream.start()
 
     async def get_confs(self, ctx, handle, create=False):
