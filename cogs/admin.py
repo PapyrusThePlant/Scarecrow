@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def setup(bot):
-    bot.add_cog(Admin(bot.conf))
+    bot.add_cog(Admin(bot))
 
 
 class IgnoredConfig(config.ConfigElement):
@@ -23,10 +23,10 @@ class IgnoredConfig(config.ConfigElement):
 
 class Admin:
     """Bot management commands and events."""
-    def __init__(self, bot_conf):
+    def __init__(self, bot):
         self.commands_used = Counter()
         self.ignored = config.Config(paths.IGNORED_CONFIG, encoding='utf-8')
-        self.bot_conf = bot_conf
+        self.bot = bot
 
     def __global_check_once(self, ctx):
         """A global check used on every command."""
@@ -177,6 +177,35 @@ class Admin:
             self.ignored.save()
             await ctx.send('\N{OK HAND SIGN}')
 
+    def get_prune_candidates(self, bot):
+        candidates = [g for g in bot.guilds if len([m for m in g.members if m.bot]) >= len(g.members) / 2]
+        twitter_destinations = set(chan_id for f in bot.cogs['Twitter'].conf.follows.values() for chan_id in f.discord_channels)
+        twitch_destinations = set(chan_id for f in bot.cogs['Twitch'].conf.follows.values() for chan_id in f.keys())
+
+        for guild in candidates:
+            guild_channels = set(c.id for c in guild.text_channels)
+            if twitter_destinations.intersection(guild_channels) or twitch_destinations.intersection(guild_channels):
+                candidates.remove(guild)
+
+        return candidates
+
+    @commands.group(name='prune_guilds', invoke_without_command=True)
+    @checks.is_owner()
+    async def prune_guilds_group(self, ctx):
+        targets = self.get_prune_candidates(ctx.bot)
+        if targets:
+            log.info(f'Leaving {len(targets)} guilds.')
+
+        for guild in targets:
+            await guild.leave()
+
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @prune_guilds_group.command(name='count')
+    @checks.is_owner()
+    async def prune_guilds_count(self, ctx):
+        await ctx.send(len(self.get_prune_candidates(ctx.bot)))
+
     @commands.command()
     @checks.is_owner()
     async def restart(self, ctx):
@@ -194,8 +223,8 @@ class Admin:
     async def status(self, ctx, *, status=None):
         """Changes the bot's status."""
         await ctx.bot.change_presence(game=discord.Game(name=status))
-        self.bot_conf.status = status
-        self.bot_conf.save()
+        self.bot.conf.status = status
+        self.bot.conf.save()
 
     async def on_command(self, ctx):
         self.commands_used[ctx.command.qualified_name] += 1
