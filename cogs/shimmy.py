@@ -7,6 +7,7 @@ import discord.ext.commands as commands
 SHIMMY_USER_ID = 140526957686161408
 SHIMMY_GUILD_ID = 140880261360517120
 NSFW_ROLE_ID = 261189004681019392
+LOG_CHANNEL_ID = 373829704345452546
 
 
 eight_ball_responses = [
@@ -37,16 +38,39 @@ eight_ball_responses = [
 
 
 def setup(bot):
-    bot.add_cog(Shimmy())
+    bot.add_cog(Shimmy(bot))
 
 
 class Shimmy:
     """Exclusivities to Shimmy's discord server."""
-    def __init__(self):
+    def __init__(self, bot):
+        self.bot = bot
         self.nsfw_role = None
+        self.log_channel = None
 
     def __local_check(self, ctx):
         return ctx.guild is not None and ctx.guild.id == SHIMMY_GUILD_ID
+
+    async def on_member_join(self, member):
+        if member.guild is None or member.guild.id != SHIMMY_GUILD_ID:
+            return
+        if self.log_channel is None:
+            self.log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
+        await self.log_channel.send(f'{str(member)} (id {member.id}) joined.')
+
+    async def on_member_remove(self, member):
+        if member.guild is None or member.guild.id != SHIMMY_GUILD_ID:
+            return
+        if self.log_channel is None:
+            self.log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
+        await self.log_channel.send(f'{str(member)} (id {member.id}) left or got removed.')
+
+    async def on_member_ban(self, guild, member):
+        if guild is None or guild.id != SHIMMY_GUILD_ID:
+            return
+        if self.log_channel is None:
+            self.log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
+        await self.log_channel.send(f'{str(member)} (id {member.id}) got banned.')
 
     @commands.command()
     @commands.guild_only()
