@@ -35,10 +35,10 @@ class TwitchConfig(config.ConfigElement):
             # Remove the given channels from this followed channel
             for channel in channels:
                 try:
-                    del destinations[channel]
+                    del destinations.channels[channel]
                 except KeyError:
                     pass
-            if not destinations:
+            if not destinations.channels:
                 conf_to_remove.add(stream_id)
 
         # Cleanup the followed channels
