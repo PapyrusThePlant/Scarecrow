@@ -116,7 +116,7 @@ class Info:
         perms = discord.Permissions(486464)
         invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
 
-        command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/%h) %s' -n 5"
+        command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/commit/%h) %s' -n 5"
         with os.popen(command) as fp:
             changes = fp.read().strip()
 
