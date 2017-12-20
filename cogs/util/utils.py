@@ -56,7 +56,7 @@ class HTTPError(Exception):
         self.response = resp
         if isinstance(message, dict):
             self.resp_msg = message.get('message', message.get('msg', ''))
-            self.code = message.get('code', 0)
+            self.code = message.get('code', message.get('status', 0))
         else:
             self.resp_msg = message
 

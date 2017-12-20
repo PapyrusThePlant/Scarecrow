@@ -200,7 +200,13 @@ class Twitch:
             follow_conf.preview_updates += 1
 
     async def get_user(self, channel):
-        data = await utils.fetch_page(f'{self.api_base}/users', session=self.session, params={'login': channel})
+        try:
+            data = await utils.fetch_page(f'{self.api_base}/users', session=self.session, params={'login': channel})
+        except utils.HTTPError as e:
+            if e.code == 400:
+                raise commands.BadArgument(e.resp_msg)
+            else:
+                raise e
         count = data['_total']
         if count == 0:
             raise commands.BadArgument('Channel not found.')
