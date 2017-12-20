@@ -198,39 +198,45 @@ class Twitter:
     async def twitter_fetch(self, ctx, handle, limit: int=1):
         """Retrieves the latest tweets from a channel and displays them.
 
+        If the channel is followed on the server, every tweets missed since
+        the last displayed one will be fetched and displayed in the Discord
+        channel receiving this feed.
+
         You do not need to include the '@' before the Twitter channel's
-         handle, it will avoid unwanted mentions in Discord.
+        handle, it will avoid unwanted mentions in Discord.
 
         If a limit is given, at most that number of tweets will be displayed. Defaults to 1.
         """
         sane_handle = handle.lower().lstrip('@')
-        # Get the latest tweets from the user
+        conf, chan_conf = await self.get_confs(ctx, handle)
+
         try:
-            to_display = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
+            if conf:
+                missed = await self.get_latest_valid(conf.id, since_id=conf.latest_received)
+            else:
+                missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
         except tweepy.TweepError as e:
-            # The channel is probably protected
             if e.reason == 'Not authorized.':
-                raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
+                if conf:
+                    await self.notify_channels(f'Could not check for missed tweets for {conf.screen_name}. The channel is protected, consider unfollowing it.', *conf.discord_channels.values())
+                else:
+                    raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
+
             if e.api_code == 34:
                 raise TwitterError(f'User "{handle}" not found.') from e
             else:
                 log.error(str(e))
                 raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-
-        # Display the kept tweets
-        for tweet in to_display:
-            embed = await self.prepare_embed(tweet)
-            await ctx.send(embed=embed)
-
-    @twitter_group.command(name='fetch_missed')
-    @checks.is_owner()
-    async def twitter_fetch_missed(self, ctx):
-        """Checks if we've missed any tweet."""
-        if self.fetcher and not self.fetcher.done():
-            self.fetcher.cancel()
-        self.fetcher = self.bot.loop.create_task(self.fetch_missed_tweets())
-        await asyncio.wait([self.fetcher])
-        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+        else:
+            if missed:
+                for tweet in missed:
+                    if conf:
+                        await self.tweepy_on_status(tweet)
+                    else:
+                        embed = await self.prepare_embed(tweet)
+                        await ctx.send(embed=embed)
+                if conf:
+                    await ctx.message.delete()
 
     @twitter_group.command(name='follow')
     @commands.guild_only()
@@ -394,58 +400,6 @@ class Twitter:
                 await creator.send(message)
             except:
                 pass # Oh well.
-
-    async def fetch_missed_tweets(self):
-        if not self.conf.follows:
-            return
-
-        async def fetcher(chan_conf):
-            missed = []
-            try:
-                missed = await self.get_latest_valid(chan_conf.id, since_id=chan_conf.latest_received)
-            except tweepy.TweepError as e:
-                if e.reason == 'Not authorized.':
-                    await self.notify_channels(f'Could not check for missed tweets for {chan_conf.screen_name}. The channel is protected, consider unfollowing it.', *chan_conf.discord_channels.values())
-
-                log.info(f'Could not retrieve latest tweets from @{chan_conf.screen_name} : {e}')
-            else:
-                if missed:
-                    log.info(f'Found {len(missed)} tweets to display for @{chan_conf.screen_name}')
-                    missed.sort(key=lambda t: t.id)
-                    for tweet in missed:
-                        await self.tweepy_on_status(tweet)
-            finally:
-                return len(missed) # This can throw, it is fine
-
-        total = 0
-        exceptions = 0
-        log.info('Starting tweet retrieval')
-        for chan_conf in self.conf.follows.copy().values():
-            try:
-                total += await fetcher(chan_conf)
-            except Exception as e:
-                exceptions += 1
-                log.exception(f'Fetching {chan_conf.screen_name} threw {e}')
-        log.info(f'A total of {total} tweets were found missing.')
-        if exceptions > 0:
-            log.info(f'A total of {exceptions} errors occurred during the fetching of missing tweets.')
-
-        # Alternative solution that parallelises the tweets fetching, but the execution of the gathered tasks somehow
-        # blocks the bot for too long and kills it, maybe because too many tasks are scheduled at the same time (just
-        # under 1000 at the time I tested this).
-        # Maybe chunk the scheduling of fetching tasks to not clog the event loop.
-        # TODO : Find a working solution :eyes:
-
-        # self.fetcher = asyncio.gather(fetcher(c) for c in self.conf.follows.values(), loop=self.bot.loop, return_exceptions=True)
-        # log.info('Scheduling missed tweets fetching.')
-        # ret = await self.fetcher
-        # t = [], []
-        # for item in ret:
-            # t[isinstance(item, Exception)].append(item)
-        # results, errors = t
-        # log.info(f'A total of {sum(results)} tweets were found missing.')
-        # if errors:
-            # log.info(f'A total of {len(errors)} errors occurred during the fetching of missing tweets.')
 
     def replace_entities(self, text, urls, additional_matches=()):
         for url in urls.copy():
