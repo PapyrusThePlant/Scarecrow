@@ -235,8 +235,11 @@ class Twitter:
                     else:
                         embed = await self.prepare_embed(tweet)
                         await ctx.send(embed=embed)
-                if conf:
+            if conf:
+                try:
                     await ctx.message.delete()
+                except discord.NotFound:
+                    pass # The user probably deleted his message before we tried to do it
 
     @twitter_group.command(name='follow')
     @commands.guild_only()
