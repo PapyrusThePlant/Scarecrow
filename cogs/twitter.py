@@ -210,36 +210,39 @@ class Twitter:
         sane_handle = handle.lower().lstrip('@')
         conf, chan_conf = await self.get_confs(ctx, handle)
 
-        try:
-            if conf:
-                missed = await self.get_latest_valid(conf.id, since_id=conf.latest_received)
-            else:
-                missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
-        except tweepy.TweepError as e:
-            if e.reason == 'Not authorized.':
+        await ctx.message.add_reaction('\N{HOURGLASS WITH FLOWING SAND}')
+        async with ctx.typing():
+            try:
                 if conf:
-                    await self.notify_channels(f'Could not check for missed tweets for {conf.screen_name}. The channel is protected, consider unfollowing it.', *conf.discord_channels.values())
+                    missed = await self.get_latest_valid(conf.id, since_id=conf.latest_received)
                 else:
-                    raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
-
-            if e.api_code == 34:
-                raise TwitterError(f'User "{handle}" not found.') from e
-            else:
-                log.error(str(e))
-                raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
-        else:
-            if missed:
-                for tweet in missed:
+                    missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
+            except tweepy.TweepError as e:
+                if e.reason == 'Not authorized.':
                     if conf:
-                        await self.tweepy_on_status(tweet)
+                        await self.notify_channels(f'Could not check for missed tweets for {conf.screen_name}. The channel is protected, consider unfollowing it.', *conf.discord_channels.values())
                     else:
-                        embed = await self.prepare_embed(tweet)
-                        await ctx.send(embed=embed)
-            if conf:
-                try:
-                    await ctx.message.delete()
-                except discord.NotFound:
-                    pass # The user probably deleted his message before we tried to do it
+                        raise TwitterError('This channel is protected, its tweets cannot be fetched.') from e
+
+                if e.api_code == 34:
+                    raise TwitterError(f'User "{handle}" not found.') from e
+                else:
+                    log.error(str(e))
+                    raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
+            else:
+                if missed:
+                    for tweet in missed:
+                        if conf:
+                            await self.tweepy_on_status(tweet)
+                        else:
+                            embed = await self.prepare_embed(tweet)
+                            await ctx.send(embed=embed)
+
+        if conf:
+            try:
+                await ctx.message.delete()
+            except discord.NotFound:
+                pass # The user probably deleted his message before we tried to do it
 
     @twitter_group.command(name='follow')
     @commands.guild_only()
