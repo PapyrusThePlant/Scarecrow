@@ -180,7 +180,7 @@ class Admin:
     def get_prune_candidates(self, bot):
         candidates = [g for g in bot.guilds if len([m for m in g.members if m.bot]) >= len(g.members) / 2]
         twitter_destinations = set(chan_id for f in bot.cogs['Twitter'].conf.follows.values() for chan_id in f.discord_channels)
-        twitch_destinations = set(chan_id for f in bot.cogs['Twitch'].conf.follows.values() for chan_id in f.keys())
+        twitch_destinations = set(chan_id for f in bot.cogs['Twitch'].conf.follows.values() for chan_id in f.channels)
 
         for guild in candidates:
             guild_channels = set(c.id for c in guild.text_channels)
