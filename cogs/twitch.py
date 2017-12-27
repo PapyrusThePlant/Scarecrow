@@ -145,11 +145,13 @@ class Twitch:
                         # Stream came online, save the preview url and send notifications
                         stream_info = streams[stream_id]
                         follow_conf.preview_url = stream_info['preview']['template'].format(width=640, height=360)
-                        follow_conf.live = True
                         try:
                             await self.notify(stream_info)
                         except Exception as e:
                             log.error(f'Notification error: {e}')
+                        else:
+                            follow_conf.live = True
+                    self.conf.save()
             finally:
                 await asyncio.sleep(60)
 
