@@ -124,17 +124,23 @@ class Twitch:
             try:
                 streams = await self.poll_streams()
             except Exception as e:
-                log.info(f'Polling error, retrying in 60 seconds: {e}')
+                log.info(f'Polling error: {e}')
             else:
                 await self.bot.wait_until_ready()
                 for stream_id, follow_conf in self.conf.follows.copy().items():
                     if follow_conf.live:
                         if stream_id not in streams:
-                            # Stream went offline, remove the preview images
-                            await follow_conf.remove_previews(self.bot)
+                            try:
+                                # Stream went offline, remove the preview images
+                                await follow_conf.remove_previews(self.bot)
+                            except Exception as e:
+                                log.error(f'Preview removal error: {e}')
                         else:
-                            # Stream is still online, update its info
-                            await self.update(streams[stream_id])
+                            try:
+                                # Stream is still online, update its info
+                                await self.update(streams[stream_id])
+                            except Exception as e:
+                                log.error(f'Update error: {e}')
                     elif stream_id in streams:
                         # Stream came online, save the preview url and send notifications
                         stream_info = streams[stream_id]
