@@ -8,6 +8,7 @@ try:
     from lxml import etree
 except:
     pass
+import pyparsing # req of the dice module
 from urllib.parse import urlparse, parse_qs
 
 import paths
@@ -388,7 +389,7 @@ class Misc:
 
     @roll.error
     async def roll_error(self, ctx, error):
-        if isinstance(error.original, dice.ParseException):
+        if hasattr(error, 'original') and isinstance(error.original, pyparsing.ParseBaseException):
             await ctx.send(error)
             raise error # Abuse the lib's impl to skip the bot's `on_command_error`
 
