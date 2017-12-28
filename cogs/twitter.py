@@ -111,7 +111,7 @@ class Twitter:
             try:
                 await ctx.send(error)
             except discord.Forbidden:
-                await ctx.author.send(f'Missing the `Send Messages` permission to send the following error to {ctx.message.channel.mention}: {error}')
+                await ctx.author.send(f'Missing the `Send Messages` permission to send the following error to {ctx.channel.mention}: {error}')
 
     async def on_guild_channel_delete(self, channel):
         removed, unfollowed = self.conf.remove_channels(channel)
@@ -170,7 +170,7 @@ class Twitter:
                     log.error(str(e))
                     raise TwitterError('Unknown error from the Twitter API, this has been logged.') from e
 
-        chan_conf = conf.discord_channels.get(ctx.message.channel.id) if conf is not None else None
+        chan_conf = conf.discord_channels.get(ctx.channel.id) if conf is not None else None
         return conf, chan_conf
 
     @commands.group(name='twitter')

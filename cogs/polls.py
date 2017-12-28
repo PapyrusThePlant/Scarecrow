@@ -1,12 +1,7 @@
 import asyncio
-import datetime
-import re
 
 import discord
 import discord.ext.commands as commands
-
-import paths
-from .util import config, utils
 
 
 def setup(bot):
@@ -35,7 +30,7 @@ class Polls:
 
         poll = discord.Embed(title=title, colour=discord.Colour.blurple())
         poll.description = '\n'.join(f'{self.keycaps_emojis[i]} {o}' for i, o in enumerate(options))
-        poll.set_author(name=f'{ctx.message.author.display_name} ({ctx.message.author})', icon_url=ctx.message.author.avatar_url)
+        poll.set_author(name=f'{ctx.author.display_name} ({ctx.author})', icon_url=ctx.author.avatar_url)
         poll.set_footer(text='Vote using reactions !')
 
         message = await ctx.send(embed=poll)
@@ -48,18 +43,17 @@ class Polls:
 
         This is a more user friendly version of the `instantpoll` command.
         """
-        message = ctx.message
-        to_delete = [message]
+        to_delete = [ctx.message]
 
         def check(msg):
-            return msg.channel == message.channel and msg.author == message.author
+            return msg.channel == ctx.channel and msg.author == ctx.author
 
         # Start with the poll's title
         to_delete.append(await ctx.send("Yay let's make a poll !\nWhat will its title be?"))
         try:
             title = await ctx.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
-            raise commands.UserInputError(f'{message.author.mention} You took too long, aborting poll creation.')
+            raise commands.UserInputError(f'{ctx.author.mention} You took too long, aborting poll creation.')
         to_delete.append(title)
 
         # Loop and register the poll's options until the user says we're done
@@ -70,12 +64,11 @@ class Polls:
             try:
                 entry = await ctx.bot.wait_for('message', check=check, timeout=60)
             except asyncio.TimeoutError:
-                raise commands.UserInputError(f'{message.author.mention} You took too long, aborting poll creation.')
+                raise commands.UserInputError(f'{ctx.author.mention} You took too long, aborting poll creation.')
             to_delete.append(entry)
 
             if entry.content.lower() == 'no more options':
                 break
-
             options.append(entry.content)
 
         # Create the poll

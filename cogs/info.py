@@ -204,7 +204,7 @@ class Info:
 
         # Gather the valid and permanent invites if we have permission to do so
         invite = None
-        perms = ctx.channel.permissions_for(ctx.guild.me)
+        perms = guild.text_channels[0].permissions_for(guild.me)
         if perms.manage_guild:
             # Get only permanent and valid invites
             invites = await guild.invites()
