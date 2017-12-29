@@ -253,8 +253,9 @@ class Twitch:
         # Check if the channel is live
         streams = await utils.fetch_page(f'{self.api_base}/streams', session=self.session, params={'channel': user_id})
         if streams['_total'] == 1:
-            self.conf.follows[user_id].live = True
+            self.conf.follows[user_id].preview_url = streams['streams'][0]['preview']['template'].format(width=640, height=360)
             await self.notify(streams['streams'][0])
+            self.conf.follows[user_id].live = True
 
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
