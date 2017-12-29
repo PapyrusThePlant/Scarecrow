@@ -135,6 +135,8 @@ class Twitch:
                                 await follow_conf.remove_previews(self.bot)
                             except Exception as e:
                                 log.error(f'Preview removal error: {e}')
+                            else:
+                                follow_conf.live = False
                         else:
                             try:
                                 # Stream is still online, update its info
