@@ -54,10 +54,11 @@ class FollowConfig(config.ConfigElement):
         self.preview_updates = preview_updates
         self.channels = utils.dict_keys_to_int(kwargs.pop('channels', {}))
 
-    async def remove_previews(self, bot):
+    async def put_offline(self, bot):
         for channel_conf in self.channels.values():
-            await channel_conf.remove_preview(bot)
+            await channel_conf.put_offline(bot)
         self.preview_updates = 0
+        self.live = False
 
 
 class ChannelConfig(config.ConfigElement):
@@ -73,13 +74,21 @@ class ChannelConfig(config.ConfigElement):
         else:
             return await bot.get_message(bot.get_channel(self.id), self.message_id)
 
-    async def remove_preview(self, bot):
+    async def put_offline(self, bot):
         if self.message_id is None:
             return
 
+        # Get the notification's embed
         message = await self.get_message(bot)
         embed = message.embeds[0]
+
+        # Remove the image preview, modify the title and timestamp
         del embed._image
+        embed.title = 'Offline'
+        embed.description = None
+        embed.timestamp = datetime.datetime.utcnow()
+
+        # Send the edit and remove the message's reference in the conf
         await message.edit(embed=embed)
         self.message_id = None
         self._message = None
@@ -132,11 +141,9 @@ class Twitch:
                         if stream_id not in streams:
                             try:
                                 # Stream went offline, remove the preview images
-                                await follow_conf.remove_previews(self.bot)
+                                await follow_conf.put_offline(self.bot)
                             except Exception as e:
                                 log.error(f'Preview removal error: {e}')
-                            else:
-                                follow_conf.live = False
                         else:
                             try:
                                 # Stream is still online, update its info
@@ -178,11 +185,13 @@ class Twitch:
 
     async def notify(self, stream_info):
         # Build the embed
-        embed = discord.Embed(title='Click here to join the fun !', url=stream_info['channel']['url'], colour=discord.Colour.blurple())
+        embed = discord.Embed(url=stream_info['channel']['url'],
+                              colour=discord.Colour.blurple(),
+                              title=stream_info['channel']['status'],
+                              description=f'Playing [{stream_info["game"]}](https://www.twitch.tv/directory/game/{stream_info["game"]})')
         embed.set_author(name=stream_info['channel']['display_name'])
         embed.set_thumbnail(url=stream_info['channel']['logo'])
         embed.set_image(url=stream_info['preview']['large'])
-        embed.add_field(name=stream_info['channel']['status'], value=f'Playing {stream_info["game"]}')
         embed.timestamp = datetime.datetime.strptime(stream_info['created_at'], '%Y-%m-%dT%H:%M:%SZ')
 
         # Send the notification to every interested channel
@@ -276,7 +285,7 @@ class Twitch:
             raise commands.BadArgument(f'Not following "{channel}" on this channel.')
 
         # Remove the discord channel from the conf and clean it up if no one else follow that stream
-        await self.conf.follows[user_id].channels[ctx.channel.id].remove_preview(self.bot)
+        await self.conf.follows[user_id].channels[ctx.channel.id].put_offline(self.bot)
         del self.conf.follows[user_id].channels[ctx.channel.id]
         if not self.conf.follows[user_id].channels:
             del self.conf.follows[user_id]
