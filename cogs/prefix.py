@@ -73,7 +73,7 @@ class Prefix:
 
         # Save and acknowledge
         self.conf.save()
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @prefix_group.command(name='remove')
     @commands.guild_only()
@@ -91,4 +91,4 @@ class Prefix:
             del self.conf.guild_specific[sid]
 
         self.conf.save()
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')

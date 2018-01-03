@@ -159,7 +159,7 @@ class Admin:
         if isinstance(target, discord.Guild):
             await target.leave()
         else:
-            await ctx.send('\N{OK HAND SIGN}')
+            await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @commands.command()
     @commands.guild_only()
@@ -175,7 +175,7 @@ class Admin:
             await ctx.send('Target not found.')
         else:
             self.ignored.save()
-            await ctx.send('\N{OK HAND SIGN}')
+            await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     def get_prune_candidates(self, bot):
         candidates = [g for g in bot.guilds if len([m for m in g.members if m.bot]) >= len(g.members) / 2]

@@ -59,7 +59,7 @@ class Dev:
         except ImportError as e:
             raise commands.BadArgument(f'Could not find module "{name}".') from e
 
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @cogs_group.command(name='reload')
     async def cogs_reload(self, ctx, name: str):
@@ -71,7 +71,7 @@ class Dev:
         ctx.bot.unload_extension(module_path)
         ctx.bot.load_extension(module_path)
 
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @cogs_group.command(name='unload')
     async def cogs_unload(self, ctx, *, name: str):
@@ -81,7 +81,7 @@ class Dev:
             raise commands.BadArgument(f'"{name}" not loaded.')
 
         ctx.bot.unload_extension(module_path)
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @commands.group(invoke_without_command=True)
     async def debug(self, ctx, *, code: str):

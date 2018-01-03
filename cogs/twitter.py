@@ -191,7 +191,7 @@ class Twitter:
             raise TwitterError(f'Not following {handle} on this channel.')
         chan_conf.message = message
         self.conf.save()
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @twitter_group.command(name='fetch')
     @commands.guild_only()
@@ -275,7 +275,7 @@ class Twitter:
         # Add new discord channel
         conf.discord_channels[ctx.channel.id] = ChannelConfig(ctx.channel.id, ctx.author.id, message=message)
         self.conf.save()
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @twitter_group.command(name='search')
     async def twitter_search(self, ctx, query, limit=5):
@@ -376,7 +376,7 @@ class Twitter:
                 self.stream.stop()
 
         self.conf.save()
-        await ctx.send('\N{OK HAND SIGN}')
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     async def get_latest_valid(self, channel_id=None, screen_name=None, limit=0, since_id=0):
         if since_id == 0:
