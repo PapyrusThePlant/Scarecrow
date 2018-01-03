@@ -101,7 +101,7 @@ class Info:
         proc = psutil.Process()
         mem_info = proc.memory_full_info()
         mem_str = f'{mem_info.uss / 1048576:.2f} Mb' # Expressed in bytes, turn to Mb and round to 2 decimals
-        cpu_str = f'{psutil.cpu_percent() / psutil.cpu_count():.2f}%'
+        cpu_str = f'{psutil.cpu_percent()}%'
         uptime = round(time.time() - self.bot.start_time)
         uptime_str = utils.duration_to_str(uptime)
 
