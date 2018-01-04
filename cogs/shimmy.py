@@ -9,6 +9,13 @@ SHIMMY_GUILD_ID = 140880261360517120
 NSFW_ROLE_ID = 261189004681019392
 LOG_CHANNEL_ID = 373829704345452546
 
+requestable_roles = {
+    'Animal Crossing': 373406099098828800,
+    'Battle Royale': 374318563374399488,
+    'Battlerite': 392048585472213012,
+    'Destiny 2': 374102233513590794,
+    'nsfw': 261189004681019392
+}
 
 eight_ball_responses = [
     # Positive
@@ -74,12 +81,13 @@ class Shimmy:
 
     @commands.command()
     @commands.guild_only()
-    async def nsfw(self, ctx):
-        """Tries to add the NSFW role to a member."""
-        if self.nsfw_role is None:
-            self.nsfw_role = discord.utils.get(ctx.guild.roles, id=NSFW_ROLE_ID)
+    async def role(self, ctx, *, role_name):
+        """Tries to add the wanted role to a member."""
+        role = discord.utils.get(ctx.guild.roles, name=role_name)
+        if role_name not in requestable_roles or role is None:
+            raise commands.BadArgument(f'Cannot request role "{role_name}".')
 
-        await ctx.author.add_roles(self.nsfw_role)
+        await ctx.author.add_roles(role)
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @commands.command()
