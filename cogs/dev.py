@@ -116,7 +116,18 @@ class Dev:
 
         # Send the feedback
         if content:
-            await ctx.send(utils.format_block(content, language='py'))
+            if len(content) <= 1990:
+                await ctx.send(utils.format_block(content, language='py'))
+            else:
+                paginator = commands.Paginator()
+                for line in content.splitlines():
+                    try:
+                        paginator.add_line(line)
+                    except RuntimeError as e:
+                        await ctx.send(str(e))
+
+                for page in paginator.pages:
+                    await ctx.send(page)
         else:
             await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
