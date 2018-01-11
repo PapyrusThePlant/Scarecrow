@@ -115,9 +115,10 @@ class Twitter:
 
     async def on_guild_channel_delete(self, channel):
         removed, unfollowed = self.conf.remove_channels(channel)
-        log.info(f'Deletion of channel {channel.id} removed {removed} feeds and unfollowed {unfollowed}.')
-        self.conf.save()
-        self.stream.start()
+        if removed > 0:
+            log.info(f'Deletion of channel {channel.id} removed {removed} feeds and unfollowed {unfollowed}.')
+            self.conf.save()
+            self.stream.start()
 
     async def on_guild_remove(self, guild):
         removed, unfollowed = self.conf.remove_channels(*guild.channels)
