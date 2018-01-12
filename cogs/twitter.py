@@ -216,6 +216,9 @@ class Twitter:
             try:
                 if conf:
                     missed = await self.get_latest_valid(conf.id, since_id=conf.latest_received)
+                    if len(missed) < limit and ctx.channel.id not in conf.discord_channels:
+                        missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
+                        conf = None
                 else:
                     missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
             except tweepy.TweepError as e:
