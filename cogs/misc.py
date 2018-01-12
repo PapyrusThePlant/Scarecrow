@@ -1,19 +1,18 @@
 import aiohttp
+import logging
 import random
+from urllib.parse import urlparse, parse_qs
 
 import dice
 import discord
 import discord.ext.commands as commands
-try:
-    from lxml import etree
-except:
-    pass
 import pyparsing # req of the dice module
-from urllib.parse import urlparse, parse_qs
+from lxml import etree
 
 import paths
 from .util import agarify, utils
 
+log = logging.getLogger(__name__)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
@@ -294,8 +293,9 @@ class Misc:
         }
         async with self.google_session.get('https://www.google.com/search', params=params) as resp:
             if resp.status != 200:
-                await ctx.send(utils.HTTPError(resp, 'Error while querying google.'))
-                return
+                err = utils.HTTPError(resp, 'Error while querying google.')
+                log.info(f'Error while querying google {err.code} {err.resp_msg}')
+                raise err
             data = await resp.text()
 
         root = etree.fromstring(data, etree.HTMLParser())
