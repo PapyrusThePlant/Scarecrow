@@ -65,7 +65,7 @@ class Dev:
     async def cogs_reload(self, ctx, name: str):
         """Reloads a cog."""
         module_path = f'{paths.COGS_DIR_NAME}.{name.lower()}'
-        if module_path is None:
+        if module_path not in ctx.bot.extensions:
             raise commands.BadArgument(f'"{name}" not loaded.')
 
         ctx.bot.unload_extension(module_path)
@@ -77,7 +77,7 @@ class Dev:
     async def cogs_unload(self, ctx, *, name: str):
         """Unloads a cog."""
         module_path = f'{paths.COGS_DIR_NAME}.{name.lower()}'
-        if module_path is None:
+        if module_path not in ctx.bot.extensions:
             raise commands.BadArgument(f'"{name}" not loaded.')
 
         ctx.bot.unload_extension(module_path)
