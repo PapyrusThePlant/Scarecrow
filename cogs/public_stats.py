@@ -46,7 +46,7 @@ class PublicStats:
             'server_count': guild_count
         }
         async with self.session.post(url=url, headers=headers, data=json.dumps(data)) as resp:
-            if resp.status != 200:
+            if resp.status < 200 or resp.status >= 300:
                 log.warning(utils.HTTPError(resp, 'Error while posting stats to DBots'))
 
         # Save the new server count after the post succeeded
