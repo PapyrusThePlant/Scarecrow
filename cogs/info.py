@@ -79,7 +79,7 @@ class Info:
             await ctx.send(utils.format_block(content))
         else:
             # Minimal info for each character
-            entries = [f'`{c}` | `\\u{ord(c):04x}` | `{unicodedata.name(c, "None")}` | {url_fmt.format(ord(c))}' for c in data]
+            entries = [f'`\N{ZERO WIDTH SPACE}{c}\N{ZERO WIDTH SPACE}` | `\\u{ord(c):04x}` | `{unicodedata.name(c, "None")}` | {url_fmt.format(ord(c))}' for c in data]
             content = '\n'.join(entries)
             await ctx.send(content)
 
