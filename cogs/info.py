@@ -170,20 +170,16 @@ class Info:
         roles = [role.name.replace('@', '@\u200b') for role in ordered_roles]
         del ordered_roles
 
-        # Create a default member to test locked channels
-        default_member = copy.copy(guild.me)
-        default_member.roles = [guild.default_role]
-
         # Figure out how many channels are locked
         locked_text = 0
         locked_voice = 0
         for channel in guild.channels:
-            perms = channel.permissions_for(default_member)
+            overwrites = channel.overwrites_for(guild.default_role)
             if isinstance(channel, discord.TextChannel):
-                if not perms.read_messages:
+                if overwrites.read_messages is False:
                     locked_text += 1
-            elif not perms.connect or not perms.speak:
-                locked_voice += 1
+            elif overwrites.connect is False or overwrites.speak is False:
+                    locked_voice += 1
 
         # Count the channels
         text_channels = len(guild.text_channels)
