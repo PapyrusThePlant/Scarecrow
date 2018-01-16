@@ -5,6 +5,7 @@ import html
 import logging
 import multiprocessing
 import os
+import time
 from queue import Empty as QueueEmpty
 
 import tweepy
@@ -13,7 +14,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from .util import checks, config, oembed, utils
+from .util import config, oembed, utils
 
 log = logging.getLogger(__name__)
 
@@ -99,7 +100,11 @@ class Twitter:
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
         self.latest_received = 0
-        self.fetcher = None
+        self.last_average_timestamp = 0
+        self.tweets_processed = 0
+        self.average_tweets_processed = 0
+        self.tweets_sent = 0
+        self.average_tweets_sent = 0
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -345,6 +350,64 @@ class Twitter:
 
         await ctx.send(embed=embed)
 
+    @twitter_group.command(name='stats')
+    async def twitter_stats(self, ctx):
+        """Displays statistics about the Twitter stream."""
+        server_followed_count = 0
+        followed_count = len(self.conf.follows)
+        server_target_channels = 0
+        target_channels = 0
+        total_module_uses = 0
+        most_followed = []
+
+        # Prepare some data structures to speed things up
+        total_channels = {}
+        for guild in ctx.bot.guilds:
+            total_channels[guild.id] = set(c.id for c in guild.text_channels)
+        server_channels = set(c.id for c in ctx.guild.text_channels)
+
+        # Get some stats
+        for twitter_id, conf in self.conf.follows.items():
+            target_chans = set(conf.discord_channels.keys())
+            target_channels += len(target_chans)
+
+            # Number of Twitter channels followed by the server and number of feeds
+            server_intersection = server_channels.intersection(target_chans)
+            if len(server_intersection) > 0:
+                server_followed_count += 1
+                server_target_channels += len(server_intersection)
+
+            # Number of servers following Twitter channels
+            for guild in ctx.bot.guilds:
+                if len(total_channels[guild.id].intersection(target_chans)) > 0:
+                    total_module_uses += 1
+
+            # Get the 3 most followed Twitter channels
+            most_followed.append((len(conf.discord_channels), conf))
+        most_followed = sorted(most_followed, key=lambda t: t[0], reverse=True)[:3]
+
+        # Get the average number of tweets processed and sent
+        now = time.time()
+        last_time_frame = self.last_average_timestamp - self.stream.start_time
+        new_time_frame = now - self.stream.start_time
+        self.average_tweets_processed = (self.average_tweets_processed * last_time_frame + self.tweets_processed) / new_time_frame
+        self.average_tweets_sent = (self.average_tweets_sent * last_time_frame + self.tweets_sent) / new_time_frame
+        self.tweets_processed = 0
+        self.tweets_sent = 0
+        self.last_average_timestamp = now
+
+        # Build the response
+        embed = discord.Embed(colour=discord.Colour.blurple(), title='Stats', description='\N{ZERO WIDTH SPACE}')
+        embed.add_field(name='Followed Twitter channels', value=f'{server_followed_count} here / {followed_count} overall')
+        embed.add_field(name='Target Discord channels', value=f'{server_target_channels} here / {target_channels} overall')
+        embed.add_field(name='\N{ZERO WIDTH SPACE}', value=f'\N{ZERO WIDTH SPACE}')
+        embed.add_field(name=f'\N{FIRST PLACE MEDAL} {most_followed[0][1].screen_name}', value=f'{most_followed[0][0]} follows' if len(most_followed) > 0 else 'None')
+        embed.add_field(name=f'\N{SECOND PLACE MEDAL} {most_followed[1][1].screen_name}', value=f'{most_followed[1][0]} follows' if len(most_followed) > 1 else 'None')
+        embed.add_field(name=f'\N{THIRD PLACE MEDAL} {most_followed[2][1].screen_name}', value=f'{most_followed[2][0]} follows' if len(most_followed) > 2 else 'None')
+        embed.add_field(name='Processed tweets', value=f'{round(self.average_tweets_processed)} tweets per sec', inline=False)
+        embed.add_field(name='Sent tweets', value=f'{round(self.average_tweets_sent)} tweets per sec', inline=False)
+        await ctx.send(embed=embed)
+
     @twitter_group.command(name='status')
     async def twitter_status(self, ctx):
         """Displays the status of the Twitter stream."""
@@ -545,6 +608,7 @@ class Twitter:
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
+        self.tweets_processed += 1
         if tweet.id > self.latest_received:
             self.latest_received = tweet.id
 
@@ -579,8 +643,9 @@ class Twitter:
                 continue
 
             try:
+                self.tweets_sent += 1
                 # Send the message to the appropriate channel
-                await destination.send(chan_conf.message, embed=embed)
+                # await destination.send(chan_conf.message, embed=embed)
             except discord.Forbidden:
                 # Notify if we're missing permissions
                 await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', chan_conf)
@@ -672,6 +737,7 @@ class TweepyStream(tweepy.StreamListener):
         self.sub_process = None
         self.mp_queue = None
         self.daemon = None
+        self.start_time = 0
 
     @property
     def running(self):
@@ -699,6 +765,9 @@ class TweepyStream(tweepy.StreamListener):
 
         # Schedule the polling daemon (it will take care of starting the child process)
         self.daemon = asyncio.ensure_future(self._run())
+        if self.start_time == 0:
+            self.start_time = time.time()
+            self.handler.last_average_timestamp = self.start_time
 
     def stop(self):
         """Stops the tweepy Stream."""
