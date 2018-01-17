@@ -17,7 +17,6 @@ DATA_DIR_NAME = 'data'
 DATA_DIR = f'{WORK_DIR}{DATA_DIR_NAME}/'
 INSULTS = f'{DATA_DIR}insults.txt'
 WEEBNAMES = f'{DATA_DIR}weeb_names.txt'
-OEMBED_PROVIDERS = f'{DATA_DIR}oEmbed_providers.json'
 
 LOGS_DIR_NAME = 'logs'
 LOGS_DIR = f'{WORK_DIR}{LOGS_DIR_NAME}/'

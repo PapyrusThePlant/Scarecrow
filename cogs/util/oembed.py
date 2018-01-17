@@ -1,23 +1,21 @@
 # oEmbed data fetching (see http://oembed.com/)
 
-import json
 import re
+import requests
 
-import paths
 from . import utils
 
-with open(paths.OEMBED_PROVIDERS, 'r', encoding='utf-8') as fp:
-    oEmbed_providers = json.load(fp)
-    oEmbed_discovery = []
+oEmbed_providers = requests.get('https://oembed.com/providers.json').json()
+oEmbed_discovery = []
 
-    # Escaoe the special characters in the schemes
-    for provider in oEmbed_providers:
-        for endpoint in provider['endpoints']:
-            endpoint['schemes'] = [s.replace('.', '\.').replace('?', '\?') for s in endpoint.get('schemes', [])]
-            if not endpoint['schemes'] and endpoint.get('discovery', False):
-                oEmbed_discovery.append(endpoint['url'])
+# Escaoe the special characters in the schemes
+for provider in oEmbed_providers:
+    for endpoint in provider['endpoints']:
+        endpoint['schemes'] = [s.replace('.', '\.').replace('?', '\?') for s in endpoint.get('schemes', [])]
+        if not endpoint['schemes'] and endpoint.get('discovery', False):
+            oEmbed_discovery.append(endpoint['url'])
 
-    oEmbed_discovery.reverse()  # Yes, bleh, whatever, get over it
+oEmbed_discovery.reverse()  # Yes, bleh, whatever, get over it
 
 
 class OembedException(Exception):
@@ -44,6 +42,7 @@ def find_oembed_endpoint(url):
                     return endpoint['url']
 
     raise EndpointNotFound(url)
+
 
 async def do_fetch(url):
     try:
