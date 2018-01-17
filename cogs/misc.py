@@ -389,9 +389,9 @@ class Misc:
 
     @roll.error
     async def roll_error(self, ctx, error):
-        if hasattr(error, 'original') and isinstance(error.original, pyparsing.ParseBaseException):
-            await ctx.send(error)
-            raise error # Abuse the lib's impl to skip the bot's `on_command_error`
+        if hasattr(error, 'original') and isinstance(error.original, (pyparsing.ParseBaseException, dice.ParseException)):
+            await ctx.send(error.original)
+            error.handled = True
 
     @commands.command()
     async def weebnames(self, ctx, wanted_gender=None):

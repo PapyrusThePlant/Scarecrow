@@ -63,6 +63,10 @@ class Bot(commands.Bot):
             self.unload_extension(extension)
 
     async def on_command_error(self, ctx, error):
+        # Pass if we marked the error as handled
+        if getattr(error, 'handled', False):
+            return
+
         if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand)):
             message = str(error)
         elif isinstance(error, commands.CommandInvokeError) and not isinstance(error.original, discord.Forbidden):
