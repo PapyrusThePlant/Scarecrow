@@ -254,12 +254,12 @@ class Twitter:
                     except discord.NotFound:
                         pass # The user probably deleted his message before we tried to do it
                 else:
-                    await ctx.message.remove_reaction('\N{HOURGLASS}', ctx.me)
+                    await ctx.message.remove_reaction('\N{HOURGLASS WITH FLOWING SAND}', ctx.me)
                     await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @twitter_fetch.error
     async def twitter_fetch_error(self, ctx, error):
-        await ctx.message.remove_reaction('\N{HOURGLASS}', ctx.me)
+        await ctx.message.remove_reaction('\N{HOURGLASS WITH FLOWING SAND}', ctx.me)
 
     @twitter_group.command(name='follow')
     @commands.guild_only()
