@@ -202,31 +202,39 @@ class Twitter:
 
     @twitter_group.command(name='fetch')
     @commands.guild_only()
-    async def twitter_fetch(self, ctx, handle, limit: int=1):
+    async def twitter_fetch(self, ctx, handle, limit: int=None):
         """Retrieves the latest tweets from a channel and displays them.
-
-        If the channel is followed on the server, every tweets missed since
-        the last displayed one will be fetched and displayed in the Discord
-        channel receiving this feed.
 
         You do not need to include the '@' before the Twitter channel's
         handle, it will avoid unwanted mentions in Discord.
 
         If a limit is given, at most that number of tweets will be displayed. Defaults to 1.
+        
+        If the channel is followed on the server, only tweets missed since
+        the last displayed one will be fetched and displayed in the Discord
+        channel receiving this feed.
+        This can be bypassed by explicitly providing a limit.
         """
         sane_handle = handle.lower().lstrip('@')
         conf, chan_conf = await self.get_confs(ctx, handle)
+        if not limit:
+            forced = False
+            limit = 1
+        else:
+            forced = True
 
         await ctx.message.add_reaction('\N{HOURGLASS WITH FLOWING SAND}')
         async with ctx.typing():
             try:
-                if conf:
+                if conf and not forced:
                     missed = await self.get_latest_valid(conf.id, since_id=conf.latest_received)
                     if len(missed) < limit and ctx.channel.id not in conf.discord_channels:
                         missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
                         conf = None
                 else:
                     missed = await self.get_latest_valid(screen_name=sane_handle, limit=limit)
+                    if forced:
+                        conf = None
             except tweepy.TweepError as e:
                 if e.reason == 'Not authorized.':
                     if conf:
