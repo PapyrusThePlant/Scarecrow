@@ -140,10 +140,10 @@ class Admin:
 
         await ctx.send('All good.')
 
-    @commands.command()
+    @commands.group(name='ignore', invoke_without_command=True)
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def ignore(self, ctx, *, target):
+    async def ignore_group(self, ctx, *, target):
         """Ignores a channel, a user (server-wide), or a whole server.
 
         The target can be a name, an ID, the keyword 'channel' or 'server'.
@@ -160,6 +160,23 @@ class Admin:
             await target.leave()
         else:
             await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @ignore_group.command(name='list')
+    @commands.guild_only()
+    @commands.has_permissions(manage_guild=True)
+    async def ignore_list(self, ctx):
+        """Lists ignored channels, users and servers related to the command's use."""
+        channels = set(discord.utils.get(ctx.guild.text_channels, id=cid) for cid in self.ignored.channels)
+        members = set(discord.utils.get(ctx.guild.members, id=uid) for uid in self.ignored.users.get(ctx.guild.id, []))
+
+        embed = discord.Embed(colour=discord.Colour.blurple())
+        embed.add_field(name='Ignored channels', value=', '.join(c.mention for c in channels if c is not None) or 'None', inline=False)
+        embed.add_field(name='Ignored users', value=', '.join(m.mention for m in members if m is not None) or 'None', inline=False)
+
+        if ctx.author == ctx.bot.owner:
+            embed.add_field(name='Ignored guilds', value=', '.join(self.ignored.guilds) or 'None', inline=False)
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
