@@ -69,10 +69,9 @@ class ChannelConfig(config.ConfigElement):
         self._message = None
 
     async def get_message(self, bot):
-        if self._message is not None:
-            return self._message
-        else:
-            return await bot.get_message(bot.get_channel(self.id), self.message_id)
+        if self._message is None:
+            self._message = await bot.get_message(bot.get_channel(self.id), self.message_id)
+        return self._message
 
     async def put_offline(self, bot):
         if self.message_id is None:
