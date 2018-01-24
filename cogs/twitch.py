@@ -212,8 +212,8 @@ class Twitch:
             embed.set_image(url=url)
 
             # Update the stream title and played game
-            del embed._fields
-            embed.add_field(name=stream_info['channel']['status'], value=f'Playing {stream_info["game"]}')
+            embed.title = stream_info['channel']['status']
+            embed.description = f'Playing [{stream_info["game"]}](https://www.twitch.tv/directory/game/{stream_info["game"]})'
 
             await message.edit(embed=embed)
             follow_conf.preview_updates += 1
