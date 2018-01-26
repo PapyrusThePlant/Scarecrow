@@ -14,7 +14,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from .util import config, oembed, utils
+from .util import checks, config, oembed, utils
 
 log = logging.getLogger(__name__)
 
@@ -183,6 +183,21 @@ class Twitter:
     @commands.group(name='twitter')
     async def twitter_group(self, ctx):
         pass
+
+    @twitter_group.command(name='cleanup')
+    @commands.guild_only()
+    @checks.is_owner()
+    async def twitter_cleanup(self, ctx):
+        to_delete = set()
+        for chan_conf in self.conf.follows.values():
+            for chan in chan_conf.discord_channels.values():
+                if not ctx.bot.get_channel(chan.id):
+                    to_delete.add(chan)
+        if to_delete:
+            self.conf.remove_channels(*to_delete)
+            await ctx.send(f'Removed {len(to_delete)} target channels.')
+        else:
+            await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @twitter_group.command(name='setmessage', aliases=['editmessage'])
     @commands.guild_only()
