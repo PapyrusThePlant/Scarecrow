@@ -669,7 +669,7 @@ class Twitter:
             try:
                 self.tweets_sent += 1
                 # Send the message to the appropriate channel
-                # await destination.send(chan_conf.message, embed=embed)
+                await destination.send(chan_conf.message, embed=embed)
             except discord.Forbidden:
                 # Notify if we're missing permissions
                 await self.notify_channel(f'Insufficient permissions to display {tweet.tweet_url}.', chan_conf)
