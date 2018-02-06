@@ -26,6 +26,10 @@ def setup(bot):
     if bot.is_ready():
         cog.stream.start()
 
+def get_tweet_text(tweet):
+    if hasattr(tweet, 'extended_tweet'):
+        return tweet.extended_tweet['full_text']
+    return tweet.text
 
 class TwitterError(commands.CommandError):
     pass
@@ -572,19 +576,19 @@ class Twitter:
         # Check for retweets and quotes to format the tweet
         if tweet.is_quote_status:
             sub_tweet = tweet.quoted_status
-            embed.description = tweet.text
+            embed.description = get_tweet_text(tweet)
             if not sub_tweet:
                 # Original tweet is unavailable
                 embed.add_field(name='Retweet unavailable', value='The retweeted status is unavailable.')
                 sub_tweet = tweet
             else:
-                embed.add_field(name=f'Retweet from @{sub_tweet.author.screen_name} :', value=sub_tweet.text)
+                embed.add_field(name=f'Retweet from @{sub_tweet.author.screen_name} :', value=get_tweet_text(sub_tweet))
         elif hasattr(tweet, 'retweeted_status'):
             sub_tweet = tweet.retweeted_status
-            embed.add_field(name=f'Retweet from @{sub_tweet.author.screen_name} :', value=sub_tweet.text)
+            embed.add_field(name=f'Retweet from @{sub_tweet.author.screen_name} :', value=get_tweet_text(sub_tweet))
         else:
             sub_tweet = tweet
-            embed.description = tweet.text
+            embed.description = get_tweet_text(tweet)
 
         # Parse the tweet's entities to extract media and include them as the embed's image
         urls = sub_tweet.entities.get('urls', [])
