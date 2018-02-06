@@ -222,7 +222,7 @@ class Twitch:
             data = await utils.fetch_page(f'{self.api_base}/users', session=self.session, params={'login': channel})
         except utils.HTTPError as e:
             if e.code == 400:
-                raise commands.BadArgument(e.resp_msg)
+                raise commands.BadArgument(e.message)
             else:
                 raise e
         count = data['_total']

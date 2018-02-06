@@ -49,11 +49,16 @@ class Misc:
         ]
         url, loader = random.choice(providers)
 
-        data = await utils.fetch_page(url, timeout=5)
-        if data is None:
-            content = f'Timed out on {url} .'
+        try:
+            data = await utils.fetch_page(url, timeout=5)
+        except utils.HTTPError as e:
+            log.info(e)
+            content = f'Error when querying {url} . This has been logged.'
         else:
-            content = loader(data)
+            if data is None:
+                content = f'Timed out on {url} .'
+            else:
+                content = loader(data)
 
         await ctx.send(content)
 
@@ -293,8 +298,8 @@ class Misc:
         }
         async with self.google_session.get('https://www.google.com/search', params=params) as resp:
             if resp.status != 200:
-                err = utils.HTTPError(resp, 'Error while querying google.')
-                log.info(f'Error while querying google {err.code} {err.resp_msg}')
+                err = utils.HTTPError(resp, 'Error while querying google')
+                log.info(err)
                 raise err
             data = await resp.text()
 

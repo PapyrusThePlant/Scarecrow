@@ -53,14 +53,23 @@ class GuildConverter(commands.IDConverter):
 
 class HTTPError(Exception):
     def __init__(self, resp, message):
-        self.response = resp
+        self._resp = resp
+        self._message = message
         if isinstance(message, dict):
-            self.resp_msg = message.get('message', message.get('msg', ''))
-            self.code = message.get('code', message.get('status', 0))
+            self._resp_msg = message.get('message', message.get('msg', ''))
         else:
-            self.resp_msg = message
+            self._resp_msg = message
 
-        super().__init__(f'{resp.reason} (status code: {resp.status}){f": {self.resp_msg}" if self.resp_msg else ""}')
+        super().__init__(f'{f"{self._resp_msg}: " if self._resp_msg else ""}{resp.reason} (status code: {resp.status})')
+
+    @property
+    def code(self):
+        return self._message.get('code', self._message.get('status', self._resp.status))
+
+    @property
+    def message(self):
+        return self._resp_msg
+
 
 
 def dict_keys_to_int(d):
