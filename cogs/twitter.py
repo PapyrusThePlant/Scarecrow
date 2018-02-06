@@ -133,8 +133,10 @@ class Twitter:
     async def on_guild_remove(self, guild):
         removed, unfollowed = self.conf.remove_channels(*guild.channels)
         log.info(f'removal from guild {guild.id} removed {removed} feeds and unfollowed {unfollowed}.')
-        self.conf.save()
-        self.stream.start()
+        if removed > 0:
+            self.conf.save()
+        if unfollowed > 0:
+            self.stream.start()
 
     async def on_ready(self):
         self.stream.start()
