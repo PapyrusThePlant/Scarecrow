@@ -271,14 +271,8 @@ class Twitter:
                             embed = await self.prepare_embed(tweet)
                             await ctx.send(embed=embed)
 
-                if conf and ctx.channel.id in conf.discord_channels:
-                    try:
-                        await ctx.message.delete()
-                    except discord.NotFound:
-                        pass # The user probably deleted his message before we tried to do it
-                else:
-                    await ctx.message.remove_reaction('\N{HOURGLASS WITH FLOWING SAND}', ctx.me)
-                    await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+                await ctx.message.remove_reaction('\N{HOURGLASS WITH FLOWING SAND}', ctx.me)
+                await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @twitter_fetch.error
     async def twitter_fetch_error(self, ctx, error):
