@@ -375,6 +375,7 @@ class Twitter:
         await ctx.send(embed=embed)
 
     @twitter_group.command(name='stats')
+    @commands.guild_only()
     async def twitter_stats(self, ctx):
         """Displays statistics about the Twitter stream."""
         server_followed_count = 0

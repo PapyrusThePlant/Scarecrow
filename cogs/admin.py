@@ -116,6 +116,7 @@ class Admin:
             raise commands.BadArgument('Cannot ignore/unignore voice channels.')
 
     @commands.command(aliases=['checkpermissions'])
+    @commands.guild_only()
     async def checkperms(self, ctx):
         name = ctx.bot.user.name
         perms_str = 'Read Messages, Send Messages, Manage Messages, Embed Links, Read Message History, Use External Emojis, Add Reactions'
