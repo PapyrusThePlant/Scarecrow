@@ -93,6 +93,7 @@ class Bot(commands.Bot):
     async def on_connect(self):
         self.app_info = await self.application_info()
         self.owner = self.app_info.owner
+        self.owner_id = self.owner.id # For the builtin is_owner check
         log.info('Connected to Discord as {0.name} (id: {0.id})'.format(self.user))
         if self.conf.status:
             await self.change_presence(game=discord.Game(name=self.conf.status))

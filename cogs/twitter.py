@@ -14,7 +14,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from .util import checks, config, oembed, utils
+from .util import config, oembed, utils
 
 log = logging.getLogger(__name__)
 
@@ -192,7 +192,7 @@ class Twitter:
 
     @twitter_group.command(name='cleanup')
     @commands.guild_only()
-    @checks.is_owner()
+    @commands.is_owner()
     async def twitter_cleanup(self, ctx):
         to_delete = set()
         for chan_conf in self.conf.follows.values():

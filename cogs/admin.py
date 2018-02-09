@@ -5,7 +5,7 @@ import discord.utils
 import discord.ext.commands as commands
 
 import paths
-from .util import checks, config, utils
+from .util import config, utils
 
 log = logging.getLogger(__name__)
 
@@ -208,7 +208,7 @@ class Admin:
         return candidates
 
     @commands.group(name='prune_guilds', invoke_without_command=True)
-    @checks.is_owner()
+    @commands.is_owner()
     async def prune_guilds_group(self, ctx):
         targets = self.get_prune_candidates(ctx.bot)
         if targets:
@@ -220,24 +220,24 @@ class Admin:
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @prune_guilds_group.command(name='count')
-    @checks.is_owner()
+    @commands.is_owner()
     async def prune_guilds_count(self, ctx):
         await ctx.send(len(self.get_prune_candidates(ctx.bot)))
 
     @commands.command()
-    @checks.is_owner()
+    @commands.is_owner()
     async def restart(self, ctx):
         """Restarts the bot."""
         ctx.bot.restart()
 
     @commands.command()
-    @checks.is_owner()
+    @commands.is_owner()
     async def shutdown(self, ctx):
         """Shuts the bot down."""
         ctx.bot.shutdown()
 
     @commands.command()
-    @checks.is_owner()
+    @commands.is_owner()
     async def status(self, ctx, *, status=None):
         """Changes the bot's status."""
         await ctx.bot.change_presence(game=discord.Game(name=status))
