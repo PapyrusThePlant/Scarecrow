@@ -11,6 +11,17 @@ import discord
 import discord.ext.commands as commands
 
 
+class AuditLogReason(commands.Converter):
+    def __init__(self, details=None):
+        self.details = details
+
+    async def convert(self, ctx, argument):
+        reason = f'Ordered by {ctx.author} (ID {ctx.author.id}) :{f" [{self.details}]" if self.details else ""} {argument}'
+        if len(reason) > 512:
+            max_len = 512 - len(reason) + len(argument)
+            raise commands.BadArgument(f'Reason is too long : {len(argument)}. Max for you is {max_len}')
+        return reason
+
 class GuildChannelConverter(commands.IDConverter):
     def __init__(self):
         super().__init__()

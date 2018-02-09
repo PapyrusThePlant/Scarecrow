@@ -67,7 +67,7 @@ class Bot(commands.Bot):
         if getattr(error, 'handled', False):
             return
 
-        if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand)):
+        if isinstance(error, (commands.UserInputError, commands.NoPrivateMessage, commands.DisabledCommand, commands.CheckFailure)):
             message = str(error)
         elif isinstance(error, commands.CommandInvokeError) and not isinstance(error.original, discord.Forbidden):
             tb = ''.join(traceback.format_exception(type(error), error, error.__traceback__))

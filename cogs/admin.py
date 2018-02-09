@@ -244,6 +244,64 @@ class Admin:
         self.bot.conf.status = status
         self.bot.conf.save()
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    async def ban(self, ctx, member, *, reason: utils.AuditLogReason):
+        """Bans a member by name, mention or ID."""
+        try:
+            member_id = int(member)
+        except ValueError:
+            member = await commands.MemberConverter().convert(ctx, member) # Let this raise on failure
+            await member.ban(reason=reason)
+        else:
+            await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    async def unban(self, ctx, member, *, reason: utils.AuditLogReason):
+        """Unbans a member by name or ID."""
+        bans = await ctx.guild.bans()
+        try:
+            member_id = int(member, base=10)
+        except ValueError:
+            ban_entry = discord.utils.get(bans, user__name=member)
+        else:
+            ban_entry = discord.utils.get(bans, user__id=member_id)
+
+        if not ban_entry:
+            raise commands.BadArgument(f'Banned member "{member}" not found.')
+
+        await ctx.guild.unban(ban_entry.user, reason=reason)
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    async def softban(self, ctx, member: discord.Member, *, reason: utils.AuditLogReason(details='softban')):
+        """Softbans a member by name, mention or ID.
+
+        A softban is the action of banning a member and immediatly unbanning them.
+        It results in a kick that cleared their last day's message.
+        """
+        await member.ban(reason=reason)
+        await member.unban(reason=reason)
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(kick_members=True)
+    @commands.bot_has_permissions(kick_members=True)
+    async def kick(self, ctx, member: discord.Member, *, reason: utils.AuditLogReason):
+        """Kicks a member by name, mention or ID."""
+        await member.kick(reason=reason)
+        await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+
     async def on_command(self, ctx):
         self.commands_used[ctx.command.qualified_name] += 1
         if ctx.guild is None:
