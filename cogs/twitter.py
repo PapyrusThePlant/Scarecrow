@@ -27,8 +27,18 @@ def setup(bot):
         cog.stream.start()
 
 def get_tweet_text(tweet):
-    if hasattr(tweet, 'extended_tweet'):
+    try:
         return tweet.extended_tweet['full_text']
+    except AttributeError:
+        pass
+    except KeyError:
+        return tweet.extended_tweet.text
+
+    try:
+        return tweet.full_text
+    except AttributeError:
+        pass
+
     return tweet.text
 
 class TwitterError(commands.CommandError):
@@ -478,17 +488,18 @@ class Twitter:
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     async def get_latest_valid(self, channel_id=None, screen_name=None, limit=0, since_id=0):
+        args = {'user_id': channel_id, 'screen_name': screen_name, 'exclude_replies': True, 'include_rts': True, 'tweet_mode': 'extended'}
         if since_id == 0:
             # Because we could potentially end up fetching thousands of tweets here, let's force a limit
             limit = limit or 3
-            partial = functools.partial(self.api.user_timeline, user_id=channel_id, screen_name=screen_name, exclude_replies=True, include_rts=True)
+            partial = functools.partial(self.api.user_timeline, **args, count=limit)
         else:
-            partial = functools.partial(self.api.user_timeline, user_id=channel_id, screen_name=screen_name, exclude_replies=True, include_rts=True, since_id=since_id)
+            partial = functools.partial(self.api.user_timeline, **args, since_id=since_id)
 
         latest = await self.bot.loop.run_in_executor(None, partial)
         valid = [t for t in latest if not self.skip_tweet(t, from_stream=False)]
         valid.sort(key=lambda t: t.id)
-        return valid[-limit:]
+        return valid
 
     async def notify_channels(self, message, *channels):
         for channel in channels:
@@ -543,6 +554,8 @@ class Twitter:
             sub_tweet = tweet.retweeted_status
         else:
             sub_tweet = None
+
+        tweet.text = get_tweet_text(tweet)
 
         # Remove the links to the attached media
         for medium in tweet.entities.get('media', []):
