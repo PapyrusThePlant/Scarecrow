@@ -82,12 +82,15 @@ class Shimmy:
     @commands.command()
     @commands.guild_only()
     async def role(self, ctx, *, role_name):
-        """Tries to add the wanted role to a member."""
+        """Tries to add the wanted role to a member. Only game roles and NSFW can be requested with that command."""
         role = discord.utils.get(ctx.guild.roles, name=role_name)
         if role_name not in requestable_roles or role is None:
             raise commands.BadArgument(f'Cannot request role "{role_name}".')
 
-        await ctx.author.add_roles(role)
+        if role in ctx.author.roles:
+            await ctx.author.remove_roles(role)
+        else:
+            await ctx.author.add_roles(role)
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @commands.command()
