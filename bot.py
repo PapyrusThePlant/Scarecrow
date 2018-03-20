@@ -23,7 +23,7 @@ class BotConfig(config.ConfigElement):
             setattr(self, k, v)
 
 
-class Bot(commands.Bot):
+class Bot(commands.AutoShardedBot):
     def __init__(self, conf_path=paths.BOT_CONFIG, debug_instance=False):
         self.app_info = None
         self.owner = None
