@@ -43,7 +43,7 @@ class Misc:
     async def cat(self, ctx):
         """Meow !"""
         providers = [
-            ('http://random.cat/meow', lambda d: d['file']),
+            ('http://aws.random.cat/meow', lambda d: d['file']),
             ('http://edgecats.net/random', lambda d: d),
             ('http://thecatapi.com/api/images/get?format=src', lambda d: d)
         ]
