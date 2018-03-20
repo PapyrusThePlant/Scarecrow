@@ -17,6 +17,8 @@ def setup(bot):
     bot.add_cog(cog)
     cog.start()
 
+class TwitchError(commands.CommandError):
+    pass
 
 class TwitchConfig(config.ConfigElement):
     def __init__(self, client_id, **kwargs):
@@ -60,6 +62,23 @@ class FollowConfig(config.ConfigElement):
         self.preview_updates = 0
         self.live = False
 
+    async def update(self, bot, stream_info):
+        url = f'{self.preview_url}?v={str(self.preview_updates + 1)}'
+        for channel_id, chan_conf in self.channels.items():
+            message = await chan_conf.get_message(bot)
+            if not message or not message.embeds: # Sometimes embeds disappear
+                await chan_conf.put_offline(bot)
+                continue
+
+            # Update the stream preview, title and played game
+            embed = message.embeds[0]
+            embed.set_image(url=url)
+            embed.title = stream_info['channel']['status']
+            embed.description = f'Playing [{stream_info["game"]}](https://www.twitch.tv/directory/game/{stream_info["game"]})'
+
+            await message.edit(embed=embed)
+        self.preview_updates += 1
+
 
 class ChannelConfig(config.ConfigElement):
     def __init__(self, id, content, message_id=None, **kwargs):
@@ -79,6 +98,11 @@ class ChannelConfig(config.ConfigElement):
 
         # Get the notification's embed
         message = await self.get_message(bot)
+        if not message or not message.embeds: # Sometimes embeds disappear
+            self.message_id = None
+            self._message = None
+            return
+
         embed = message.embeds[0]
 
         # Remove the image preview, modify the title and timestamp
@@ -146,7 +170,7 @@ class Twitch:
                         else:
                             try:
                                 # Stream is still online, update its info
-                                await self.update(streams[stream_id])
+                                await follow_conf.update(streams[stream_id])
                             except Exception as e:
                                 log.error(f'Update error: {e}')
                     elif stream_id in streams:
@@ -196,26 +220,12 @@ class Twitch:
         # Send the notification to every interested channel
         for channel_id, chan_conf in self.conf.follows[str(stream_info['channel']['_id'])].channels.items():
             destination = self.bot.get_channel(channel_id)
-            chan_conf._message = await destination.send(chan_conf.content, embed=embed)
-            chan_conf.message_id = chan_conf._message.id
-        self.conf.save()
-
-    async def update(self, stream_info):
-        follow_conf = self.conf.follows[str(stream_info['channel']['_id'])]
-        for channel_id, chan_conf in follow_conf.channels.items():
-            message = await chan_conf.get_message(self.bot)
-            embed = message.embeds[0]
-
-            # Update the stream preview
-            url = f'{follow_conf.preview_url}?v={str(follow_conf.preview_updates + 1)}'
-            embed.set_image(url=url)
-
-            # Update the stream title and played game
-            embed.title = stream_info['channel']['status']
-            embed.description = f'Playing [{stream_info["game"]}](https://www.twitch.tv/directory/game/{stream_info["game"]})'
-
-            await message.edit(embed=embed)
-            follow_conf.preview_updates += 1
+            if not destination.permissions_for(self.bot.user).embed_links:
+                await destination.send(f'Missing permissions to embed links to send stream notification for {stream_info["channel"]["url"]}. Retrying later.')
+            else:
+                chan_conf._message = await destination.send(chan_conf.content, embed=embed)
+                chan_conf.message_id = chan_conf._message.id
+                self.conf.save()
 
     async def get_user(self, channel):
         try:
