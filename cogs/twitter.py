@@ -100,6 +100,7 @@ class ChannelConfig(config.ConfigElement):
     def __init__(self, id, feed_creator, **kwargs):
         self.id = id
         self.feed_creator = feed_creator
+        self.display_retweets = kwargs.pop('display_retweets', True)
         self.message = kwargs.pop('message', None)
 
 
@@ -215,19 +216,32 @@ class Twitter:
         else:
             await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
-    @twitter_group.command(name='setmessage', aliases=['editmessage'])
+    @twitter_group.group(name='edit')
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def twitter_setmessage(self, ctx, handle, *, message=None):
+    async def twitter_edit_group(self, ctx, handle):
+        """Manages how Twitter feeds behave."""
+        conf, chan_conf = await self.get_confs(ctx, handle)
+        if chan_conf is None:
+            raise TwitterError(f'Not following {handle} on this channel.')
+        ctx.conf = conf
+        ctx.chan_conf = chan_conf
+
+    @twitter_edit_group.command(name='retweets')
+    async def twitter_edit_rewtweets(self, ctx):
+        """Toggles on and off the display of retweets for the given Twitter channel."""
+        ctx.chan_conf.display_retweets = not ctx.chan_conf.display_retweets
+        self.conf.save()
+        await ctx.send(f'Retweets display is now {"**ON**" if ctx.chan_conf.display_retweets else "**OFF**"}.')
+
+    @twitter_edit_group.command(name='message')
+    async def twitter_edit_message(self, ctx, *, message=None):
         """Sets a custom message for all the tweets of a given Twitter channel.
 
         If a message was already set, it will be overridden. Omitting
         the message will remove it for that feed.
         """
-        conf, chan_conf = await self.get_confs(ctx, handle)
-        if chan_conf is None:
-            raise TwitterError(f'Not following {handle} on this channel.')
-        chan_conf.message = message
+        ctx.chan_conf.message = message
         self.conf.save()
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
@@ -678,6 +692,10 @@ class Twitter:
             destination = self.bot.get_channel(chan_conf.id)
             if destination is None:
                 log.warning(f'Channel {chan_conf.id} is unavailable, ignoring.')
+                continue
+
+            # Skip retweets if configured to do so
+            if hasattr(tweet, 'retweeted_status') and not chan_conf.display_retweets:
                 continue
 
             try:
