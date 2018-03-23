@@ -194,6 +194,8 @@ class Admin:
         except ValueError:
             await ctx.send('Target not found.')
         else:
+            if isinstance(target, discord.Member) and len(conf) == 0:
+                del self.ignored.users[ctx.guild.id]
             self.ignored.save()
             await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
