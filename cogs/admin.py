@@ -16,9 +16,11 @@ def setup(bot):
 
 class IgnoredConfig(config.ConfigElement):
     def __init__(self, **kwargs):
-        self.channels = kwargs.pop('channels', [])
-        self.guilds = kwargs.pop('guilds', [])
+        self.channels = utils.dict_keys_to_int(kwargs.pop('channels', {}))
+        self.guilds = utils.dict_keys_to_int(kwargs.pop('guilds', {}))
         self.users = utils.dict_keys_to_int(kwargs.pop('users', {}))
+        for gid, members in self.users.items():
+            self.users[gid] = utils.dict_keys_to_int(members)
 
 
 class Admin:
@@ -82,7 +84,7 @@ class Admin:
             try:
                 return member, self.ignored.users[guild_id]
             except KeyError:
-                self.ignored.users[guild_id] = []
+                self.ignored.users[guild_id] = {}
                 return member, self.ignored.users[guild_id]
 
         # Convert to a guild
@@ -144,7 +146,7 @@ class Admin:
     @commands.group(name='ignore', invoke_without_command=True)
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def ignore_group(self, ctx, *, target):
+    async def ignore_group(self, ctx, target, *, reason):
         """Ignores a channel, a user (server-wide), or a whole server.
 
         The target can be a name, an ID, the keyword 'channel' or 'server'.
@@ -153,7 +155,7 @@ class Admin:
         self.validate_ignore_target(ctx, target)
 
         # Save the ignore
-        conf.append(target.id)
+        conf[target.id] = reason
         self.ignored.save()
 
         # Leave the server or acknowledge the ignore being successful
@@ -167,15 +169,15 @@ class Admin:
     @commands.has_permissions(manage_guild=True)
     async def ignore_list(self, ctx):
         """Lists ignored channels, users and servers related to the command's use."""
-        channels = set(discord.utils.get(ctx.guild.text_channels, id=cid) for cid in self.ignored.channels)
-        members = set(discord.utils.get(ctx.guild.members, id=uid) for uid in self.ignored.users.get(ctx.guild.id, []))
+        channels = {discord.utils.get(ctx.guild.text_channels, id=cid): reason for cid, reason in self.ignored.channels.items()}
+        members = {discord.utils.get(ctx.guild.members, id=uid): reason for uid, reason in self.ignored.users.get(ctx.guild.id, {}).items()}
 
         embed = discord.Embed(colour=discord.Colour.blurple())
-        embed.add_field(name='Ignored channels', value=', '.join(c.mention for c in channels if c is not None) or 'None', inline=False)
-        embed.add_field(name='Ignored users', value=', '.join(m.mention for m in members if m is not None) or 'None', inline=False)
+        embed.add_field(name='Ignored channels', value='\n'.join(f'{c.mention}: {r}' for c, r in channels.items() if c is not None) or 'None', inline=False)
+        embed.add_field(name='Ignored users', value='\n'.join(f'{m.mention}: {r}' for m, r in members.items() if m is not None) or 'None', inline=False)
 
         if ctx.author == ctx.bot.owner:
-            embed.add_field(name='Ignored guilds', value=', '.join(self.ignored.guilds) or 'None', inline=False)
+            embed.add_field(name='Ignored guilds', value='\n'.join(f'{g}: {r}' for g, r in self.ignored.guilds) or 'None', inline=False)
 
         await ctx.send(embed=embed)
 
@@ -188,7 +190,7 @@ class Admin:
         self.validate_ignore_target(ctx, target)
 
         try:
-            conf.remove(target.id)
+            del conf[target.id]
         except ValueError:
             await ctx.send('Target not found.')
         else:
