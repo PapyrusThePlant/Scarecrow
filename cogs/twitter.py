@@ -332,9 +332,11 @@ class Twitter:
         if not perms.embed_links:
             raise TwitterError(f'The `Embed Links` permission in {ctx.channel.mention} is required to display tweets properly.')
 
-        conf, chan_conf = await self.get_confs(ctx, handle, create=True)
+        conf, chan_conf = await self.get_confs(ctx, handle)
         if chan_conf:
             raise TwitterError(f'Already following "{handle}" on this channel.')
+        else:
+            raise TwitterError(f'Maximum amount of followed Twitter channels reached. Follow this link for a brief explanation : https://github.com/PapyrusThePlant/Scarecrow/issues/5')
 
         # Add new discord channel
         conf.discord_channels[ctx.channel.id] = ChannelConfig(ctx.channel.id, ctx.author.id, message=message)
