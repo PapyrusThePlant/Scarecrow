@@ -173,6 +173,10 @@ class Twitter:
                 conf.screen_name = user.screen_name.lower()
                 self.conf.save()
             elif create:
+                # Make sure we don't reach the 5k filtered user IDs
+                if len(self.conf.follows) >= 4999:
+                    raise TwitterError(f'Maximum amount of followed Twitter channels reached. Follow this link for a brief explanation : https://github.com/PapyrusThePlant/Scarecrow/issues/5\nTry again later, some slots might free themselves in the meantime.')
+
                 # The Twitter API does not support following protected users
                 # https://dev.twitter.com/streaming/overview/request-parameters#follow
                 if user.protected:
@@ -223,7 +227,7 @@ class Twitter:
         """Manages how Twitter feeds behave."""
         conf, chan_conf = await self.get_confs(ctx, handle)
         if chan_conf is None:
-            raise TwitterError(f'Not following {handle} on this channel.')
+            raise TwitterError(f'Not following "{handle}" on this channel.')
         ctx.conf = conf
         ctx.chan_conf = chan_conf
 
@@ -332,11 +336,9 @@ class Twitter:
         if not perms.embed_links:
             raise TwitterError(f'The `Embed Links` permission in {ctx.channel.mention} is required to display tweets properly.')
 
-        conf, chan_conf = await self.get_confs(ctx, handle)
+        conf, chan_conf = await self.get_confs(ctx, handle, create=True)
         if chan_conf:
             raise TwitterError(f'Already following "{handle}" on this channel.')
-        else:
-            raise TwitterError(f'Maximum amount of followed Twitter channels reached. Follow this link for a brief explanation : https://github.com/PapyrusThePlant/Scarecrow/issues/5')
 
         # Add new discord channel
         conf.discord_channels[ctx.channel.id] = ChannelConfig(ctx.channel.id, ctx.author.id, message=message)
