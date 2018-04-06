@@ -115,11 +115,6 @@ class Twitter:
         self.api = TweepyAPI(self.conf.credentials)
         self.stream = TweepyStream(self, self.conf, self.api)
         self.latest_received = 0
-        self.last_average_timestamp = 0
-        self.tweets_processed = 0
-        self.average_tweets_processed = 0
-        self.tweets_sent = 0
-        self.average_tweets_sent = 0
 
     def __unload(self):
         log.info('Unloading cog.')
@@ -439,16 +434,6 @@ class Twitter:
             most_followed.append((len(conf.discord_channels), conf))
         most_followed = sorted(most_followed, key=lambda t: t[0], reverse=True)[:3]
 
-        # Get the average number of tweets processed and sent
-        now = time.time()
-        last_time_frame = self.last_average_timestamp - self.stream.start_time
-        new_time_frame = now - self.stream.start_time
-        self.average_tweets_processed = (self.average_tweets_processed * last_time_frame + self.tweets_processed) / new_time_frame
-        self.average_tweets_sent = (self.average_tweets_sent * last_time_frame + self.tweets_sent) / new_time_frame
-        self.tweets_processed = 0
-        self.tweets_sent = 0
-        self.last_average_timestamp = now
-
         # Build the response
         embed = discord.Embed(colour=discord.Colour.blurple(), title='Stats', description='\N{ZERO WIDTH SPACE}')
         embed.add_field(name='Followed Twitter channels', value=f'{server_followed_count} here / {followed_count} overall')
@@ -457,8 +442,6 @@ class Twitter:
         embed.add_field(name=f'\N{FIRST PLACE MEDAL} {most_followed[0][1].screen_name}', value=f'{most_followed[0][0]} follows' if len(most_followed) > 0 else 'None')
         embed.add_field(name=f'\N{SECOND PLACE MEDAL} {most_followed[1][1].screen_name}', value=f'{most_followed[1][0]} follows' if len(most_followed) > 1 else 'None')
         embed.add_field(name=f'\N{THIRD PLACE MEDAL} {most_followed[2][1].screen_name}', value=f'{most_followed[2][0]} follows' if len(most_followed) > 2 else 'None')
-        embed.add_field(name='Processed tweets', value=f'{round(self.average_tweets_processed)} tweets per sec', inline=False)
-        embed.add_field(name='Sent tweets', value=f'{round(self.average_tweets_sent)} tweets per sec', inline=False)
         await ctx.send(embed=embed)
 
     @twitter_group.command(name='status')
@@ -664,7 +647,6 @@ class Twitter:
 
     async def tweepy_on_status(self, tweet):
         """Called by the stream when a tweet is received."""
-        self.tweets_processed += 1
         if tweet.id > self.latest_received:
             self.latest_received = tweet.id
 
@@ -703,7 +685,6 @@ class Twitter:
                 continue
 
             try:
-                self.tweets_sent += 1
                 # Send the message to the appropriate channel
                 await destination.send(chan_conf.message, embed=embed)
             except discord.Forbidden:
