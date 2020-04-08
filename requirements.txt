@@ -1,5 +1,5 @@
 discord.py
 dice
 lxml
+peony-twitter
 psutil
-tweepy
