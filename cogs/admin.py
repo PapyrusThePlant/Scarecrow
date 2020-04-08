@@ -14,15 +14,6 @@ def setup(bot):
     bot.add_cog(Admin(bot))
 
 
-class IgnoredConfig(config.ConfigElement):
-    def __init__(self, **kwargs):
-        self.channels = utils.dict_keys_to_int(kwargs.pop('channels', {}))
-        self.guilds = utils.dict_keys_to_int(kwargs.pop('guilds', {}))
-        self.users = utils.dict_keys_to_int(kwargs.pop('users', {}))
-        for gid, members in self.users.items():
-            self.users[gid] = utils.dict_keys_to_int(members)
-
-
 class Admin:
     """Bot management commands and events."""
     def __init__(self, bot):

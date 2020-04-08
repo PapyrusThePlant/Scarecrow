@@ -14,15 +14,6 @@ from cogs.util import config
 log = logging.getLogger(__name__)
 
 
-class BotConfig(config.ConfigElement):
-    def __init__(self, token, description, **kwargs):
-        self.description = description
-        self.token = token
-        self.status = kwargs.get('status', None)
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
 class Bot(commands.AutoShardedBot):
     def __init__(self, conf_path=paths.BOT_CONFIG, debug_instance=False):
         self.app_info = None

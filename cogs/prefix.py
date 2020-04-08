@@ -12,12 +12,6 @@ def setup(bot):
     bot.add_cog(Prefix(bot))
 
 
-class PrefixesConfig(config.ConfigElement):
-    def __init__(self, global_, **kwargs):
-        self.global_ = global_
-        self.guild_specific = utils.dict_keys_to_int(kwargs.get('guild_specific', {}))
-
-
 class Prefix:
     """Custom prefixes per server."""
     def __init__(self, bot):

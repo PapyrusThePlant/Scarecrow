@@ -1,11 +1,27 @@
 import collections
 import inspect
 import json
+import operator
 import os
 
 
+def get(iterable, **attrs):
+    """Helper function to perform lookups in collections."""
+    if isinstance(iterable, dict):
+        for key, elem in iterable.items():
+            if all(operator.attrgetter(attr)(elem) == value for attr, value in attrs.items()):
+                return key, elem
+        return None, None
+
+    for elem in iterable:
+        if all(operator.attrgetter(attr)(elem) == value for attr, value in attrs.items()):
+            return elem
+    return None
+
+
 class Config:
-    """The config object, created from a json file"""
+    """The config object, created from a json file."""
+
     def __init__(self, file, **options):
         super().__setattr__('_data', {})
         self.file = file
@@ -13,14 +29,11 @@ class Config:
         self.object_hook = options.pop('object_hook', _ConfigDecoder().decode)
         self.encoder = options.pop('encoder', _ConfigEncoder)
 
-        try:
-            with open(self.file, 'r', encoding=self.encoding) as fp:
-                self._data = json.load(fp, object_pairs_hook=self.object_hook)
-        except FileNotFoundError:
-            pass
+        with open(self.file, 'r', encoding=self.encoding) as fp:
+            self._data = json.load(fp, object_pairs_hook=self.object_hook)
 
     def save(self):
-        """Saves the config on disk"""
+        """Saves the config on disk."""
         tmp_file = self.file + '~'
         with open(tmp_file, 'w', encoding=self.encoding) as fp:
             json.dump(self._data, fp, ensure_ascii=True, cls=self.encoder)
@@ -44,39 +57,58 @@ class Config:
             super().__setattr__(key, value)
 
 
-class ConfigElement:
+class ConfigElement(collections.Mapping):
+    """The main data holding class."""
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
+    def __len__(self):
+        return len(self.__dict__)
+
     def __iter__(self):
         return iter(self.__dict__)
 
 
 class _ConfigEncoder(json.JSONEncoder):
-    """Default JSON encoder."""
+    """Custom JSON encoder."""
+
     def default(self, o):
+        """Support of ConfigElement's serialization."""
         if isinstance(o, ConfigElement):
-            d = o.__dict__.copy()
-
             # Ignore 'private' attributes
-            for k in o.__dict__.keys():
+            for k in o.__dict__.copy():
                 if k[0] == '_':
-                    del d[k]
+                    del o.__dict__[k]
 
-            d['__class__'] = o.__class__.__qualname__
-            return d
+            # The following is dependant on the file location
+            o.__dict__['__class__'] = f'{__name__}.{o.__class__.__qualname__}'
+            return o
 
-        return json.JSONEncoder.default(self, o)
+        # Let the base class default method raise the TypeError
+        return super().default(self, o)
 
 
 class _ConfigDecoder:
-    """Default JSON decoder, do not instantiate as the inspect magic involved is not tailored for it."""
+    """Custom JSON decoder.
+
+    Do not instantiate as the inspect magic involved is not tailored for it.
+    """
+
     def __init__(self):
         # Back once to reach Config.__init__
         # Back twice to reach the caller
         self._globals = inspect.currentframe().f_back.f_back.f_globals
 
     def decode(self, o):
+        """Support the deserialization of ConfigElements objects."""
         o = collections.OrderedDict(o)
         if '__class__' in o:
-            name = o['__class__']
+            name = o.pop('__class__')
 
             # Get the top level module/class in the given name
             parts = name.split('.')
@@ -93,7 +125,14 @@ class _ConfigDecoder:
                 else:
                     raise TypeError('Expected Class or Module.')
 
-            del o['__class__']
             return obj(**o)
-        else:
-            return o
+
+        # Try to convert keys to ints when possible
+        for k, v in o.copy().items():
+            try:
+                o[int(k)] = v
+            except ValueError:
+                pass
+            else:
+                del o[k]
+        return o
