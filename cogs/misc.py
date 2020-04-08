@@ -14,11 +14,12 @@ from .util import agarify, utils
 
 log = logging.getLogger(__name__)
 
+
 def setup(bot):
     bot.add_cog(Misc(bot))
 
 
-class Misc:
+class Misc(commands.Cog):
     """No comment."""
     def __init__(self, bot):
         headers = {
@@ -26,7 +27,7 @@ class Misc:
         }
         self.google_session = aiohttp.ClientSession(headers=headers, loop=bot.loop)
 
-    def __unload(self):
+    def cog_unload(self):
         self.google_session.close()
 
     @commands.group(invoke_without_command=True)

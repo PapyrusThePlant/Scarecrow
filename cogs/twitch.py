@@ -13,12 +13,15 @@ log = logging.getLogger(__name__)
 
 
 def setup(bot):
+    raise NotImplementedError()
     cog = Twitch(bot)
     bot.add_cog(cog)
     cog.start()
 
+
 class TwitchError(commands.CommandError):
     pass
+
 
 class TwitchConfig(config.ConfigElement):
     def __init__(self, client_id, **kwargs):

@@ -48,16 +48,17 @@ def setup(bot):
     bot.add_cog(Shimmy(bot))
 
 
-class Shimmy:
+class Shimmy(commands.Cog):
     """Exclusivities to Shimmy's discord server."""
     def __init__(self, bot):
         self.bot = bot
         self.nsfw_role = None
         self.log_channel = None
 
-    def __local_check(self, ctx):
+    def cog_check(self, ctx):
         return ctx.guild is not None and ctx.guild.id == SHIMMY_GUILD_ID
 
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         if member.guild is None or member.guild.id != SHIMMY_GUILD_ID:
             return
@@ -65,6 +66,7 @@ class Shimmy:
             self.log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
         await self.log_channel.send(f'{str(member)} (id {member.id}) joined.')
 
+    @commands.Cog.listener()
     async def on_member_remove(self, member):
         if member.guild is None or member.guild.id != SHIMMY_GUILD_ID:
             return
@@ -72,6 +74,7 @@ class Shimmy:
             self.log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
         await self.log_channel.send(f'{str(member)} (id {member.id}) left or got removed.')
 
+    @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
         if guild is None or guild.id != SHIMMY_GUILD_ID:
             return

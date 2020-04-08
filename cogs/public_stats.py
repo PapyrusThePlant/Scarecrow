@@ -2,6 +2,8 @@ import aiohttp
 import json
 import logging
 
+import discord.ext.commands as commands
+
 from .util import utils
 
 log = logging.getLogger(__name__)
@@ -12,7 +14,7 @@ def setup(bot):
         bot.add_cog(PublicStats(bot))
 
 
-class PublicStats:
+class PublicStats(commands.Cog):
     """Automated stats collection and publication."""
     def __init__(self, bot):
         self.bot = bot
@@ -20,21 +22,24 @@ class PublicStats:
         self.guild_count = 0
         self.shard_count = 0
 
-    def __unload(self):
+    def cog_unload(self):
         self.session.close()
 
+    @commands.Cog.listener()
     async def on_ready(self):
         await self.send_stats()
 
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         await self.send_stats()
 
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         await self.send_stats()
 
     async def send_stats(self):
         guild_count = len(self.bot.guilds)
-        shard_count = len(self.bot.shard_count)
+        shard_count = self.bot.shard_count
 
         if self.guild_count == guild_count and self.shard_count == shard_count:
             return

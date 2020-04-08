@@ -19,12 +19,12 @@ def setup(bot):
     bot.add_cog(Dev(bot))
 
 
-class Dev:
+class Dev(commands.Cog):
     """Nope, not for you."""
     def __init__(self, bot):
         self.bot = bot
 
-    def __local_check(self, ctx):
+    def cog_check(self, ctx):
         # Owner commands only
         return ctx.author.id == ctx.bot.owner.id
 

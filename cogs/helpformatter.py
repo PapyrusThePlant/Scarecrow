@@ -7,14 +7,15 @@ from discord.ext.commands.core import GroupMixin, Command
 
 
 def setup(bot):
-    bot.formatter = HelpFormatter()
+    raise NotImplementedError()
+    bot.formatter = HelpCommand()
 
 
 def teardown(bot):
-    bot.formatter = commands.HelpFormatter()
+    bot.help_command = commands.DefaultHelpCommand()
 
 
-class HelpFormatter(commands.HelpFormatter):
+class HelpCommand(commands.HelpCommand):
     """Deviation from the default formatter to list subcommands with extra indentation and formatting."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

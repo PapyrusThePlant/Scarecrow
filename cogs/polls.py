@@ -8,7 +8,7 @@ def setup(bot):
     bot.add_cog(Polls(bot))
 
 
-class Polls:
+class Polls(commands.Cog):
     """Polls commands"""
     def __init__(self, bot):
         self.bot = bot
@@ -16,6 +16,7 @@ class Polls:
         self.keycaps_emojis.append('\N{KEYCAP TEN}')
 
     @commands.command(name='instantpoll', aliases=['ip'])
+    @commands.guild_only()
     async def instant_poll(self, ctx, title, *options):
         """Creates a poll.
 
@@ -38,6 +39,7 @@ class Polls:
             await message.add_reaction(self.keycaps_emojis[i])
 
     @commands.command()
+    @commands.guild_only()
     async def poll(self, ctx):
         """Interactively create a poll.
 

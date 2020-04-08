@@ -14,14 +14,14 @@ def setup(bot):
     bot.add_cog(Admin(bot))
 
 
-class Admin:
+class Admin(commands.Cog):
     """Bot management commands and events."""
     def __init__(self, bot):
         self.commands_used = Counter()
         self.ignored = config.Config(paths.IGNORED_CONFIG, encoding='utf-8')
         self.bot = bot
 
-    def __global_check_once(self, ctx):
+    def bot_check_once(self, ctx):
         """A global check used on every command."""
         author = ctx.author
         guild = ctx.guild
@@ -297,6 +297,7 @@ class Admin:
         await member.kick(reason=reason)
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
+    @commands.Cog.listener()
     async def on_command(self, ctx):
         self.commands_used[ctx.command.qualified_name] += 1
         if ctx.guild is None:
@@ -304,6 +305,7 @@ class Admin:
         else:
             log.info(f'{ctx.guild.name}:{ctx.guild.id}:{ctx.channel.name}:{ctx.channel.id}:{ctx.author.name}:{ctx.author.id}:{ctx.message.content}')
 
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         # Log that the bot has been added somewhere
         log.info(f'GUILD_JOIN:{guild.name}:{guild.id}:{guild.owner.name}:{guild.owner.id}:')
@@ -311,6 +313,7 @@ class Admin:
             log.info(f'IGNORED GUILD:{guild.name}:{guild.id}:')
             await guild.leave()
 
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         # Log that the bot has been removed from somewhere
         log.info(f'GUILD_REMOVE:{guild.name}:{guild.id}:{guild.owner.name}:{guild.owner.id}:')

@@ -17,7 +17,7 @@ def setup(bot):
     psutil.cpu_percent() # Initialise the first interval
 
 
-class Info:
+class Info(commands.Cog):
     """When your curiosity takes over."""
     def __init__(self, bot):
         self.bot = bot
@@ -135,7 +135,7 @@ class Info:
 
     @info_group.command(name='channel')
     @commands.guild_only()
-    async def info_channel(self, ctx, *, channel: utils.GuildChannelConverter=None):
+    async def info_channel(self, ctx, *, channel: utils.GuildChannelConverter = None):
         """Shows information about the channel.
 
         The channel can either be the name, the mention or the ID of a text or voice channel.

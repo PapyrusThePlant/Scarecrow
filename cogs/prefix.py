@@ -12,7 +12,7 @@ def setup(bot):
     bot.add_cog(Prefix(bot))
 
 
-class Prefix:
+class Prefix(commands.Cog):
     """Custom prefixes per server."""
     def __init__(self, bot):
         self.bot = bot
@@ -20,7 +20,7 @@ class Prefix:
         self.saved_prefixes = self.bot.command_prefix
         self.bot.command_prefix = self.get_prefixes
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.command_prefix = self.saved_prefixes
 
     def get_prefixes(self, bot, message):
@@ -34,6 +34,7 @@ class Prefix:
 
         return prefixes
 
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         if guild.id in self.conf.guild_specific:
             del self.conf.guild_specific[guild.id]
