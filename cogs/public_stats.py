@@ -18,6 +18,7 @@ class PublicStats:
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=bot.loop)
         self.guild_count = 0
+        self.shard_count = 0
 
     def __unload(self):
         self.session.close()
@@ -33,21 +34,25 @@ class PublicStats:
 
     async def send_stats(self):
         guild_count = len(self.bot.guilds)
-        if self.guild_count == guild_count:
+        shard_count = len(self.bot.shard_count)
+
+        if self.guild_count == guild_count and self.shard_count == shard_count:
             return
 
-        # Post to DiscordBots
-        url = f'https://bots.discord.pw/api/bots/{self.bot.user.id}/stats'
+        # Post to Discord Bots
+        url = f'https://discord.bots.gg/api/v1/bots/{self.bot.user.id}/stats'
         headers = {
-            'authorization': self.bot.conf.dbots_token,
+            'authorization': self.bot.conf.discord_bots_token,
             'content-type': 'application/json'
         }
         data = {
-            'server_count': guild_count
+            'shardCount': shard_count,
+            'guildCount': guild_count
         }
         async with self.session.post(url=url, headers=headers, data=json.dumps(data)) as resp:
             if resp.status < 200 or resp.status >= 300:
-                log.warning(utils.HTTPError(resp, 'Error while posting stats to DBots'))
+                log.warning(utils.HTTPError(resp, 'Error while posting stats to Discord Bots.'))
 
-        # Save the new server count after the post succeeded
+        # Save the new counts after the post succeeded
         self.guild_count = guild_count
+        self.shard_count = shard_count
