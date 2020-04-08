@@ -1,4 +1,4 @@
-git+https://github.com/PapyrusThePlant/discord.py.git@rewrite#egg=discord.py
+discord.py
 dice
 lxml
 psutil
