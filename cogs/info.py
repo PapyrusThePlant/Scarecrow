@@ -1,4 +1,4 @@
-import os
+import subprocess
 import time
 import unicodedata
 from collections import Counter
@@ -115,9 +115,8 @@ class Info(commands.Cog):
         perms = discord.Permissions(486464)
         invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
 
-        command = r"git log --pretty=format:'[`%h`](https://github.com/PapyrusThePlant/Scarecrow/commit/%h) %s' -n 5"
-        with os.popen(command) as fp:
-            changes = fp.read().strip()
+        latest_commits = subprocess.check_output(
+            ['git', 'log', '--pretty=format:[`%h`](https://github.com/PapyrusThePlant/Scarecrow/commit/%h) %s', '-n', '5']).decode('utf-8')
 
         embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=discord.Colour.blurple())
         embed.set_author(name=f'{owner.display_name} ({owner})', icon_url=owner.avatar_url)
@@ -127,7 +126,7 @@ class Info(commands.Cog):
         embed.add_field(name='CPU', value=cpu_str)
         embed.add_field(name='Memory', value=mem_str)
         embed.add_field(name='Uptime', value=uptime_str)
-        embed.add_field(name='Latest changes', value=changes, inline=False)
+        embed.add_field(name='Latest changes', value=latest_commits, inline=False)
         embed.add_field(name='\N{ZERO WIDTH SPACE}', value='For any question about the bot, announcements and an easy way to get in touch with me, feel free to join the dedicated [discord server](https://discord.gg/M85dw9u).')
         embed.set_footer(text='Powered by discord.py', icon_url='http://i.imgur.com/5BFecvA.png')
 
