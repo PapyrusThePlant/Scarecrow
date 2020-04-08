@@ -245,7 +245,7 @@ class Info(commands.Cog):
         else:
             voice = 'Not connected.'
 
-        embed = discord.Embed(title=member.display_name, url=member.avatar_url, colour=discord.Colour.blurple())
+        embed = discord.Embed(title=member.display_name, colour=discord.Colour.blurple())
         embed.set_author(name=str(member))
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='ID', value=member.id)
