@@ -128,4 +128,4 @@ if __name__ == '__main__':
         log.info('Exiting normally')
     finally:
         logging.shutdown()
-        exit(bot.do_restart)
+        exit(bot.exit_code)
