@@ -1,20 +1,19 @@
+import collections
 import subprocess
 import time
 import unicodedata
-from collections import Counter
 
 import psutil
 
 import discord
 import discord.ext.commands as commands
-import discord.utils as dutils
 
 from .util import utils
 
 
 def setup(bot):
     bot.add_cog(Info(bot))
-    psutil.cpu_percent() # Initialise the first interval
+    psutil.cpu_percent()  # Initialise the first interval
 
 
 class Info(commands.Cog):
@@ -113,14 +112,15 @@ class Info(commands.Cog):
         #  * Use External Emojis
         #  * Add Reactions
         perms = discord.Permissions(486464)
-        invite = dutils.oauth_url(ctx.bot.app_info.id, perms)
+        invite = discord.utils.oauth_url(ctx.bot.app_info.id, perms)
 
         latest_commits = subprocess.check_output(
             ['git', 'log', '--pretty=format:[`%h`](https://github.com/PapyrusThePlant/Scarecrow/commit/%h) %s', '-n', '5']).decode('utf-8')
 
-        embed = discord.Embed(title='Click here to invite me to your server !', url=invite, colour=discord.Colour.blurple())
-        embed.set_author(name=f'{owner.display_name} ({owner})', icon_url=owner.avatar_url)
-        embed.add_field(name='Command prefixes', value="'" + "', '".join(prefixes) + "'")
+        embed = discord.Embed(description=f'[Click here to invite me to your server !]({invite})', colour=discord.Colour.blurple())
+        embed.set_thumbnail(url=ctx.me.avatar_url)
+        embed.set_author(name=f'Author : {owner}', icon_url=owner.avatar_url)
+        embed.add_field(name='Command prefixes', value="`" + "`, `".join(prefixes) + "`")
         embed.add_field(name='Servers', value=len(ctx.bot.guilds))
         embed.add_field(name='Members', value=members_str)
         embed.add_field(name='CPU', value=cpu_str)
@@ -162,11 +162,11 @@ class Info(commands.Cog):
         """Shows information about the server."""
         guild = ctx.guild
 
-        # Order the roles and avoid mentions when listing them
-        ordered_roles = guild.roles.copy()
-        ordered_roles.sort(key=lambda s: s.position)
-        roles = [role.name.replace('@', '@\u200b') for role in ordered_roles]
-        del ordered_roles
+        # List the roles other than @everyone
+        roles = ', '.join(guild.roles[i].name for i in range(1, len(guild.roles)))
+
+        # List the guild's features
+        features = ', '.join(feature.replace('_', ' ').capitalize() for feature in guild.features) or 'None'
 
         # Figure out how many channels are locked
         locked_text = 0
@@ -177,16 +177,14 @@ class Info(commands.Cog):
                 if overwrites.read_messages is False:
                     locked_text += 1
             elif overwrites.connect is False or overwrites.speak is False:
-                    locked_voice += 1
+                locked_voice += 1
 
         # Count the channels
-        text_channels = len(guild.text_channels)
-        voice_channels = len(guild.voice_channels)
-        channels = f'Text : {text_channels} ({locked_text} locked)\n' \
-                   f'Voice : {voice_channels} ({locked_voice} locked)'
+        channels = f'Text : {len(guild.text_channels)} ({locked_text} locked)\n' \
+                   f'Voice : {len(guild.voice_channels)} ({locked_voice} locked)'
 
         # Count the members
-        members_by_status = Counter(f'{m.status}{"_bot" if m.bot else ""}' for m in guild.members)
+        members_by_status = collections.Counter(f'{m.status}{"_bot" if m.bot else ""}' for m in guild.members)
         members_by_status['online'] += members_by_status['online_bot']
         members_by_status['idle'] += members_by_status['idle_bot']
         members_by_status['offline'] += members_by_status['offline_bot']
@@ -219,7 +217,8 @@ class Info(commands.Cog):
         embed.add_field(name='Region', value=guild.region.value.title())
         embed.add_field(name='Members', value=members)
         embed.add_field(name='Channels', value=channels)
-        embed.add_field(name='Roles', value=', '.join(roles))
+        embed.add_field(name='Features', value=features)
+        embed.add_field(name='Roles', value=roles)
         embed.set_footer(text='Server created the ')
         embed.timestamp = guild.created_at
 
@@ -235,13 +234,13 @@ class Info(commands.Cog):
         """
         if member is None:
             member = ctx.author
-        roles = [role.name.replace('@', '@\u200b') for role in member.roles]
+        roles = ', '.join(role.name.replace('@', '@\u200b') for role in member.roles)
         shared = sum(1 for m in ctx.bot.get_all_members() if m.id == member.id)
 
         if member.voice:
             vc = member.voice.channel
             other_people = len(vc.members) - 1
-            voice = f'{vc.name}, {"with {other_people} others" if other_people else "by themselves"}'
+            voice = f'{vc.name}, {f"with {other_people} others" if other_people else "by themselves"}'
         else:
             voice = 'Not connected.'
 
@@ -251,7 +250,7 @@ class Info(commands.Cog):
         embed.add_field(name='ID', value=member.id)
         embed.add_field(name='Servers', value=f'{shared} shared')
         embed.add_field(name='Joined', value=member.joined_at)
-        embed.add_field(name='Roles', value=', '.join(roles))
+        embed.add_field(name='Roles', value=roles)
         embed.add_field(name='Voice', value=voice)
         embed.set_footer(text='User created the ')
         embed.timestamp = member.created_at
