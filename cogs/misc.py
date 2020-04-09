@@ -6,11 +6,11 @@ from urllib.parse import urlparse, parse_qs
 import dice
 import discord
 import discord.ext.commands as commands
-import pyparsing # req of the dice module
+import pyparsing  # requirement of the dice module
 from lxml import etree
 
 import paths
-from .util import agarify, utils
+from cogs.util import agarify, utils
 
 log = logging.getLogger(__name__)
 
