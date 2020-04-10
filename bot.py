@@ -9,7 +9,7 @@ import discord
 import discord.ext.commands as commands
 
 import paths
-from cogs.util import config
+from utils import config
 
 log = logging.getLogger(__name__)
 

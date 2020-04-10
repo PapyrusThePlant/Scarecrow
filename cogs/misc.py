@@ -7,7 +7,7 @@ import discord.ext.commands as commands
 import pyparsing  # requirement of the dice module
 
 import paths
-from cogs.util import agarify, utils
+from utils import agarify, utils
 
 log = logging.getLogger(__name__)
 

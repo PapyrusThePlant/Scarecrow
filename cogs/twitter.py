@@ -4,7 +4,7 @@ import discord
 import discord.ext.commands as commands
 import peony
 
-from cogs.util import config
+from utils import config
 
 log = logging.getLogger(__name__)
 logging.getLogger('peony').setLevel(logging.WARNING)

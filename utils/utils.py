@@ -3,9 +3,7 @@ This gather stuff that for the most part should be written elsewhere but is not 
 """
 import aiohttp
 import asyncio
-import collections
 import random
-import re
 
 import discord
 import discord.ext.commands as commands

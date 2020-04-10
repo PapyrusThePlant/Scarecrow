@@ -8,7 +8,7 @@ import psutil
 import discord
 import discord.ext.commands as commands
 
-from .util import utils
+from utils import utils
 
 
 def setup(bot):

@@ -12,7 +12,7 @@ from discord.ext import commands
 import psutil
 
 import paths
-from cogs.util import utils
+from utils import utils
 
 
 def setup(bot):

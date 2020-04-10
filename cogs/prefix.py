@@ -3,7 +3,7 @@ import logging
 import discord.ext.commands as commands
 
 import paths
-from cogs.util import config
+from utils import config
 
 log = logging.getLogger(__name__)
 
@@ -24,13 +24,18 @@ class Prefix(commands.Cog):
         self.bot.command_prefix = self.saved_prefixes
 
     def get_prefixes(self, bot, message):
-        prefixes = self.conf.global_
+        prefixes = list(self.conf.global_)
         if message.guild is not None:
             prefixes += self.conf.guild_specific.get(message.guild.id, [])
 
-        if 'mention' in prefixes:
-            prefixes.remove('mention')
-            prefixes.extend(commands.when_mentioned(bot, message))
+        try:
+            index = prefixes.index('mention')
+        except ValueError:
+            pass
+        else:
+            mentions = commands.when_mentioned(bot, message)
+            prefixes[index] = mentions[0]
+            prefixes.insert(index, mentions[1])
 
         return prefixes
 

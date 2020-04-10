@@ -1,5 +1,3 @@
-import random
-
 import discord
 import discord.ext.commands as commands
 
