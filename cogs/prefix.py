@@ -24,13 +24,13 @@ class Prefix(commands.Cog):
         self.bot.command_prefix = self.saved_prefixes
 
     def get_prefixes(self, bot, message):
+        prefixes = self.conf.global_
         if message.guild is not None:
-            prefixes = self.conf.guild_specific.get(message.guild.id, []) + self.conf.global_
-        else:
-            prefixes = [] + self.conf.global_
+            prefixes += self.conf.guild_specific.get(message.guild.id, [])
 
         if 'mention' in prefixes:
-            prefixes[prefixes.index('mention')] = f'{message.guild.me.mention if message.guild else bot.user.mention} '
+            prefixes.remove('mention')
+            prefixes.extend(commands.when_mentioned(bot, message))
 
         return prefixes
 
