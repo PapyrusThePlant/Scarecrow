@@ -94,6 +94,8 @@ class Info(commands.Cog):
         members_str = f'{members_count} ({unique_members_count} unique)'
         owner = (ctx.guild.get_member(ctx.bot.owner.id) if ctx.guild else None) or ctx.bot.owner
         prefixes = ctx.bot.command_prefix(ctx.bot, ctx.message)
+        prefixes.remove(f'{ctx.me.mention.replace("@", "@!")} ')
+        prefixes[prefixes.index(f'{ctx.me.mention} ')] = f'@\u200b{ctx.me.display_name} '
 
         # Get cpu,  memory and uptime
         proc = psutil.Process()
