@@ -28,6 +28,40 @@ class Misc(commands.Cog):
         """Agarifies a user's name."""
         await ctx.send(agarify.agarify(user.display_name, True))
 
+    @commands.command(name='8ball')
+    async def ball(self, ctx, *, question):
+        """Scarecrow's 8-Ball reaches into the future, to find the answers to your questions.
+
+        It knows what will be, and is willing to share this with you. Just send a question that can be answered by
+        "Yes" or "No", then let Scarecrow's 8-Ball show you the way !
+        """
+        eight_ball_responses = [
+            # Positive
+            "It is certain",
+            "It is decidedly so",
+            "Without a doubt",
+            "Yes, definitely",
+            "You may rely on it",
+            "As I see it, yes",
+            "Most likely",
+            "Outlook good",
+            "Yes",
+            "Signs point to yes",
+            # Non committal
+            "Reply hazy try again",
+            "Ask again later",
+            "Better not tell you now",
+            "Cannot predict now",
+            "Concentrate and ask again",
+            # Negative
+            "Don't count on it",
+            "My reply is no",
+            "My sources say no",
+            "Outlook not so good",
+            "Very doubtful"
+        ]
+        await ctx.send(random.choice(eight_ball_responses))
+
     @commands.command(aliases=['meow'])
     async def cat(self, ctx):
         """Meow !"""
@@ -69,21 +103,19 @@ class Misc(commands.Cog):
         A set of dice rolls can be sorted with the sort (s) operator. 4d6s will not change the return value, but the dice will be sorted from lowest to highest.
         The lowest or highest rolls can be selected with ^ and v. 6d6^3 will keep the highest 3 rolls, whereas 6d6v3 will select the lowest 3 rolls.
         """
-        res = dice.roll(expression)
-        if isinstance(res, list):
-            embed = discord.Embed(title='Rolls', description=', '.join([str(r) for r in res]), colour=discord.Colour.blurple())
-            embed.add_field(name='Total', value=sum(res))
-            embed.add_field(name='Minimum', value=min(res))
-            embed.add_field(name='Maximum', value=max(res))
-            await ctx.send(embed=embed)
+        try:
+            res = dice.roll(expression)
+        except (pyparsing.ParseBaseException, dice.ParseException) as e:
+            await ctx.send(e)
         else:
-            await ctx.send(f'Result : {res}')
-
-    @roll.error
-    async def roll_error(self, ctx, error):
-        if hasattr(error, 'original') and isinstance(error.original, (pyparsing.ParseBaseException, dice.ParseException)):
-            await ctx.send(error.original)
-            error.handled = True
+            if isinstance(res, list):
+                embed = discord.Embed(title='Rolls', description=', '.join([str(r) for r in res]), colour=discord.Colour.blurple())
+                embed.add_field(name='Total', value=sum(res))
+                embed.add_field(name='Minimum', value=min(res))
+                embed.add_field(name='Maximum', value=max(res))
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send(f'Result : {res}')
 
     @commands.command()
     async def weebnames(self, ctx, wanted_gender=None):
