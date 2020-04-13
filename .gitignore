@@ -1,6 +1,6 @@
 # Build files and folders
 *.pyc
-venv/
+.venv/
 
 # Development files and folders
 .idea/
