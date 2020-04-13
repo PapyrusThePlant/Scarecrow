@@ -1,22 +1,22 @@
 #!/bin/bash
 
-if [ ! -d './venv' ]
+if ! [[ -e .venv/bin/activate ]]
 then
     echo Creating new virtual environment...
-    python3 -m virtualenv venv
+    python3 -m venv .venv
 fi
 
 # Activate the virtual environment
-source venv/bin/activate
+source .venv/bin/activate
 
 if [ "$1" == 'update' ]
 then
     branch=$(git rev-parse --abbrev-ref HEAD)
-    echo Pulling last version from ${branch}...
+    echo "Pulling last version from ${branch}..."
     git pull
 
     echo Updating requirements...
-    python3 -m pip install -U -r requirements.txt
+    pip install -Ur requirements.txt
     exit 0
 fi
 
@@ -25,10 +25,10 @@ sleep_time=1
 while true
 do
     # Execute the bot
-    start_time=`date +%s`
+    start_time=$(date +%s)
     python3 run.py "$@"
     exit_code=$?
-    end_time=`date +%s`
+    end_time=$(date +%s)
 
     # Check for the exit code
     if [ $exit_code -eq 1 ]
@@ -41,13 +41,13 @@ do
     fi
 
     # Compute the next sleep time
-    if [ $(($end_time - $start_time)) -ge 45 ]
+    if [ $((end_time - start_time)) -ge 45 ]
     then
         # The execution was long enough, reset the sleep time
         sleep_time=1
     else
         # Double the sleep time but cap it to 45
-        sleep_time=$(($sleep_time > 22 ? 45 : $sleep_time * 2))
+        sleep_time=$((sleep_time > 22 ? 45 : sleep_time * 2))
     fi
 done
 
