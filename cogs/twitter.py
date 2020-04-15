@@ -15,6 +15,15 @@ def setup(bot):
     bot.add_cog(Twitter(bot))
 
 
+def owner_in_guild():
+    def predicate(ctx):
+        for member in ctx.guild.members:
+            if member.id == ctx.bot.owner_id:
+                return True
+        raise commands.DisabledCommand(f'{ctx.invoked_with} command is disabled.')
+    return commands.check(predicate)
+
+
 class TwitterError(commands.UserInputError):
     """Base exception for errors involving the Twitter cog."""
     pass
@@ -51,7 +60,7 @@ class Twitter(commands.Cog):
     async def cog_command_error(self, ctx, error):
         """Error handler for the cog's commands."""
         if not isinstance(error, (commands.UserInputError, commands.CheckFailure)):
-            raise error
+            return
 
         await ctx.message.add_reaction('\N{CROSS MARK}')
 
@@ -164,6 +173,7 @@ class Twitter(commands.Cog):
                     await self.update_feeds()
 
     @commands.command()
+    @owner_in_guild()
     async def list(self, ctx):
         """Lists the followed channels on the server."""
         follows = {}
@@ -211,7 +221,7 @@ class Twitter(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.has_permissions(manage_guild=True)
+    @commands.is_owner()
     async def follow(self, ctx, handle):
         """Follows a Twitter channel.
 
@@ -252,7 +262,7 @@ class Twitter(commands.Cog):
         await ctx.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
 
     @commands.command()
-    @commands.has_permissions(manage_guild=True)
+    @commands.is_owner()
     async def unfollow(self, ctx, handle):
         """Unfollows a Twitter channel.
 
